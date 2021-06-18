@@ -850,16 +850,16 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
     case ESA_SETWEAPONS: {
       INDEX iWeapon;
       nmMessage >> iWeapon;
-      UBYTE bItems;
-      nmMessage >> bItems;
-      
-      INDEX iKnife = 1 << (WEAPON_KNIFE - 1);
-      INDEX iColt = 1 << (WEAPON_COLT - 1);
+      UBYTE bPlayer;
+      nmMessage >> bPlayer;
+
+      // add default weapons to the desired one
+      INDEX iSetWeapons = (1 << (WEAPON_KNIFE - 1)) | (1 << (WEAPON_COLT - 1)) | iWeapon;
 
       FOREACHINDYNAMICCONTAINER(wo.wo_cenEntities, CEntity, iten) {
         CEntity *penFound = iten;
 
-        if (bItems) {
+        if (!bPlayer) {
           if (!IsDerivedFromDllClass(penFound, CWeaponItem_DLLClass)) {
             continue;
           }
@@ -868,17 +868,34 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
           penFound->Reinitialize();
 
         } else {
-          // add a knife and something else (or otherwise colt)
-          INDEX iSetWeapons = iKnife | (iWeapon > iKnife ? iWeapon : iColt);
-
+          // player markers
           if (IsDerivedFromDllClass(penFound, CPlayerMarker_DLLClass)) {
             ((CPlayerMarker *)penFound)->m_iGiveWeapons = iSetWeapons;
           }
 
+          // current player weapons
           if (IsDerivedFromDllClass(penFound, CPlayerWeapons_DLLClass)) {
             ((CPlayerWeapons *)penFound)->m_iAvailableWeapons = iSetWeapons;
+
+            for (INDEX iAddAmmo = WEAPON_NONE; iAddAmmo < WEAPON_LAST; iAddAmmo++) {
+              INDEX iAddAmmoFlag = 1 << (iAddAmmo - 1);
+
+              if (iSetWeapons & iAddAmmoFlag) {
+                ((CPlayerWeapons *)penFound)->AddDefaultAmmoForWeapon(iAddAmmo, 0);
+              }
+            }
+
+            // force change from the current weapon
+            ((CPlayerWeapons *)penFound)->WeaponSelectOk(WEAPON_COLT);
+            penFound->SendEvent(EBegin());
           }
         }
+      }
+
+      if (!bPlayer) {
+        CPrintF("Replaced all weapon items with \"%s\"\n", WeaponItemType_enum.NameForValue(iWeapon));
+      } else {
+        CPrintF("Set all PlayerMarkers and PlayerWeapons to %d\n", iSetWeapons);
       }
     } break;
 
