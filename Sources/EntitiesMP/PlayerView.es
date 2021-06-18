@@ -250,7 +250,7 @@ procedures:
     m_penOwner = eInit.penOwner;
     m_iViewType = eInit.vtView;
     m_bFixed = eInit.bDeathFixed;
-    ASSERT(IsOfClass(m_penOwner, "Player"));
+    ASSERT(IS_PLAYER(m_penOwner));
 
     // init as model
     InitAsEditorModel();

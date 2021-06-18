@@ -1115,7 +1115,7 @@ functions:
     }
 
     // if player
-    if (IsOfClass(penYou, "Player")) {
+    if (IS_PLAYER(penYou)) {
       // if ally player 
       if (GetSP()->sp_bCooperative) {
         // if ally prediction is on and this player is local
@@ -1187,7 +1187,7 @@ functions:
         CheckTargetPrediction(pen);
 
         // if player
-        if( IsOfClass( pen, "Player")) {
+        if( IS_PLAYER( pen)) {
           // rememer when targeting begun  
           if( m_tmTargetingStarted==0) {
             m_penTargeting = pen;
@@ -1934,7 +1934,7 @@ functions:
     // if any model hit
     if (penClosest!=NULL) {
       // in deathmatches check for backstab
-      if (!(GetSP()->sp_bCooperative) && IsOfClass(penClosest, "Player")) {
+      if (!(GetSP()->sp_bCooperative) && IS_PLAYER(penClosest)) {
         FLOAT3D vToTarget = penClosest->GetPlacement().pl_PositionVector - m_penPlayer->GetPlacement().pl_PositionVector;
         FLOAT3D vTargetHeading = FLOAT3D(0.0, 0.0, -1.0f)*penClosest->GetRotationMatrix();
         vToTarget.Normalize(); vTargetHeading.Normalize();

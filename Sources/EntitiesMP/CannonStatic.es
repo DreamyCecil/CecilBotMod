@@ -176,11 +176,11 @@ virtual CTString GetPlayerKillDescription(const CTString &strPlayerName, const E
 
   CPlayer *AcquireTarget() {
     // find actual number of players
-    INDEX ctMaxPlayers = GetMaxPlayers();
+    INDEX ctMaxPlayers = CECIL_GetMaxPlayers();
     CEntity *penPlayer;
 
     for(INDEX i=0; i<ctMaxPlayers; i++) {
-      penPlayer=GetPlayerEntity(i);
+      penPlayer=CECIL_GetPlayerEntity(i);
       if (penPlayer!=NULL && DistanceTo(this, penPlayer)<m_fFiringRangeFar) {
         // if this player is more or less directly in front of the shooter
         if (IsInTheLineOfFire(penPlayer, m_fViewAngle)) {
@@ -310,11 +310,11 @@ procedures:
 
     // find the one who killed, or other best suitable player
     CEntityPointer penKiller = eDeath.eLastDamage.penInflictor;
-    if (penKiller==NULL || !IsOfClass(penKiller, "Player")) {
+    if (penKiller==NULL || !IS_PLAYER(penKiller)) {
       penKiller = m_penEnemy;
     }
 
-    if (penKiller==NULL || !IsOfClass(penKiller, "Player")) {
+    if (penKiller==NULL || !IS_PLAYER(penKiller)) {
       penKiller = FixupCausedToPlayer(this, penKiller, /*bWarning=*/FALSE);
     }
 

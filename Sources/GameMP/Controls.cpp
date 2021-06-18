@@ -257,6 +257,115 @@ void CControls::Load_t( CTFileName fnFile)
   }
 	while( !strmFile.AtEOF());
 
+  // [Cecil] TEMP 2021-06-13: Bot mod buttons
+  if (fnFile == CTString("Controls\\System\\Common.ctl")) {
+    #define BOTBUTTON_ADD      "Add NavMesh point"
+    #define BOTBUTTON_DELETE   "Delete NavMesh point"
+    #define BOTBUTTON_SELECT   "NavMesh select point"
+    #define BOTBUTTON_CONNECT  "NavMesh connection type"
+    #define BOTBUTTON_TOPLAYER "NavMesh move to player"
+    #define BOTBUTTON_SNAP     "NavMesh position snapping"
+    #define BOTBUTTON_QUICKBOT "Quick bot add"
+    
+    BOOL bBotAdd = FALSE;
+    BOOL bBotDelete = FALSE;
+    BOOL bBotSelect = FALSE;
+    BOOL bBotConnect = FALSE;
+    BOOL bBotToPlayer = FALSE;
+    BOOL bBotSnap = FALSE;
+    BOOL bBotQuick = FALSE;
+
+    FOREACHINLIST(CButtonAction, ba_lnNode, ctrl_lhButtonActions, itba) {
+      CButtonAction &ba = *itba;
+
+      if (ba.ba_strName == BOTBUTTON_ADD) {
+        bBotAdd = TRUE;
+      } else if (ba.ba_strName == BOTBUTTON_DELETE) {
+        bBotDelete = TRUE;
+      } else if (ba.ba_strName == BOTBUTTON_SELECT) {
+        bBotSelect = TRUE;
+      } else if (ba.ba_strName == BOTBUTTON_CONNECT) {
+        bBotConnect = TRUE;
+      } else if (ba.ba_strName == BOTBUTTON_TOPLAYER) {
+        bBotToPlayer = TRUE;
+      } else if (ba.ba_strName == BOTBUTTON_SNAP) {
+        bBotSnap = TRUE;
+      } else if (ba.ba_strName == BOTBUTTON_QUICKBOT) {
+        bBotQuick = TRUE;
+      }
+    }
+
+    if (!bBotQuick) {
+      CButtonAction &baBot = AddButtonAction();
+      baBot.ba_strName = BOTBUTTON_QUICKBOT;
+      baBot.ba_iFirstKey = KID_EQUALS;
+      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("QuickBot();");
+      baBot.ba_strCommandLineWhenReleased = "";
+      baBot.ba_lnNode.Remove();
+      ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);
+    }
+
+    if (!bBotSnap) {
+      CButtonAction &baBot = AddButtonAction();
+      baBot.ba_strName = BOTBUTTON_SNAP;
+      baBot.ba_iFirstKey = KID_NUMSLASH;
+      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("SnapNavMeshPoint(0.25);");
+      baBot.ba_strCommandLineWhenReleased = "";
+      baBot.ba_lnNode.Remove();
+      ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);
+    }
+
+    if (!bBotToPlayer) {
+      CButtonAction &baBot = AddButtonAction();
+      baBot.ba_strName = BOTBUTTON_TOPLAYER;
+      baBot.ba_iFirstKey = KID_NUMMULTIPLY;
+      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("TeleportNavMeshPoint(0.25);");
+      baBot.ba_strCommandLineWhenReleased = "";
+      baBot.ba_lnNode.Remove();
+      ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);
+    }
+
+    if (!bBotConnect) {
+      CButtonAction &baBot = AddButtonAction();
+      baBot.ba_strName = BOTBUTTON_CONNECT;
+      baBot.ba_iFirstKey = KID_NUMDECIMAL;
+      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("NavMeshConnectionType();");
+      baBot.ba_strCommandLineWhenReleased = "";
+      baBot.ba_lnNode.Remove();
+      ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);
+    }
+
+    if (!bBotSelect) {
+      CButtonAction &baBot = AddButtonAction();
+      baBot.ba_strName = BOTBUTTON_SELECT;
+      baBot.ba_iFirstKey = KID_NUM1;
+      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("NavMeshSelectPoint();");
+      baBot.ba_strCommandLineWhenReleased = "";
+      baBot.ba_lnNode.Remove();
+      ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);
+    }
+
+    if (!bBotDelete) {
+      CButtonAction &baBot = AddButtonAction();
+      baBot.ba_strName = BOTBUTTON_DELETE;
+      baBot.ba_iFirstKey = KID_NUMMINUS;
+      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("DeleteNavMeshPoint();");
+      baBot.ba_strCommandLineWhenReleased = "";
+      baBot.ba_lnNode.Remove();
+      ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);
+    }
+
+    if (!bBotAdd) {
+      CButtonAction &baBot = AddButtonAction();
+      baBot.ba_strName = BOTBUTTON_ADD;
+      baBot.ba_iFirstKey = KID_NUMPLUS;
+      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("AddNavMeshPoint(0.25);");
+      baBot.ba_strCommandLineWhenReleased = "";
+      baBot.ba_lnNode.Remove();
+      ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);
+    }
+  }
+
 /*
   // search for talk button
   BOOL bHasTalk = FALSE;

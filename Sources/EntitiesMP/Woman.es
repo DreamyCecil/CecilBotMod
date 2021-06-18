@@ -250,10 +250,10 @@ functions:
   void PreMoving() {
     if (m_bKamikazeAttached && m_bKamikazeCarrier) {
       // see if any of players are close enough to drop the kamikaze
-      INDEX ctMaxPlayers = GetMaxPlayers();
+      INDEX ctMaxPlayers = CECIL_GetMaxPlayers();
       CEntity *penPlayer;
       for(INDEX i=0; i<ctMaxPlayers; i++) {
-        penPlayer=GetPlayerEntity(i);
+        penPlayer=CECIL_GetPlayerEntity(i);
         if (penPlayer!=NULL) {
           if (DistanceTo(this, penPlayer)<m_rKamikazeDropDistance && IsVisible(penPlayer)) {
             DropKamikaze();

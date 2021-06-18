@@ -953,7 +953,7 @@ functions:
   {
     return 
       penPlayer!=NULL && 
-      IsDerivedFromClass(penPlayer, "Player") &&
+      IS_PLAYER(penPlayer) &&
       penPlayer->GetFlags()&ENF_ALIVE;
   }
   
@@ -2752,11 +2752,11 @@ procedures:
 
     // find the one who killed, or other best suitable player
     CEntityPointer penKiller = eDeath.eLastDamage.penInflictor;
-    if (penKiller==NULL || !IsOfClass(penKiller, "Player")) {
+    if (penKiller==NULL || !IS_PLAYER(penKiller)) {
       penKiller = m_penEnemy;
     }
 
-    if (penKiller==NULL || !IsOfClass(penKiller, "Player")) {
+    if (penKiller==NULL || !IS_PLAYER(penKiller)) {
       penKiller = FixupCausedToPlayer(this, penKiller, /*bWarning=*/FALSE);
     }
 

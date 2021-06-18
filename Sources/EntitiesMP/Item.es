@@ -97,10 +97,10 @@ functions:
   // check if given player already picked this item, and mark if not
   BOOL MarkPickedBy(CEntity *pen)
   {
-    if (!IsOfClass(pen, "Player")) {
+    if (!IS_PLAYER(pen)) {
       return FALSE;
     }
-    INDEX iPlayer = ((CPlayerEntity*)pen)->GetMyPlayerIndex();
+    INDEX iPlayer = CECIL_PlayerIndex((CPlayer *)pen); // [Cecil]
     BOOL bPickedAlready = (1<<iPlayer)&m_ulPickedMask;
     m_ulPickedMask |= (1<<iPlayer);
     return bPickedAlready;
@@ -259,7 +259,7 @@ procedures:
     wait() {
       on (EBegin) : { resume; }
       on (EPass epass) : { 
-        if (!IsOfClass(epass.penOther, "Player")) {
+        if (!IS_PLAYER(epass.penOther)) {
           pass;
         }
         if (!(m_bPickupOnce||m_bRespawn)) {

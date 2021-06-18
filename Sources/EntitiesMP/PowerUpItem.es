@@ -192,7 +192,7 @@ procedures:
  
     // don't pick up more bombs then you can carry
     if (m_puitType == PUIT_BOMB) {
-      if (IsOfClass(epass.penOther, "Player")) {
+      if (IS_PLAYER(epass.penOther)) {
         if (((CPlayer &)*epass.penOther).m_iSeriousBombCount>=3) {
           return;
         }

@@ -1023,6 +1023,9 @@ void CGame::InitInternal( void)
 
   // provide URL to the engine
   _strModURL = "http://www.croteam.com/mods/TheSecondEncounter";
+
+  // [Cecil] 2021-06-11: Initialize the bot mod
+  CECIL_InitBotMod();
 }
 
 // internal cleanup
@@ -1063,6 +1066,9 @@ void CGame::EndInternal(void)
   } catch (char *strError) {
     WarningMessage("Cannot load game settings:\n%s\nUsing defaults!", strError);
   }
+  
+  // [Cecil] 2021-06-13: End the bot mod
+  CECIL_EndBotMod();
 }
 
 BOOL CGame::NewGame(const CTString &strSessionName, const CTFileName &fnWorld,
@@ -1117,6 +1123,9 @@ BOOL CGame::NewGame(const CTString &strSessionName, const CTFileName &fnWorld,
       BOOL bWaitAllPlayers = sp.sp_bWaitAllPlayers && _pNetwork->IsNetworkEnabled();
       _pNetwork->StartPeerToPeer_t( strSessionName, fnWorld, 
         sp.sp_ulSpawnFlags, sp.sp_ctMaxPlayers, bWaitAllPlayers, &sp);
+
+      // [Cecil] 2021-06-13: Bot game start
+      CECIL_BotGameStart(sp);
     }
   } catch (char *strError) {
     gm_bFirstLoading = FALSE;
@@ -1345,6 +1354,9 @@ void CGame::StopGame(void)
 {
   // disable computer quickly
   ComputerForceOff();
+
+  // [Cecil] 2021-06-12: Bot game cleanup
+  CECIL_BotGameCleanup();
 
   // if no game is currently running
   if (!gm_bGameOn)
@@ -2180,16 +2192,26 @@ void CGame::GameRedrawView( CDrawPort *pdpDrawPort, ULONG ulFlags)
       }
     }}
 
+    // [Cecil] 2021-06-12: List of player entities
+    CDynamicContainer<CPlayer> cenPlayerEntities;
+
     // fill in all players that are not local
     INDEX ctNonlocals = 0;
-    CEntity *apenNonlocals[16];
-    memset(apenNonlocals, 0, sizeof(apenNonlocals));
     {for (INDEX i=0; i<16; i++) {
       CEntity *pen = CEntity::GetPlayerEntity(i);
       if (pen!=NULL && !_pNetwork->IsPlayerLocal(pen)) {
-        apenNonlocals[ctNonlocals++] = pen;
+        // [Cecil] Add player
+        cenPlayerEntities.Add((CPlayer *)pen);
       }
     }}
+
+    // [Cecil] Add bots
+    for (INDEX iBot = 0; iBot < _cenPlayerBots.Count(); iBot++) {
+      CPlayerBot *penBot = _cenPlayerBots.Pointer(iBot);
+      cenPlayerEntities.Add(penBot);
+    }
+    // [Cecil] Count non-local players
+    ctNonlocals = cenPlayerEntities.Count();
 
     // if there are any non-local players
     if (ctNonlocals>0) {
@@ -2197,7 +2219,9 @@ void CGame::GameRedrawView( CDrawPort *pdpDrawPort, ULONG ulFlags)
       {for (INDEX i=0; i<ctObservers; i++) {
         // get the given player with given offset that is not local
         INDEX iPlayer = (i+iObserverOffset)%ctNonlocals;
-        apenViewers[ctViewers++] = apenNonlocals[iPlayer];
+
+        // [Cecil] 2021-06-12: Add viewer from the player list
+        apenViewers[ctViewers++] = cenPlayerEntities.Pointer(iPlayer);
       }}
     }
 

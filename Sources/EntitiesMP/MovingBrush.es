@@ -466,7 +466,7 @@ functions:
       return FALSE;
     }
 
-    if (m_bPlayersOnly && !IsDerivedFromClass(pen, "Player")) {
+    if (m_bPlayersOnly && !IS_PLAYER(pen)) {
       return FALSE;
     }
 

@@ -1299,7 +1299,7 @@ void PrintCenterMessage(CEntity *penThis, CEntity *penCaused,
 void SpawnRangeSound( CEntity *penPlayer, CEntity *penPos, enum SoundType st, FLOAT fRange)
 {
   // if not really player
-  if (!IsDerivedFromClass(penPlayer, "Player")) {
+  if (!IS_PLAYER(penPlayer)) {
     // do nothing
     return;
   }
@@ -1313,7 +1313,7 @@ void SpawnRangeSound( CEntity *penPlayer, CEntity *penPos, enum SoundType st, FL
 // get some player for trigger source if any is existing
 CEntity *FixupCausedToPlayer(CEntity *penThis, CEntity *penCaused, BOOL bWarning/*=TRUE*/)
 {
-  if (penCaused!=NULL && IsOfClass(penCaused, "Player")) {
+  if (penCaused!=NULL && IS_PLAYER(penCaused)) {
     return penCaused;
   }
 
@@ -1324,7 +1324,7 @@ CEntity *FixupCausedToPlayer(CEntity *penThis, CEntity *penCaused, BOOL bWarning
       (const char*)penThis->GetClass()->GetName());
   }
 
-  INDEX ctPlayers = penThis->GetMaxPlayers();
+  INDEX ctPlayers = CECIL_GetMaxPlayers();
   if (ctPlayers==0) {
     return NULL;
   }
@@ -1333,8 +1333,8 @@ CEntity *FixupCausedToPlayer(CEntity *penThis, CEntity *penCaused, BOOL bWarning
   FLOAT fClosestPlayer = UpperLimit(0.0f);
 
   // for all players
-  for (INDEX iPlayer=0; iPlayer<penThis->GetMaxPlayers(); iPlayer++) {
-    CEntity *penPlayer = penThis->GetPlayerEntity(iPlayer);
+  for (INDEX iPlayer=0; iPlayer<CECIL_GetMaxPlayers(); iPlayer++) {
+    CEntity *penPlayer = CECIL_GetPlayerEntity(iPlayer);
     // if player exists
     if (penPlayer!=NULL) {
       // calculate distance to player
@@ -1394,7 +1394,7 @@ FLOAT GetGameDamageMultiplier(void)
 // get entity's serious damage multiplier
 FLOAT GetSeriousDamageMultiplier( CEntity *pen)
 {
-  if( !IsOfClass(pen,"Player")) return 1.0f;
+  if( !IS_PLAYER(pen)) return 1.0f;
   const TIME tmNow = _pTimer->CurrentTick();
   const TIME tmDamage = ((CPlayer*)pen)->m_tmSeriousDamage;
   if( tmDamage>tmNow) return 4.0f;

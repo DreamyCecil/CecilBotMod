@@ -76,7 +76,7 @@
     <IntDir>Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>$(SolutionDir)Extras;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(SolutionDir);$(SolutionDir)Extras;$(SolutionDir)Engine107;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir);$(SolutionDir)EntitiesMP/StdH;$(SolutionDir)Extras;$(SolutionDir)Engine107;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Engine107;$(LibraryPath)</LibraryPath>
     <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
@@ -151,6 +151,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>Release\EntitiesMP.dll</OutputFile>
       <ImportLibrary>.\Release\EntitiesMP.lib</ImportLibrary>
+      <AdditionalDependencies>user32.lib</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>copy Release\$(TargetName).dll $(SolutionDir)..\Bin\ &gt;nul
@@ -316,11 +317,22 @@ copy Debug\$(TargetName).lib $(SolutionDir)..\Bin\Debug\ &gt;nul</Command>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Bots\AdvancedPaths.cpp" />
+    <ClCompile Include="..\Bots\BotMovement.cpp" />
+    <ClCompile Include="..\Bots\Patcher\patcher.cpp" />
+    <ClCompile Include="..\Bots\SandboxCommon.cpp" />
+    <ClCompile Include="..\Bots\BotModMain.cpp" />
+    <ClCompile Include="..\Bots\NetworkPatch\ServerIntegration.cpp" />
+    <ClCompile Include="..\Bots\NetworkPatch\StreamBlock.cpp" />
+    <ClCompile Include="..\Bots\BotFunctions.cpp" />
     <ClCompile Include="Common\Common.cpp" />
     <ClCompile Include="Common\EmanatingParticles.cpp" />
     <ClCompile Include="Common\HUD.cpp" />
     <ClCompile Include="Common\Particles.cpp" />
     <ClCompile Include="Common\PathFinding.cpp" />
+    <ClCompile Include="BotModGlobal.cpp" />
+    <ClCompile Include="NavMeshGenerator.cpp" />
+    <ClCompile Include="PlayerBot.cpp" />
     <ClCompile Include="StdH\StdH.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_110|Win32'">Create</PrecompiledHeader>
@@ -568,11 +580,27 @@ copy Debug\$(TargetName).lib $(SolutionDir)..\Bin\Debug\ &gt;nul</Command>
     <ClCompile Include="WorldSettingsController.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Bots\AdvancedPaths.h" />
+    <ClInclude Include="..\Bots\BotMovement.h" />
+    <ClInclude Include="..\Bots\Patcher\patcher.h" />
+    <ClInclude Include="..\Bots\Patcher\patcher_defines.h" />
+    <ClInclude Include="..\Bots\SandboxCommon.h" />
+    <ClInclude Include="..\Bots\BotModMain.h" />
+    <ClInclude Include="..\Bots\NetworkPatch\StreamBlock.h" />
+    <ClInclude Include="..\Bots\NetworkPatch\ServerIntegration.h" />
+    <ClInclude Include="..\Bots\BotFunctions.h" />
+    <ClInclude Include="..\Bots\_BotMod.h" />
     <ClInclude Include="Common\Common.h" />
     <ClInclude Include="Common\Flags.h" />
     <ClInclude Include="Common\GameInterface.h" />
     <ClInclude Include="Common\Particles.h" />
     <ClInclude Include="Common\PathFinding.h" />
+    <ClInclude Include="BotModGlobal.h" />
+    <ClInclude Include="BotModGlobal_tables.h" />
+    <ClInclude Include="NavMeshGenerator.h" />
+    <ClInclude Include="NavMeshGenerator_tables.h" />
+    <ClInclude Include="PlayerBot.h" />
+    <ClInclude Include="PlayerBot_tables.h" />
     <ClInclude Include="StdH\StdH.h" />
     <ClInclude Include="Common\WeaponPositions.h" />
     <ClInclude Include="AirElemental.h" />
@@ -3933,6 +3961,29 @@ ecc EntitiesMP/%(Filename).es </Command>
     <CustomBuild Include="..\..\Flesh\Data\Messages\Enemies\WalkerBig.txt" />
     <CustomBuild Include="..\..\Flesh\Data\Messages\Enemies\WalkerSmall.txt" />
     <CustomBuild Include="..\..\Flesh\Data\Messages\Enemies\Woman.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="PlayerBot.es">
+      <FileType>Document</FileType>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">EntitiesMP/%(Filename).es</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">cd $(SolutionDir)
+ecc EntitiesMP/%(Filename).es </Command>
+    </CustomBuild>
+    <CustomBuild Include="BotModGlobal.es">
+      <FileType>Document</FileType>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">EntitiesMP/%(Filename).es</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).cpp;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">cd $(SolutionDir)
+ecc EntitiesMP/%(Filename).es </Command>
+    </CustomBuild>
+    <CustomBuild Include="NavMeshGenerator.es">
+      <FileType>Document</FileType>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">EntitiesMP/%(Filename).es</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).cpp;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">cd $(SolutionDir)
+ecc EntitiesMP/%(Filename).es </Command>
+    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

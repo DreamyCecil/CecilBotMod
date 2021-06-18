@@ -17,3 +17,5 @@
 #include "..\Common\Particles.h"
 #include "..\Common\EmanatingParticles.h"
 #include "..\Common\GameInterface.h"
+// [Cecil] 2021-06-11: Bot Mod
+#include "Bots/_BotMod.h"

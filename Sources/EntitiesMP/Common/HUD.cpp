@@ -374,12 +374,12 @@ extern INDEX SetAllPlayersStats( INDEX iSortKey)
 {
   // determine maximum number of players for this session
   INDEX iPlayers    = 0;
-  INDEX iMaxPlayers = _penPlayer->GetMaxPlayers();
+  INDEX iMaxPlayers = CECIL_GetMaxPlayers();
   CPlayer *penCurrent;
   // loop thru potentional players 
   for( INDEX i=0; i<iMaxPlayers; i++)
   { // ignore non-existent players
-    penCurrent = (CPlayer*)&*_penPlayer->GetPlayerEntity(i);
+    penCurrent = CECIL_GetPlayerEntity(i);
     if( penCurrent==NULL) continue;
     // fill in player parameters
     _apenPlayers[iPlayers] = penCurrent;

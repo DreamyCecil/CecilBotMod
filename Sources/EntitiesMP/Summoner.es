@@ -325,11 +325,11 @@ functions:
   BOOL DistanceToAllPlayersGreaterThen(FLOAT fDistance)
   {
     // find actual number of players
-    INDEX ctMaxPlayers = GetMaxPlayers();
+    INDEX ctMaxPlayers = CECIL_GetMaxPlayers();
     CEntity *penPlayer;
     
     for(INDEX i=0; i<ctMaxPlayers; i++) {
-      penPlayer=GetPlayerEntity(i);
+      penPlayer=CECIL_GetPlayerEntity(i);
       if (penPlayer) {
         if (DistanceTo(this, penPlayer)<fDistance) {
           return FALSE;
@@ -363,11 +363,11 @@ functions:
   void ChangeEnemyNumberForAllPlayers(INDEX iDelta)
   {
     // find actual number of players
-    INDEX ctMaxPlayers = GetMaxPlayers();
+    INDEX ctMaxPlayers = CECIL_GetMaxPlayers();
     CEntity *penPlayer;
     
     for(INDEX i=0; i<ctMaxPlayers; i++) {
-      penPlayer=GetPlayerEntity(i);
+      penPlayer=CECIL_GetPlayerEntity(i);
       if (penPlayer) {
         // set totals for level and increment for game
         ((CPlayer &)*penPlayer).m_psLevelTotal.ps_iKills+=iDelta;
@@ -387,7 +387,7 @@ functions:
     }
 
     // summoner doesn't receive damage from other monsters
-    if(!IsOfClass(penInflictor, "Player")) {
+    if(!IS_PLAYER(penInflictor)) {
       return;
     }
 
@@ -960,11 +960,11 @@ procedures:
 
     // find the one who killed, or other best suitable player
     m_penKiller = m_penDeathInflictor;
-    if (m_penKiller ==NULL || !IsOfClass(m_penKiller, "Player")) {
+    if (m_penKiller ==NULL || !IS_PLAYER(m_penKiller)) {
       m_penKiller = m_penEnemy;
     }
 
-    if (m_penKiller==NULL || !IsOfClass(m_penKiller, "Player")) {
+    if (m_penKiller==NULL || !IS_PLAYER(m_penKiller)) {
       m_penKiller = FixupCausedToPlayer(this, m_penKiller, /*bWarning=*/FALSE);
     }
 

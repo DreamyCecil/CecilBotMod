@@ -205,7 +205,7 @@ functions:
           esi.vRotationAngle = ANGLE3D(-m_sgnSpinDir*500.0f, 0, 0);
           esi.fUpSpeed = m_fDiffMultiply*3.0f;          
         // don't take it easy with players
-        } else if (IsOfClass(pen, "Player")){
+        } else if (IS_PLAYER(pen)){
           esi.tmSpinTime = 3.0f;
           esi.vRotationAngle = ANGLE3D(-m_sgnSpinDir*220.0f, 0, 0);
           esi.bImpulse = TRUE;

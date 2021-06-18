@@ -646,7 +646,7 @@ procedures:
         on (ETrigger eTrigger) : {
           CEntity *penCaused;
           penCaused = FixupCausedToPlayer(this, eTrigger.penCaused, FALSE);
-          if( IsDerivedFromClass(penCaused, "Player")) {
+          if( IS_PLAYER(penCaused)) {
             m_penPlayer = penCaused;
             call PlayCamera();
           }

@@ -97,7 +97,7 @@ procedures:
       wait() {
         on (EPass ePass) : {
           if (m_penTarget!=NULL && m_bActive) {
-            if (m_bPlayersOnly && !IsOfClass(ePass.penOther, "Player")) {
+            if (m_bPlayersOnly && !IS_PLAYER(ePass.penOther)) {
             resume;
             }
             TeleportEntity(ePass.penOther, m_penTarget->GetPlacement());

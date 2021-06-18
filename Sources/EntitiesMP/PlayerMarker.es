@@ -53,7 +53,7 @@ functions:
       CEntity *penCaused = ((ETrigger&)ee).penCaused;
       if (bNew &&
         (GetSP()->sp_bSinglePlayer && GetSP()->sp_gmGameMode!=CSessionProperties::GM_FLYOVER)
-        && IsOfClass(penCaused, "Player")) {
+        && IS_PLAYER(penCaused)) {
         // if the player wants auto-save
         CPlayerSettings *pps = (CPlayerSettings *) (((CPlayerEntity*)penCaused)->en_pcCharacter.pc_aubAppearance);
         if (pps->ps_ulFlags&PSF_AUTOSAVE) {

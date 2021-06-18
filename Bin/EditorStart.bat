@@ -1,2 +1,3 @@
 @echo off
-..\..\..\Bin\SeriousSam.exe +game BotMod
+start ..\..\..\Bin\SeriousEditor.exe +game BotMod
+exit

@@ -363,10 +363,11 @@ extern FLOAT wpn_fRecoilFactorZ[17] = {0};
 // misc
 static FLOAT plr_fAcceleration  = 100.0f;
 static FLOAT plr_fDeceleration  = 60.0f;
-static FLOAT plr_fSpeedForward  = 10.0f;
-static FLOAT plr_fSpeedBackward = 10.0f;
-static FLOAT plr_fSpeedSide     = 10.0f;
-static FLOAT plr_fSpeedUp       = 11.0f;
+// [Cecil] 2021-06-12: Made extern
+extern FLOAT plr_fSpeedForward  = 10.0f;
+extern FLOAT plr_fSpeedBackward = 10.0f;
+extern FLOAT plr_fSpeedSide     = 10.0f;
+extern FLOAT plr_fSpeedUp       = 11.0f;
 static FLOAT plr_fViewHeightStand  = 1.9f;
 static FLOAT plr_fViewHeightCrouch = 0.7f;
 static FLOAT plr_fViewHeightSwim   = 0.4f;
@@ -458,6 +459,7 @@ DECL_DLL void ctl_ComposeActionPacket(const CPlayerCharacter &pc, CPlayerAction 
 
   // find local player, if any
   CPlayer *penThis = NULL;
+  // [Cecil] NOTE: CEntity::GetMaxPlayers() and CEntity::GetPlayerEntity() should remain as they are
   INDEX ctPlayers = CEntity::GetMaxPlayers();
   for (INDEX iPlayer = 0; iPlayer<ctPlayers; iPlayer++) {
     CPlayer *pen=(CPlayer *)CEntity::GetPlayerEntity(iPlayer);
@@ -917,7 +919,7 @@ void PrintPlayerDeathMessage(CPlayer *ppl, const EDeath &eDeath)
   // if killed by a valid entity
   if (penKiller!=NULL) {
     // if killed by a player
-    if (IsOfClass(penKiller, "Player")) {
+    if (IS_PLAYER(penKiller)) { // [Cecil]
       // if not self
       if (penKiller!=ppl) {
         CTString strKillerName = ((CPlayer*)penKiller)->GetPlayerName();
@@ -1277,6 +1279,20 @@ components:
 
 
 functions:
+  // [Cecil] 2021-06-11 ~ 2021-06-12
+  
+  // Check if selected point is a current one
+  virtual BOOL CurrentPoint(CBotPathPoint *pbppExclude) { return FALSE; };
+  // Identify as a bot
+  virtual BOOL IsBot(void) { return FALSE; };
+  // Apply action for bots
+  virtual void BotApplyAction(CPlayerAction &paAction) {};
+  // Change bot's speed
+  virtual void BotSpeed(FLOAT3D &vTranslation) {};
+  // Initialize the bot
+  virtual void InitBot(void) {};
+  // Bot destructor
+  virtual void EndBot(void) {};
 
   INDEX GenderSound(INDEX iSound)
   {
@@ -2131,7 +2147,7 @@ functions:
       {
         fIntensity = 0.5f-0.5f*cos((m_tmInvisibility-tmNow)*(6.0f*3.1415927f/3.0f));
       }
-      if (_ulPlayerRenderingMask == 1<<GetMyPlayerIndex()) {
+      if (_ulPlayerRenderingMask == 1<<CECIL_PlayerIndex(this)) { // [Cecil]
         colAlpha = (colAlpha&0xffffff00)|(INDEX)(INVISIBILITY_ALPHA_LOCAL+(FLOAT)(254-INVISIBILITY_ALPHA_LOCAL)*fIntensity);
       } else if (TRUE) {
         if ((m_tmInvisibility-tmNow)<1.28f) {
@@ -2466,8 +2482,9 @@ functions:
 
       // render the view
       ASSERT(IsValidFloat(plViewer.pl_OrientationAngle(1))&&IsValidFloat(plViewer.pl_OrientationAngle(2))&&IsValidFloat(plViewer.pl_OrientationAngle(3)));
-      _ulPlayerRenderingMask = 1<<GetMyPlayerIndex();
+      _ulPlayerRenderingMask = 1<<CECIL_PlayerIndex(this); // [Cecil]
       RenderView(*en_pwoWorld, *penViewer, apr, *pdp);
+      CECIL_WorldOverlayRender(this, penViewer, apr, pdp); // [Cecil] Extras on top of the world
       _ulPlayerRenderingMask = 0;
 
       if (iEye==STEREO_LEFT) {
@@ -2560,7 +2577,7 @@ functions:
 
       // render the view
       ASSERT(IsValidFloat(plViewer.pl_OrientationAngle(1))&&IsValidFloat(plViewer.pl_OrientationAngle(2))&&IsValidFloat(plViewer.pl_OrientationAngle(3)));
-      _ulPlayerRenderingMask = 1<<GetMyPlayerIndex();
+      _ulPlayerRenderingMask = 1<<CECIL_PlayerIndex(this); // [Cecil]
       RenderView(*en_pwoWorld, *penViewer, apr, *pdpCamera);
       _ulPlayerRenderingMask = 0;
 
@@ -3042,7 +3059,7 @@ functions:
 
     // check for friendly fire
     if (!GetSP()->sp_bFriendlyFire && GetSP()->sp_bCooperative) {
-      if (IsOfClass(penInflictor, "Player") && penInflictor!=this) {
+      if (IS_PLAYER(penInflictor) && penInflictor!=this) { // [Cecil]
         return;
       }
     }
@@ -3523,6 +3540,7 @@ functions:
   void SetGameEnd(void)
   {
     _pNetwork->SetGameFinished();
+    // [Cecil] NOTE: CEntity::GetMaxPlayers() and CEntity::GetPlayerEntity() should remain as they are
     // start console for first player possible
     for(INDEX iPlayer=0; iPlayer<GetMaxPlayers(); iPlayer++) {
       CEntity *pen = GetPlayerEntity(iPlayer);
@@ -3615,14 +3633,18 @@ functions:
       CheckGameEnd();
     }
 
+    // [Cecil] 2021-06-11: Apply action for bots
+    BotApplyAction(paAction);
+
     // limit speeds against abusing
     paAction.pa_vTranslation(1) = Clamp( paAction.pa_vTranslation(1), -plr_fSpeedSide,    plr_fSpeedSide);
     paAction.pa_vTranslation(2) = Clamp( paAction.pa_vTranslation(2), -plr_fSpeedUp,      plr_fSpeedUp);
     paAction.pa_vTranslation(3) = Clamp( paAction.pa_vTranslation(3), -plr_fSpeedForward, plr_fSpeedBackward);
 
     // if speeds are like walking
-    if (Abs(paAction.pa_vTranslation(3))< plr_fSpeedForward/1.99f
-      &&Abs(paAction.pa_vTranslation(1))< plr_fSpeedSide/1.99f) {
+    if (!IsBot() // [Cecil] Bots get stuck when forced to walk at high places
+     && Abs(paAction.pa_vTranslation(3))< plr_fSpeedForward/1.99f
+     && Abs(paAction.pa_vTranslation(1))< plr_fSpeedSide/1.99f) {
       // don't allow falling
       en_fStepDnHeight = 1.5f;
 
@@ -3976,6 +3998,9 @@ functions:
       vTranslation(3) *= 1.35f;
     //en_fDeceleration *= 0.8f;
     }
+    
+    // [Cecil] Adjust bot's speed
+    BotSpeed(vTranslation);
 
     CContentType &ctUp = GetWorld()->wo_actContentTypes[en_iUpContent];
     CContentType &ctDn = GetWorld()->wo_actContentTypes[en_iDnContent];
@@ -4920,8 +4945,8 @@ functions:
       }
       // get min distance from any player
       FLOAT fMinD = UpperLimit(0.0f);
-      for (INDEX iPlayer=0; iPlayer<GetMaxPlayers(); iPlayer++) {
-        CPlayer *ppl = (CPlayer *)&*GetPlayerEntity(iPlayer);
+      for (INDEX iPlayer=0; iPlayer<CECIL_GetMaxPlayers(); iPlayer++) { // [Cecil]
+        CPlayer *ppl = CECIL_GetPlayerEntity(iPlayer); // [Cecil]
         if (ppl==NULL) { 
           continue;
         }
@@ -4991,6 +5016,9 @@ functions:
     SetPhysicsFlags(EPF_MODEL_WALKING|EPF_HASLUNGS);
     SetCollisionFlags(ECF_MODEL|((ECBI_PLAYER)<<ECB_IS));
     SetFlags(GetFlags()|ENF_ALIVE);
+
+    InitBot(); // [Cecil] Bot Mod
+
     // animation
     StartModelAnim(PLAYER_ANIM_STAND, AOF_LOOPING);
     TeleportPlayer(WLT_FIXED);
@@ -5000,7 +5028,7 @@ functions:
   FLOAT3D GetTeleportingOffset(void)
   {
     // find player index
-    INDEX iPlayer = GetMyPlayerIndex();
+    INDEX iPlayer = CECIL_PlayerIndex(this); // [Cecil]
 
     // create offset from marker
     const FLOAT fOffsetY = 0.1f;  // how much to offset up (as precaution not to spawn in floor)
@@ -5082,7 +5110,7 @@ functions:
     }
 
     // find player index
-    INDEX iPlayer = GetMyPlayerIndex();
+    INDEX iPlayer = CECIL_PlayerIndex(this); // [Cecil]
     // player placement
     CPlacement3D plSet = GetPlacement();
     // teleport in dummy space to avoid auto teleport frag
@@ -5416,8 +5444,8 @@ functions:
     // if we are in coop
     if (GetSP()->sp_bCooperative && !GetSP()->sp_bSinglePlayer) {
       // for each player
-      for(INDEX iPlayer=0; iPlayer<GetMaxPlayers(); iPlayer++) {
-        CPlayer *ppl = (CPlayer*)GetPlayerEntity(iPlayer);
+      for(INDEX iPlayer=0; iPlayer<CECIL_GetMaxPlayers(); iPlayer++) { // [Cecil]
+        CPlayer *ppl = CECIL_GetPlayerEntity(iPlayer); // [Cecil]
         if (ppl!=NULL) {
           // put it at marker
           CPlacement3D pl = ppam->GetPlacement();
@@ -5450,7 +5478,7 @@ functions:
     }
     // if killed by a player or enemy
     CEntity *penKiller = eDeath.eLastDamage.penInflictor;
-    if (IsOfClass(penKiller, "Player") || IsDerivedFromClass(penKiller, "Enemy Base")) {
+    if (IS_PLAYER(penKiller) || IsDerivedFromClass(penKiller, "Enemy Base")) { // [Cecil]
       // mark for respawning in place
       m_ulFlags |= PLF_RESPAWNINPLACE;
       m_vDied = GetPlacement().pl_PositionVector;
@@ -5584,7 +5612,7 @@ procedures:
       // if killed by some entity
       if (penKiller!=NULL) {
         // if killed by player
-        if (IsOfClass(penKiller, "Player")) {
+        if (IS_PLAYER(penKiller)) { // [Cecil]
           // if someone other then you
           if (penKiller!=this) {
             pplKillerPlayer = (CPlayer*)penKiller;
@@ -6500,8 +6528,13 @@ procedures:
 /************************************************************
  *                        M  A  I  N                        *
  ************************************************************/
-  Main(EVoid evoid)
-  {
+  // [Cecil] 2021-06-12: Jump into SubMain procedure
+  Main() {
+    jump SubMain();
+  };
+
+  // [Cecil] Sub-procedure
+  SubMain() {
     // remember start time
     time(&m_iStartTime);
 
@@ -6707,6 +6740,7 @@ procedures:
     if (!IsPredictor() && m_ulKeys!=0) {
       // find first live player
       CPlayer *penNextPlayer = NULL;
+      // [Cecil] NOTE: CEntity::GetMaxPlayers() and CEntity::GetPlayerEntity() should remain as they are
       for(INDEX iPlayer=0; iPlayer<GetMaxPlayers(); iPlayer++) {
         CPlayer *pen = (CPlayer*)&*GetPlayerEntity(iPlayer);
         if (pen!=NULL && pen!=this && (pen->GetFlags()&ENF_ALIVE) && !(pen->GetFlags()&ENF_DELETED) ) {
@@ -6725,6 +6759,9 @@ procedures:
 
     // spawn teleport effect
     SpawnTeleport();
+
+    // [Cecil] 2021-06-12: End the bot
+    EndBot();
 
     // cease to exist
     m_penWeapons->Destroy();

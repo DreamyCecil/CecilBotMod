@@ -1035,7 +1035,7 @@ void PlayerRocketExplosion(void) {
   ese.vStretch = FLOAT3D(1,1,1);
   SpawnEffect(GetPlacement(), ese);
   // spawn sound event in range
-  if( IsDerivedFromClass( m_penLauncher, "Player")) {
+  if( IS_PLAYER(m_penLauncher)) {
     SpawnRangeSound( m_penLauncher, this, SNDT_PLAYER, m_fSoundRange);
   }
 
@@ -1112,7 +1112,7 @@ void PlayerGrenadeExplosion(void) {
   ese.vStretch = FLOAT3D(1,1,1);
   SpawnEffect(GetPlacement(), ese);
   // spawn sound event in range
-  if( IsDerivedFromClass( m_penLauncher, "Player")) {
+  if( IS_PLAYER(m_penLauncher)) {
     SpawnRangeSound( m_penLauncher, this, SNDT_PLAYER, m_fSoundRange);
   }
 
@@ -2156,7 +2156,7 @@ void DevilRocketExplosion(void) {
   ese.vStretch = FLOAT3D(2,2,2);
   SpawnEffect(GetPlacement(), ese);
   // spawn sound event in range
-  if( IsDerivedFromClass( m_penLauncher, "Player")) {
+  if( IS_PLAYER(m_penLauncher)) {
     SpawnRangeSound( m_penLauncher, this, SNDT_PLAYER, m_fSoundRange);
   }
 
@@ -2754,7 +2754,7 @@ void MeteorExplosion() {
   ese.vStretch = FLOAT3D(5,5,5);
   SpawnEffect(GetPlacement(), ese);
   // spawn sound event in range
-  if( IsDerivedFromClass( m_penLauncher, "Player")) {
+  if( IS_PLAYER(m_penLauncher)) {
     SpawnRangeSound( m_penLauncher, this, SNDT_PLAYER, m_fSoundRange);
   }
 
@@ -3019,7 +3019,7 @@ void ProjectileHit(void)
         GetPlacement().pl_PositionVector, m_fDamageHotSpotRange, m_fDamageFallOffRange);
   }
   // sound event
-  if (m_fSoundRange>0.0f && IsDerivedFromClass( m_penLauncher, "Player"))
+  if (m_fSoundRange>0.0f && IS_PLAYER(m_penLauncher))
   {
     ESound eSound;
     eSound.EsndtSound = SNDT_EXPLOSION;
