@@ -153,8 +153,8 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
 
 // [Cecil] 2021-06-15: Set bot aim
 void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
-  // [Cecil] 2021-06-16: Aim in the walking direction if haven't seen the enemy in a while
-  if (_pTimer->CurrentTick() - pen->m_tmLastSawTarget > 2.0f) {
+  // [Cecil] 2021-06-16: Aim in the walking direction on a path if haven't seen the enemy in a while
+  if (pen->m_pbppCurrent != NULL && _pTimer->CurrentTick() - pen->m_tmLastSawTarget > 2.0f) {
     // calculate an angle
     FLOAT3D vToTarget = pen->en_vCurrentTranslationAbsolute;
     vToTarget.SafeNormalize();
@@ -283,6 +283,12 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
 
   const FLOAT3D &vBotPos = pen->GetPlacement().pl_PositionVector;
 
+  // randomize strafe direction every once in a while
+  if (pen->m_tmChangeBotDir < _pTimer->CurrentTick()) {
+    pen->m_fSideDir = (pen->IRnd() % 2 == 0) ? -1.0f : 1.0f;
+    pen->m_tmChangeBotDir = _pTimer->CurrentTick() + (pen->FRnd() * 2.0f) + 2.0f; // 2 to 4 seconds
+  }
+
   FLOAT3D vBotMovement = FLOAT3D(0.0f, 0.0f, 0.0f); // in which direction bot needs to go
   FLOAT fVerticalMove = 0.0f; // jumping or crouching
 
@@ -298,7 +304,7 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
   if (SBS.bStrafe && pen->m_fTargetDist < (bwcWeapon.bw_fMinDistance + fStrafe)
    && (pen->m_penFollow == NULL || pen->m_penFollow == pen->m_penTarget || sbl.Following())) {
     // run around the enemy
-    vBotMovement = FLOAT3D(pen->m_fBotDir, 0.0f, 0.0f);
+    vBotMovement = FLOAT3D(pen->m_fSideDir, 0.0f, 0.0f);
 
   } else {
     FLOAT3D vDelta = FLOAT3D(0.0f, 0.0f, 0.0f);
@@ -365,7 +371,7 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
       fVerticalMove = 1.0f;
 
     } else {
-      vBotMovement = FLOAT3D(pen->m_fBotDir, 0.0f, 1.0f);
+      vBotMovement = FLOAT3D(pen->m_fSideDir, 0.0f, 1.0f);
     }
   }
 

@@ -49,9 +49,10 @@ properties:
   5 FLOAT m_tmButtonAction = 0.0f, // cooldown for button actions
  
  10 FLOAT m_fTargetDist = 1000.0f, // how far is the following target
- 11 FLOAT m_fBotDir = -1.0f,       // prioritize going left or right
- 12 FLOAT3D m_vAccuracy = FLOAT3D(0.0f, 0.0f, 0.0f), // accuracy angle (should be preserved between ticks)
- 13 FLOAT m_tmBotAccuracy = 0.0f,  // accuracy update cooldown
+ 11 FLOAT m_fSideDir = -1.0f,      // prioritize going left or right
+ 12 FLOAT m_tmChangeBotDir = 0.0f, // when to randomize the side direction
+ 13 FLOAT3D m_vAccuracy = FLOAT3D(0.0f, 0.0f, 0.0f), // accuracy angle (should be preserved between ticks)
+ 14 FLOAT m_tmBotAccuracy = 0.0f,  // accuracy update cooldown
  
  20 FLOAT m_tmChangePath = 0.0f,    // path update cooldown
  21 FLOAT m_tmPickImportant = 0.0f, // how often to pick important points
@@ -84,7 +85,6 @@ functions:
 
   // Initialize the bot  
   virtual void InitBot(void) {
-    m_fBotDir = (IRnd() % 2 == 0) ? -1.0f : 1.0f;
     m_pbppCurrent = NULL;
     m_pbppTarget = NULL;
     m_ulPointFlags = 0;
@@ -178,17 +178,11 @@ functions:
   // [Cecil] 2021-06-16: Perform a button action if possible
   BOOL ButtonAction(void) {
     if (m_tmButtonAction < _pTimer->CurrentTick()) {
-      m_tmButtonAction = _pTimer->CurrentTick() + 0.1f;
+      m_tmButtonAction = _pTimer->CurrentTick() + 0.2f;
       return TRUE;
     }
     return FALSE;
   }
-
-  // [Cecil] 2021-06-13: Check if it's an enemy player
-  BOOL IsEnemyPlayer(CEntity *pen) {
-    // simple class type check
-    return IS_PLAYER(pen);
-  };
 
   // [Cecil] 2021-06-16: Select new weapon
   void BotSelectNewWeapon(const WeaponType &wtSelect) {
@@ -266,28 +260,31 @@ functions:
       fMax = aWeapons[iWeapon].bw_fMaxDistance;
       fAccuracy = aWeapons[iWeapon].bw_fAccuracy;
 
-      // if we have a priority weapon
-      if (penWeapons->m_iAvailableWeapons & iWeaponFlag) {
-        // check if it's allowed
-        if (m_sbsBot.iAllowedWeapons != -1 && !(m_sbsBot.iAllowedWeapons & iWeaponFlag)) {
-          continue;
-        }
+      // skip unexistent weapons
+      if (!(penWeapons->m_iAvailableWeapons & iWeaponFlag)) {
+        continue;
+      }
 
-        // check if distance if okay
-        if (m_fTargetDist > fMax || m_fTargetDist < fMin) {
-          continue;
-        }
+      // check if it's allowed and has ammo
+      if (m_sbsBot.iAllowedWeapons != -1 && !(m_sbsBot.iAllowedWeapons & iWeaponFlag)
+       && penWeapons->HasAmmo((WeaponType)iWeapon)) {
+        continue;
+      }
 
-        FLOAT fDistRatio = (m_fTargetDist - fMin) / (fMax - fMin); // from min to max [0 .. 1]
-        FLOAT fMul = fAccuracy + (1 - fAccuracy) * (1 - fDistRatio); // from min to max [fAccuracy .. 1]
+      // check if distance is okay
+      if (m_fTargetDist > fMax || m_fTargetDist < fMin) {
+        continue;
+      }
 
-        // check damage
-        if (fLastDamage < aWeapons[iWeapon].bw_fDamage * fMul) {
-          // select this weapon
-          wtSelect = wtType;
-          fLastDamage = aWeapons[iWeapon].bw_fDamage * fMul;
-          m_iBotWeapon = iWeapon;
-        }
+      FLOAT fDistRatio = (m_fTargetDist - fMin) / (fMax - fMin); // from min to max [0 .. 1]
+      FLOAT fMul = fAccuracy + (1 - fAccuracy) * (1 - fDistRatio); // from min to max [fAccuracy .. 1]
+
+      // check damage
+      if (fLastDamage < aWeapons[iWeapon].bw_fDamage * fMul) {
+        // select this weapon
+        wtSelect = wtType;
+        fLastDamage = aWeapons[iWeapon].bw_fDamage * fMul;
+        m_iBotWeapon = iWeapon;
       }
     }
 

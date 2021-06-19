@@ -612,9 +612,10 @@ void CECIL_BotGameStart(CSessionProperties &sp) {
   } catch (char *strError) {
     (void)strError;
 
+    // [Cecil] TEMP: No point in generating unconnected points
     // generate instead
-    _pNavmesh->GenerateNavmesh(&wo);
-    _pNavmesh->bnm_bGenerated = TRUE;
+    //_pNavmesh->GenerateNavmesh(&wo);
+    //_pNavmesh->bnm_bGenerated = TRUE;
   }
 };
 

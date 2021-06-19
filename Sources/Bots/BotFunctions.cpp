@@ -66,16 +66,16 @@ CBotPathPoint *NearestNavMeshPoint(CPlayer *pen, const FLOAT3D &vCheck, CBotPath
     return NULL;
   }
 
-  FLOAT fDist = -1.0f;
+  FLOAT fDist = 1000.0f;
   CBotPathPoint *pbppNearest = NULL;
 
   FOREACHINDYNAMICCONTAINER(_pNavmesh->bnm_cbppPoints, CBotPathPoint, itbpp) {
     CBotPathPoint *pbpp = itbpp;
 
-    FLOAT fDiff = ClampDn((pbpp->bpp_vPos - vCheck).Length() - pbpp->bpp_fRange, 0.0f);
+    FLOAT fDiff = (pbpp->bpp_vPos - vCheck).Length() - pbpp->bpp_fRange; // allows negative values
     BOOL bNotCurrent = (pen == NULL ? TRUE : !pen->CurrentPoint(pbppExclude));
 
-    if ((fDiff < fDist || fDist < 0.0f) && bNotCurrent) {
+    if (fDiff < fDist && bNotCurrent) {
       pbppNearest = pbpp;
       fDist = fDiff;
     }
@@ -165,6 +165,20 @@ BOOL CastBotRay(CPlayerBot *pen, CEntity *penTarget, SBotLogic &sbl, BOOL bPhysi
 
   return (vTarget - crBot.cr_vHit).Length() <= 1.0f
        && crBot.cr_fHitDistance < 1000.0f; // [Cecil] TEMP: Target is too far
+};
+
+// [Cecil] 2021-06-13: Check if it's an enemy player
+BOOL IsEnemyPlayer(CEntity *pen) {
+  // simple class type check
+  return IS_PLAYER(pen);
+};
+
+// [Cecil] 2021-06-19: Check if it's a monster enemy
+BOOL IsEnemyMonster(CEntity *pen) {
+  // simple class type check
+  return IsDerivedFromDllClass(pen, CEnemyBase_DLLClass)
+      /*&& !IsOfDllClass(pen, CCannonStatic_DLLClass)
+      && !IsOfDllClass(pen, CCannonRotating_DLLClass)*/;
 };
 
 // [Cecil] 2021-06-17: Search for an item
@@ -319,8 +333,7 @@ CEntity *ClosestEnemy(CPlayerBot *pen, FLOAT &fLast, SBotLogic &sbl) {
     CEntity *penCheck = iten;
 
     // if enemy (but not cannons - usually hard to reach)
-    if (SBS.iTargetType >= 1 && IsDerivedFromDllClass(penCheck, CEnemyBase_DLLClass)
-     /*&& !IsOfDllClass(penCheck, CCannonStatic_DLLClass) && !IsOfDllClass(penCheck, CCannonRotating_DLLClass)*/) {
+    if (SBS.iTargetType >= 1 && IsEnemyMonster(penCheck)) {
       // if not alive
       CEnemyBase *penEnemy = (CEnemyBase *)penCheck;
 
@@ -329,7 +342,7 @@ CEntity *ClosestEnemy(CPlayerBot *pen, FLOAT &fLast, SBotLogic &sbl) {
       }
 
     // if player and it's not a coop or a singleplayer game
-    } else if (SBS.iTargetType != 1 && pen->IsEnemyPlayer(penCheck)) {
+    } else if (SBS.iTargetType != 1 && IsEnemyPlayer(penCheck)) {
       // if not alive
       CPlayer *penEnemy = (CPlayer *)penCheck;
 
@@ -360,7 +373,7 @@ CEntity *ClosestEnemy(CPlayerBot *pen, FLOAT &fLast, SBotLogic &sbl) {
     // priorities
     if (bCurrentVisible)                 iPriority++;
     if (fHealth < fLastHP)               iPriority++;
-    if (fLast == -1.0f || fDist < fLast) iPriority++;
+    if (fDist < fLast || fLast == -1.0f) iPriority++;
     if (penTargetEnemy == pen)           iPriority++;
 
     // if more priorities have been fulfilled
@@ -388,13 +401,8 @@ CEntity *ClosestEnemy(CPlayerBot *pen, FLOAT &fLast, SBotLogic &sbl) {
 };
 
 CEntity *ClosestItemType(CPlayerBot *pen, const CDLLEntityClass &decClass, FLOAT &fDist, SBotLogic &sbl) {
-  // don't search for items
-  if (!SBS.bItemSearch) {
-    return NULL;
-  }
-
-  // return selected item
-  if (pen->m_tmLastItemSearch > _pTimer->CurrentTick()) {
+  // can't search for items right now
+  if (!SBS.bItemSearch || pen->m_tmLastItemSearch > _pTimer->CurrentTick()) {
     return NULL;
   }
 
@@ -436,7 +444,7 @@ CEntity *ClosestRealPlayer(CPlayerBot *pen, FLOAT3D vCheckPos, FLOAT &fDist) {
   CEntity *penReturn = NULL;
   fDist = -1.0f;
 
-  // for each entity in the world
+  // for each real player
   for (INDEX i = 0; i < CEntity::GetMaxPlayers(); i++) {
     CPlayer *penReal = (CPlayer *)CEntity::GetPlayerEntity(i);
       

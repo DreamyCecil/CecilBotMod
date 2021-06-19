@@ -114,6 +114,12 @@ BOOL CastBotRay(CPlayerBot *pen, CEntity *penTarget, SBotLogic &sbl, BOOL bPhysi
 
 #define MAX_ITEM_DIST 256.0f
 
+// [Cecil] 2021-06-13: Check if it's an enemy player
+BOOL IsEnemyPlayer(CEntity *pen);
+
+// [Cecil] 2021-06-19: Check if it's a monster enemy
+BOOL IsEnemyMonster(CEntity *pen);
+
 // [Cecil] 2021-06-17: Search for an item
 void BotItemSearch(CPlayerBot *pen, SBotLogic &sbl);
 
