@@ -261,6 +261,7 @@ void CControls::Load_t( CTFileName fnFile)
   if (fnFile == CTString("Controls\\System\\Common.ctl")) {
     #define BOTBUTTON_ADD      "Add NavMesh point"
     #define BOTBUTTON_DELETE   "Delete NavMesh point"
+    #define BOTBUTTON_INFO     "NavMesh point info"
     #define BOTBUTTON_SELECT   "NavMesh select point"
     #define BOTBUTTON_CONNECT  "NavMesh connection type"
     #define BOTBUTTON_TOPLAYER "NavMesh move to player"
@@ -269,6 +270,7 @@ void CControls::Load_t( CTFileName fnFile)
     
     BOOL bBotAdd = FALSE;
     BOOL bBotDelete = FALSE;
+    BOOL bBotInfo = FALSE;
     BOOL bBotSelect = FALSE;
     BOOL bBotConnect = FALSE;
     BOOL bBotToPlayer = FALSE;
@@ -282,6 +284,8 @@ void CControls::Load_t( CTFileName fnFile)
         bBotAdd = TRUE;
       } else if (ba.ba_strName == BOTBUTTON_DELETE) {
         bBotDelete = TRUE;
+      } else if (ba.ba_strName == BOTBUTTON_INFO) {
+        bBotInfo = TRUE;
       } else if (ba.ba_strName == BOTBUTTON_SELECT) {
         bBotSelect = TRUE;
       } else if (ba.ba_strName == BOTBUTTON_CONNECT) {
@@ -340,6 +344,16 @@ void CControls::Load_t( CTFileName fnFile)
       baBot.ba_strName = BOTBUTTON_SELECT;
       baBot.ba_iFirstKey = KID_NUM1;
       baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("NavMeshSelectPoint();");
+      baBot.ba_strCommandLineWhenReleased = "";
+      baBot.ba_lnNode.Remove();
+      ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);
+    }
+
+    if (!bBotInfo) {
+      CButtonAction &baBot = AddButtonAction();
+      baBot.ba_strName = BOTBUTTON_INFO;
+      baBot.ba_iFirstKey = KID_NUMENTER;
+      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("NavMeshPointInfo();");
       baBot.ba_strCommandLineWhenReleased = "";
       baBot.ba_lnNode.Remove();
       ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);

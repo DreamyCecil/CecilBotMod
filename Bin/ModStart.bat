@@ -1,3 +1,3 @@
 @echo off
-start ..\..\..\Bin\SeriousSam.exe +game BotMod
+start ..\..\..\Bin\SeriousSam.exe +game CecilBotMod
 exit

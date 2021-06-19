@@ -324,6 +324,28 @@ static void CECIL_DeleteNavMeshPoint(void) {
   _pNetwork->SendToServerReliable(nmNavmesh);
 };
 
+// [Cecil] 2019-05-28: Display NavMesh point info
+static void CECIL_NavMeshPointInfo(void) {
+  CPrintF(MODCOM_NAME("NavMeshPointInfo: "));
+
+  CBotPathPoint *pbpp = _pNavmesh->FindPointByID(MOD_iNavMeshPoint);
+
+  if (pbpp == NULL) {
+    CPrintF("NavMesh point doesn't exist!\n");
+    return;
+  }
+
+  CPrintF("^cffffff%d\n", pbpp->bpp_iIndex); // point index on top
+
+  CEntity *penImportant = FindEntityByID(&_pNetwork->ga_World, pbpp->bpp_iImportant);
+  
+  CPrintF("Connections: %d\n", pbpp->bpp_cbppPoints.Count());
+  CPrintF("Pos:    %.2f, %.2f, %.2f\n", pbpp->bpp_vPos(1), pbpp->bpp_vPos(2), pbpp->bpp_vPos(3));
+  CPrintF("Range:  %.2f\n", pbpp->bpp_fRange);
+  CPrintF("Flags:  %s\n", ULongToBinary(pbpp->bpp_ulFlags));
+  CPrintF("Entity: %s\n", (penImportant == NULL) ? "<none>" : penImportant->GetName());
+};
+
 // [Cecil] 2021-06-12: Connect current NavMesh point to another one
 static void CECIL_ConnectNavMeshPoint(INDEX iTargetPoint) {
   CNetworkMessage nmNavmesh = CECIL_NavMeshClientPacket(ESA_NAVMESH_CONNECT);
@@ -501,6 +523,7 @@ void CECIL_InitBotMod(void) {
 
   _pShell->DeclareSymbol("user void " MODCOM_NAME("AddNavMeshPoint(FLOAT);"), &CECIL_AddNavMeshPoint);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("DeleteNavMeshPoint(void);"), &CECIL_DeleteNavMeshPoint);
+  _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshPointInfo(void);"), &CECIL_NavMeshPointInfo);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("ConnectNavMeshPoint(INDEX);"), &CECIL_ConnectNavMeshPoint);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("TeleportNavMeshPoint(FLOAT);"), &CECIL_TeleportNavMeshPoint);
 
