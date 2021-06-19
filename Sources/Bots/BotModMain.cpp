@@ -434,7 +434,7 @@ static void CECIL_NavMeshSelectPoint(void) {
 static void CECIL_NavMeshConnectionType(void) {
   MOD_iNavMeshConnecting = (MOD_iNavMeshConnecting + 1) % 4;
 
-  CPrintF(MODCOM_NAME("iNavMeshConnecting = %d"), MOD_iNavMeshConnecting);
+  CPrintF(MODCOM_NAME("iNavMeshConnecting = %d "), MOD_iNavMeshConnecting);
 
   switch (MOD_iNavMeshConnecting) {
     case 0: CPrintF("(disabled)\n"); break;
@@ -478,7 +478,7 @@ void CECIL_InitBotMod(void) {
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshLoad(void);"), &CECIL_NavMeshLoad);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshClear(void);"), &CECIL_NavMeshClear);
 
-  // [Cecil] Bot Editing
+  // [Cecil] Bot editing
   _pShell->DeclareSymbol("user CTString " BOTCOM_NAME("strBotEdit;"), &BOT_strBotEdit);
   _pShell->DeclareSymbol("persistent user CTString " BOTCOM_NAME("strSpawnName;"), &BOT_strSpawnName); // [Cecil] TEMP
 
@@ -516,7 +516,7 @@ void CECIL_InitBotMod(void) {
   _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fArmorDist;"     ), &_sbsBotSettings.fArmorDist);
   _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fAmmoDist;"      ), &_sbsBotSettings.fAmmoDist);
 
-  // [Cecil] NavMesh Editing
+  // [Cecil] NavMesh editing
   _pShell->DeclareSymbol("persistent user INDEX " MODCOM_NAME("iRenderNavMesh;"), &MOD_iRenderNavMesh);
   _pShell->DeclareSymbol("user INDEX " MODCOM_NAME("iNavMeshPoint;"), &MOD_iNavMeshPoint);
   _pShell->DeclareSymbol("user INDEX " MODCOM_NAME("iNavMeshConnecting;"), &MOD_iNavMeshConnecting);
