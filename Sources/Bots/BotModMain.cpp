@@ -26,6 +26,9 @@ extern INDEX MOD_iRenderNavMesh = 0; // NavMesh render mode (0 - disabled, 1 - p
 extern INDEX MOD_iNavMeshPoint = -1; // currently selected NavMesh point
 extern INDEX MOD_iNavMeshConnecting = 0; // connecting mode (0 - disabled, 1 - to point, 2 - to each other, 3 - others to this one)
 
+// [Cecil] 2021-06-19: Render entity IDs
+static INDEX MOD_bEntityIDs = FALSE;
+
 // [Cecil] 2021-06-11: List of bot entities
 extern CDynamicContainer<CPlayerBot> _cenPlayerBots = CDynamicContainer<CPlayerBot>();
 
@@ -43,11 +46,9 @@ static SBotSettings _sbsBotSettings;
 
 // [Cecil] 2019-11-07: Special client packet for NavMesh editing
 static CNetworkMessage CECIL_NavMeshClientPacket(const INDEX &iAction) {
-  CServer &srvServer = _pNetwork->ga_srvServer;
-
   NEW_PACKET(nmNavmesh, MSG_CECIL_SANDBOX);
   nmNavmesh << LOCAL_PLAYER_INDEX; // local player
-  nmNavmesh << (INDEX)srvServer.srv_bActive; // it's a server
+  nmNavmesh << (INDEX)_pNetwork->IsServer(); // it's a server
   nmNavmesh << iAction; // specific NavMesh action
 
   return nmNavmesh;
@@ -59,7 +60,7 @@ static CCecilStreamBlock CECIL_BotServerPacket(const INDEX &iAction) {
 
   CCecilStreamBlock nsbBot(MSG_CECIL_SANDBOX, ++srvServer.srv_iLastProcessedSequence);
   nsbBot << LOCAL_PLAYER_INDEX; // local player
-  nsbBot << (INDEX)srvServer.srv_bActive; // it's a server
+  nsbBot << (INDEX)TRUE; // it's a server
   nsbBot << iAction; // specific NavMesh action
 
   return nsbBot;
@@ -82,7 +83,7 @@ static void CECIL_AddBot(CTString *pstrBotName, CTString *pstrBotSkin) {
 
   CPrintF(MODCOM_NAME("AddBot:\n"));
 
-  if (!_pNetwork->ga_srvServer.srv_bActive) {
+  if (!_pNetwork->IsServer()) {
     CPrintF("  <not a server>\n");
     return;
   }
@@ -137,7 +138,7 @@ static void CECIL_QuickBot(void) {
 static void CECIL_RemoveAllBots(void) {
   CPrintF(MODCOM_NAME("RemoveAllBots:\n"));
 
-  if (!_pNetwork->ga_srvServer.srv_bActive) {
+  if (!_pNetwork->IsServer()) {
     CPrintF("  <not a server>\n");
     return;
   }
@@ -172,7 +173,7 @@ static void CECIL_RemoveAllBots(void) {
 static void CECIL_RemoveBot(CTString *pstrBotName) {
   CPrintF(MODCOM_NAME("RemoveBot:\n"));
 
-  if (!_pNetwork->ga_srvServer.srv_bActive) {
+  if (!_pNetwork->IsServer()) {
     CPrintF("  <not a server>\n");
     return;
   }
@@ -187,8 +188,8 @@ static void CECIL_RemoveBot(CTString *pstrBotName) {
       continue;
     }
 
-    // if player is on that client
-    if (penBot->en_pcCharacter.GetNameForPrinting().Undecorated().Matches(strBotName)) {
+    // if bot name matches
+    if (penBot->GetName().Undecorated().Matches(strBotName)) {
       // create message for removing player from all session
       CCecilStreamBlock nsbRemPlayerData = CECIL_BotServerPacket(ESA_REMBOT);
       nsbRemPlayerData << iBot; // bot index
@@ -211,7 +212,7 @@ static void CECIL_RemoveBot(CTString *pstrBotName) {
 static void CECIL_BotUpdate(void) {
   CPrintF(MODCOM_NAME("BotUpdate:\n"));
 
-  if (!_pNetwork->ga_srvServer.srv_bActive) {
+  if (!_pNetwork->IsServer()) {
     CPrintF("  <not a server>\n");
     return;
   }
@@ -228,7 +229,7 @@ static void CECIL_BotUpdate(void) {
 static void CECIL_SetWeapons(INDEX iWeapon, INDEX bPlayer) {
   CPrintF(MODCOM_NAME("SetWeapons:\n"));
 
-  if (!_pNetwork->ga_srvServer.srv_bActive) {
+  if (!_pNetwork->IsServer()) {
     CPrintF("  <not a server>\n");
     return;
   }
@@ -247,7 +248,7 @@ static void CECIL_SetWeapons(INDEX iWeapon, INDEX bPlayer) {
 static void CECIL_GenerateNavMesh(INDEX iPoints) {
   CPrintF(MODCOM_NAME("GenerateNavMesh:\n"));
 
-  if (!_pNetwork->ga_srvServer.srv_bActive) {
+  if (!_pNetwork->IsServer()) {
     CPrintF("  <not a server>\n");
     return;
   }
@@ -263,7 +264,7 @@ static void CECIL_GenerateNavMesh(INDEX iPoints) {
 static void CECIL_NavMeshSave(void) {
   CPrintF(MODCOM_NAME("NavMeshSave:\n"));
 
-  if (!_pNetwork->ga_srvServer.srv_bActive) {
+  if (!_pNetwork->IsServer()) {
     CPrintF("  <not a server>\n");
     return;
   }
@@ -278,7 +279,7 @@ static void CECIL_NavMeshSave(void) {
 static void CECIL_NavMeshLoad(void) {
   CPrintF(MODCOM_NAME("NavMeshLoad:\n"));
 
-  if (!_pNetwork->ga_srvServer.srv_bActive) {
+  if (!_pNetwork->IsServer()) {
     CPrintF("  <not a server>\n");
     return;
   }
@@ -294,7 +295,7 @@ static void CECIL_NavMeshLoad(void) {
 static void CECIL_NavMeshClear(INDEX iPoints) {
   CPrintF(MODCOM_NAME("NavMeshClear:\n"));
 
-  if (!_pNetwork->ga_srvServer.srv_bActive) {
+  if (!_pNetwork->IsServer()) {
     CPrintF("  <not a server>\n");
     return;
   }
@@ -471,8 +472,6 @@ void CECIL_InitBotMod(void) {
   _pShell->DeclareSymbol("user void " MODCOM_NAME("RemoveAllBots(void);"), &CECIL_RemoveAllBots);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("BotUpdate(void);"), &CECIL_BotUpdate);
 
-  _pShell->DeclareSymbol("user void " MODCOM_NAME("SetWeapons(INDEX, INDEX);"), &CECIL_SetWeapons);
-
   _pShell->DeclareSymbol("user void " MODCOM_NAME("GenerateNavMesh(INDEX);"), &CECIL_GenerateNavMesh);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshSave(void);"), &CECIL_NavMeshSave);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshLoad(void);"), &CECIL_NavMeshLoad);
@@ -535,6 +534,11 @@ void CECIL_InitBotMod(void) {
 
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshSelectPoint(void);"), &CECIL_NavMeshSelectPoint);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshConnectionType(void);"), &CECIL_NavMeshConnectionType);
+
+  // [Cecil] Misc
+  _pShell->DeclareSymbol("user INDEX " MODCOM_NAME("bEntityIDs;"), &MOD_bEntityIDs);
+
+  _pShell->DeclareSymbol("user void " MODCOM_NAME("SetWeapons(INDEX, INDEX);"), &CECIL_SetWeapons);
 
   // load bot names
   try {
@@ -625,6 +629,11 @@ void CECIL_BotGameCleanup(void) {
 
 // [Cecil] Render extras on top of the world
 void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjection3D &apr, CDrawPort *pdp) {
+  // not a server
+  if (!_pNetwork->IsServer()) {
+    return;
+  }
+
   CPerspectiveProjection3D &prProjection = *(CPerspectiveProjection3D *)(CProjection3D *)apr;
   prProjection.Prepare();
 
@@ -787,6 +796,34 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
       }
     }
   }
+
+  // render entity IDs
+  if (MOD_bEntityIDs) {
+    FOREACHINDYNAMICCONTAINER(_pNetwork->ga_World.wo_cenEntities, CEntity, iten) {
+      CEntity *pen = iten;
+
+      FLOAT fDist = (penViewer->GetPlacement().pl_PositionVector - pen->GetLerpedPlacement().pl_PositionVector).Length();
+
+      // don't render IDs from the whole map
+      if (fDist > 192.0f) {
+        continue;
+      }
+      
+      FLOAT3D vEntityID;
+      prProjection.ProjectCoordinate(pen->GetLerpedPlacement().pl_PositionVector, vEntityID);
+
+      if (vEntityID(3) >= 0.0f) {
+        continue;
+      }
+
+      FLOAT fAlpha = 1.0f - Clamp((fDist - 16.0f) / 16.0f, 0.0f, 0.8f);
+      UBYTE ubAlpha = NormFloatToByte(fAlpha);
+
+      CTString strID;
+      strID.PrintF("%d (%s)", pen->en_ulID, pen->en_pecClass->ec_pdecDLLClass->dec_strName);
+      pdp->PutTextCXY(strID, vEntityID(1), -vEntityID(2)+pdp->GetHeight(), 0xBBD1EB00|ubAlpha);
+    }
+  }
 };
 
 // Receive and perform a sandbox action
@@ -862,7 +899,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
         CPlayerBot *penBot = _cenPlayerBots.Pointer(iBot);
 
         // for only one specific bot or all bots
-        if (strBotEdit == "" || penBot->GetName().Matches(strBotEdit)) {
+        if (strBotEdit == "" || penBot->GetName().Undecorated().Matches(strBotEdit)) {
           penBot->UpdateBot(sbsSettings);
           CPrintF(" Updated Bot: %s^r\n", penBot->GetName());
         }

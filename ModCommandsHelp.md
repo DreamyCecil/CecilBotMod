@@ -7,6 +7,16 @@
 - `MOD_BotUpdate()` - update settings for all bots (if `BOT_strBotEdit` isn't blank, only updates bots with that name)
 
 ---
+- `BOT_strBotEdit` - name of a bot for editing its settings (leave blank for all bots)
+- `BOT_strSpawnName` - quick add bots with this specific name
+- `BOT_ResetBotConfig()` - reset all bot settings to default values
+
+For specific bot behaviour customization go to `Options -> Advanced options -> Bot Mod Customization` in game (all commands start with `BOT_`)
+
+## Miscellaneous
+
+- `MOD_bEntityIDs` - display IDs of all entities nearby (for `MOD_NavMeshPointEntity()`)
+
 - `MOD_SetWeapons(weapon type/mask, players)` - change all weapon items or player weapons on the map:
 ```
 Change weapon type of all CWeaponItems:
@@ -17,13 +27,6 @@ Change current player weapons and "Give Weapons" property of all CPlayerMarkers:
   weapon mask - binary mask in base 10 (e.g. 148 = 128 + 16 + 4)
   players - set to 1
 ```
-
----
-- `BOT_strBotEdit` - name of a bot for editing its settings (leave blank for all bots)
-- `BOT_strSpawnName` - quick add bots with this specific name
-- `BOT_ResetBotConfig()` - reset all bot settings to default values
-
-For specific bot behaviour customization go to `Options -> Advanced options -> Bot Mod Customization` in game (all commands start with `BOT_`)
 
 ## Navmesh creation
 
