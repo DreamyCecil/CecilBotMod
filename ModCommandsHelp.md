@@ -49,10 +49,10 @@ For specific bot behaviour customization go to `Options -> Advanced options -> B
 ```
 
 - `MOD_iNavMeshPoint` - currently selected NavMesh point by its ID
-- `MOD_"NavMeshSelectPoint()` - select closest NavMesh point to the player's crosshair position
+- `MOD_NavMeshSelectPoint()` - select closest NavMesh point to the player's crosshair position
 
 ---
-- `MOD_"NavMeshConnectionType()` - change NavMesh connection type (see `MOD_iNavMeshConnecting`)
+- `MOD_NavMeshConnectionType()` - change NavMesh connection type (see `MOD_iNavMeshConnecting`)
 - `MOD_iNavMeshConnecting` - currently selected NavMesh connection type:
 ```
   0 - disabled (point selection)
@@ -61,15 +61,15 @@ For specific bot behaviour customization go to `Options -> Advanced options -> B
   3 - one-way backwards connection (connect target point to the current one)
 ```
 
-- `MOD_"AddNavMeshPoint(offset)` - create a new NavMesh point at the player position (with vertical offset)
-- `MOD_"DeleteNavMeshPoint()` - delete currently selected NavMesh point
-- `MOD_"NavMeshPointInfo()` - display NavMesh point info
-- `MOD_"ConnectNavMeshPoint(target ID)` - connect NavMesh point to the target point using its ID.
-- `MOD_"TeleportNavMeshPoint(offset)` - move NavMesh point to the player position (with vertical offset)
+- `MOD_AddNavMeshPoint(offset)` - create a new NavMesh point at the player position (with vertical offset)
+- `MOD_DeleteNavMeshPoint()` - delete currently selected NavMesh point
+- `MOD_NavMeshPointInfo()` - display NavMesh point info
+- `MOD_ConnectNavMeshPoint(target ID)` - connect NavMesh point to the target point using its ID.
+- `MOD_TeleportNavMeshPoint(offset)` - move NavMesh point to the player position (with vertical offset)
 
 ---
-- `MOD_"NavMeshPointPos(x, y, z)` - change NavMesh point position
-- `MOD_"SnapNavMeshPoint(grid size)` - snap NavMesh point position to a some grid
-- `MOD_"NavMeshPointFlags(mask)` - set NavMesh point flags as a base 10 bit mask (e.g. 21 = 16 + 4 + 1)
-- `MOD_"NavMeshPointEntity(entity ID)` - set NavMesh point entity by its ID (-1 for none)
-- `MOD_"NavMeshPointRange(range)` - change NavMesh point range
+- `MOD_NavMeshPointPos(x, y, z)` - change NavMesh point position
+- `MOD_SnapNavMeshPoint(grid size)` - snap NavMesh point position to a some grid
+- `MOD_NavMeshPointFlags(mask)` - set NavMesh point flags as a base 10 bit mask (e.g. 21 = 16 + 4 + 1)
+- `MOD_NavMeshPointEntity(entity ID)` - set NavMesh point entity by its ID (-1 for none)
+- `MOD_NavMeshPointRange(range)` - change NavMesh point range
