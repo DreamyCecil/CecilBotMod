@@ -1,4 +1,4 @@
-### Bot Mod
+## Bot Mod
 
 - `MOD_QuickBot()` - quick bot addition (uses `BOT_strSpawnName`)
 - `MOD_AddBot(name, AMC filename)` - bot addition with custom name and player skin (empty strings for random)
@@ -6,7 +6,7 @@
 - `MOD_RemoveAllBots()` - remove all bots from the game
 - `MOD_BotUpdate()` - update settings for all bots (if `BOT_strBotEdit` isn't blank, only updates bots with that name)
 
-
+---
 - `MOD_SetWeapons(weapon type/mask, players)` - change all weapon items or player weapons on the map:
 ```
 Change weapon type of all CWeaponItems:
@@ -18,17 +18,14 @@ Change current player weapons and "Give Weapons" property of all CPlayerMarkers:
   players - set to 1
 ```
 
-
+---
 - `BOT_strBotEdit` - name of a bot for editing its settings (leave blank for all bots)
 - `BOT_strSpawnName` - quick add bots with this specific name
-
-
 - `BOT_ResetBotConfig()` - reset all bot settings to default values
 
 For specific bot behaviour customization go to `Options -> Advanced options -> Bot Mod Customization` in game (all commands start with `BOT_`)
 
-### Navmesh creation
-
+## Navmesh creation
 
 - `MOD_GenerateNavMesh(connect)` - simple NavMesh generator for the current world:
 ```
@@ -36,12 +33,11 @@ For specific bot behaviour customization go to `Options -> Advanced options -> B
   1 - connect points
 ```
 
-
 - `MOD_NavMeshSave()` - save current NavMesh into `Cecil/Navmeshes` under the world filename
 - `MOD_NavMeshLoad()` - load current NavMesh from `Cecil/Navmeshes` under the world filename
 - `MOD_NavMeshClear()` - clear the entire NavMesh
 
-### Navmesh editing
+## Navmesh editing
 
 - `MOD_iRenderNavMesh` - display world NavMesh:
 ```
@@ -52,12 +48,11 @@ For specific bot behaviour customization go to `Options -> Advanced options -> B
   4 - display flags
 ```
 
-
 - `MOD_iNavMeshPoint` - currently selected NavMesh point by its ID
 - `MOD_"NavMeshSelectPoint()` - select closest NavMesh point to the player's crosshair position
+
+---
 - `MOD_"NavMeshConnectionType()` - change NavMesh connection type (see `MOD_iNavMeshConnecting`)
-
-
 - `MOD_iNavMeshConnecting` - currently selected NavMesh connection type:
 ```
   0 - disabled (point selection)
@@ -66,14 +61,13 @@ For specific bot behaviour customization go to `Options -> Advanced options -> B
   3 - one-way backwards connection (connect target point to the current one)
 ```
 
-
 - `MOD_"AddNavMeshPoint(offset)` - create a new NavMesh point at the player position (with vertical offset)
 - `MOD_"DeleteNavMeshPoint()` - delete currently selected NavMesh point
 - `MOD_"NavMeshPointInfo()` - display NavMesh point info
 - `MOD_"ConnectNavMeshPoint(target ID)` - connect NavMesh point to the target point using its ID.
 - `MOD_"TeleportNavMeshPoint(offset)` - move NavMesh point to the player position (with vertical offset)
 
-
+---
 - `MOD_"NavMeshPointPos(x, y, z)` - change NavMesh point position
 - `MOD_"SnapNavMeshPoint(grid size)` - snap NavMesh point position to a some grid
 - `MOD_"NavMeshPointFlags(mask)` - set NavMesh point flags as a base 10 bit mask (e.g. 21 = 16 + 4 + 1)

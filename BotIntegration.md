@@ -1,15 +1,15 @@
-### All projects
+## All projects
 
 - `Bots` folder should be present at the very root of mod sources (alongside Engine, EntitiesMP etc.).
 - `Bots/_BotMod.h` is included in `StdH.h` in EntitiesMP (at the end) and in `stdafx.h` in GameMP (instead of `EntitiesMP/Player.h`).
 
-### EntitiesMP
+## EntitiesMP
 
 - All instances of `GetMaxPlayers()` and `GetPlayerEntity()` are replaced with `CECIL_PlayerCount()` and `CECIL_GetPlayerEntity()` respectively (except for three places where it's noted not to do so in `Player.es`).
 - All instances of `IsOfClass(<ptr>, "Player")` and `IsDerivedFromClass(<ptr>, "Player")` are replaced with `IS_PLAYER(<ptr>)`. Can be achieved automatically by replacing `, "Player")` with `)` and then fixing errors where they appear.
 - All `Player.es` additions that are on top of the vanilla `Player.es` (commented with `// [Cecil]`).
 
-### GameMP
+## GameMP
 
 - Initialization function at the end of `CGame::InitInternal()`:
   ```cpp
@@ -39,6 +39,7 @@
     memset(apenNonlocals, 0, sizeof(apenNonlocals));
   ```
   3. Replace `apenNonlocals[ctNonlocals++] = pen;` with `cenPlayerEntities.Add((CPlayer *)pen);` within the `for` loop.
+
   4. Add the following block after the `for` loop:
   ```cpp
     // [Cecil] Add bots
