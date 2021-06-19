@@ -5,8 +5,10 @@
 
 ## EntitiesMP
 
-- All instances of `GetMaxPlayers()` and `GetPlayerEntity()` are replaced with `CECIL_PlayerCount()` and `CECIL_GetPlayerEntity()` respectively (except for three places where it's noted not to do so in `Player.es`).
+- Copy `BotModGlobal.es`, `NavMeshGenerator.es` and `PlayerBot.es` entities to your project.
+- All instances of `GetMaxPlayers()` and `GetPlayerEntity()` are replaced with `CECIL_GetMaxPlayers()` and `CECIL_GetPlayerEntity()` respectively (except for three places where it's noted not to do so in `Player.es`).
 - All instances of `IsOfClass(<ptr>, "Player")` and `IsDerivedFromClass(<ptr>, "Player")` are replaced with `IS_PLAYER(<ptr>)`. Can be achieved automatically by replacing `, "Player")` with `)` and then fixing errors where they appear.
+- All instances of `GetMyPlayerIndex()` are replaced with `CECIL_PlayerIndex(<ptr>)`.
 - All `Player.es` additions that are on top of the vanilla `Player.es` (commented with `// [Cecil]`).
 
 ## GameMP

@@ -230,6 +230,3 @@ DECL_DLL INDEX CECIL_PlayerIndex(CPlayer *pen);
 
 // [Cecil] Check player and bot entities
 #define IS_PLAYER(_Entity) IsDerivedFromDllClass(_Entity, CPlayer_DLLClass)
-
-// [Cecil] TODO: Implement this and replace GetMyPlayerIndex() everywhere
-DECL_DLL INDEX CECIL_PlayerIndex(CPlayerEntity *pen);
