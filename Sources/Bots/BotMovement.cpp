@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SBS    (pen->m_sbsBot)
 #define WEAPON (pen->GetPlayerWeapons())
 #define WORLD  (_pNetwork->ga_World)
+#define THOUGHT(_String) (pen->m_btThoughts.Push(_String))
 
 // [Cecil] 2021-06-14: Try to find some path
 void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
@@ -51,8 +52,12 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
     if (!pen->m_bImportantPoint && pen->m_tmPickImportant <= _pTimer->CurrentTick()) {
       // 20% chance to select it
       if (pen->IRnd() % 5 == 0) {
-        pen->m_pbppTarget = _pNavmesh->FindImportantPoint(pen, -1);
-        pen->m_bImportantPoint = (pen->m_pbppTarget != NULL);
+        CBotPathPoint *pbppImportant = _pNavmesh->FindImportantPoint(pen, -1);
+
+        if (pbppImportant != NULL) {
+          pen->m_pbppTarget = pbppImportant;
+          pen->m_bImportantPoint = TRUE;
+        }
       }
 
       pen->m_tmPickImportant = _pTimer->CurrentTick() + 5.0f;
@@ -80,16 +85,6 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
     // a bit higher up
     vPointDiff = (pen->m_pbppCurrent->bpp_vPos - vBotPos) - pen->en_vGravityDir * (fRange * 0.5f);
     bChangeTargetPoint |= (vPointDiff.Length() < fRange);
-
-    vPointDiff = (pen->m_pbppCurrent->bpp_vPos - vBotPos) - pen->en_vGravityDir * fRange;
-    bChangeTargetPoint |= (vPointDiff.Length() < fRange);
-    
-    // and down
-    vPointDiff = (pen->m_pbppCurrent->bpp_vPos - vBotPos) + pen->en_vGravityDir * (fRange * 0.5f);
-    bChangeTargetPoint |= (vPointDiff.Length() < fRange);
-
-    vPointDiff = (pen->m_pbppCurrent->bpp_vPos - vBotPos) + pen->en_vGravityDir * fRange;
-    bChangeTargetPoint |= (vPointDiff.Length() < fRange);
   }
 
   BOOL bReachedImportantPoint = FALSE;
@@ -104,12 +99,9 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
       FLOAT &fRange = pen->m_pbppTarget->bpp_fRange;
       bReachedImportantPoint = (vPointDiff.Length() < fRange);
 
-      // a bit higher up
-      vPointDiff = (pen->m_pbppTarget->bpp_vPos - vBotPos) - pen->en_vGravityDir * (fRange * 0.5f);
-      bReachedImportantPoint |= (vPointDiff.Length() < fRange);
-
-      vPointDiff = (pen->m_pbppTarget->bpp_vPos - vBotPos) - pen->en_vGravityDir * fRange;
-      bReachedImportantPoint |= (vPointDiff.Length() < fRange);
+      if (bReachedImportantPoint) {
+        THOUGHT("^caf3f3fReached important point");
+      }
 
     // lost target point
     } else {
@@ -193,11 +185,15 @@ void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
     vEnemy = pen->m_penTarget->GetPlacement().pl_PositionVector + FLOAT3D(0.0f, 1.0f, 0.0f) * pen->m_penTarget->GetRotationMatrix();
   }
 
+  // current weapon
+  SBotWeaponConfig &bw = sbl.aWeapons[pen->m_iBotWeapon];
+
   // next position prediction
   vEnemy += ((CMovableEntity*)&*pen->m_penTarget)->en_vCurrentTranslationAbsolute
           * (SBS.fPrediction + pen->FRnd() * SBS.fPredictRnd) // default: *= 0.2f
-          * (1 + sbl.aWeapons[pen->m_iBotWeapon].bw_bPredict); // [Cecil] TEMP: Twice as much prediction for predicting weapons
-          //* sbl.aWeapons[m_iBotWeapon].bw_bPredict;
+          //* (1 + bw.bw_bPredict); // [Cecil] TEMP: Twice as much prediction for predicting weapons
+          //* bw.bw_bPredict; // use prediction only for predicting weapons
+          * (1.0f - bw.bw_fAccuracy); // [Cecil] 2021-06-20: Prediction based on accuracy
 
   // look a bit higher if it's a player
   if (IS_PLAYER(pen->m_penTarget)) {
@@ -284,7 +280,7 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
   const FLOAT3D &vBotPos = pen->GetPlacement().pl_PositionVector;
 
   // randomize strafe direction every once in a while
-  if (pen->m_tmChangeBotDir < _pTimer->CurrentTick()) {
+  if (pen->m_tmChangeBotDir <= _pTimer->CurrentTick()) {
     pen->m_fSideDir = (pen->IRnd() % 2 == 0) ? -1.0f : 1.0f;
     pen->m_tmChangeBotDir = _pTimer->CurrentTick() + (pen->FRnd() * 2.0f) + 2.0f; // 2 to 4 seconds
   }
@@ -292,16 +288,16 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
   FLOAT3D vBotMovement = FLOAT3D(0.0f, 0.0f, 0.0f); // in which direction bot needs to go
   FLOAT fVerticalMove = 0.0f; // jumping or crouching
 
-  SBotWeaponConfig &bwcWeapon = sbl.aWeapons[pen->m_iBotWeapon]; // current weapon config
+  SBotWeaponConfig &bwWeapon = sbl.aWeapons[pen->m_iBotWeapon]; // current weapon config
 
   // strafe further if lower health
   FLOAT fHealthRatio = Clamp(100.0f - pen->GetHealth(), 0.0f, 100.0f)/100.0f;
-  const FLOAT fStrafeDist = (bwcWeapon.bw_fMaxDistance - bwcWeapon.bw_fMinDistance) * bwcWeapon.bw_fStrafe;
+  const FLOAT fStrafeDist = (bwWeapon.bw_fMaxDistance - bwWeapon.bw_fMinDistance) * bwWeapon.bw_fStrafe;
 
   // avoid the target in front of the bot
   FLOAT fStrafe = Clamp(fStrafeDist * fHealthRatio, 5.0f, 16.0f);
 
-  if (SBS.bStrafe && pen->m_fTargetDist < (bwcWeapon.bw_fMinDistance + fStrafe)
+  if (SBS.bStrafe && pen->m_fTargetDist < (bwWeapon.bw_fMinDistance + fStrafe)
    && (pen->m_penFollow == NULL || pen->m_penFollow == pen->m_penTarget || sbl.Following())) {
     // run around the enemy
     vBotMovement = FLOAT3D(pen->m_fSideDir, 0.0f, 0.0f);

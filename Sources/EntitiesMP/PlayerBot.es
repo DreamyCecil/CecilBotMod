@@ -19,6 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "Bots/BotFunctions.h"
 #include "Bots/BotMovement.h"
+
+#define THOUGHT(_String) (m_btThoughts.Push(_String))
 %}
 
 uses "EntitiesMP/Player";
@@ -44,6 +46,7 @@ thumbnail "";
 properties:
   1 CEntityPointer m_penTarget, // shooting target
   2 CEntityPointer m_penFollow, // following target
+  // [Cecil] TODO: m_tmLastBotTarget and m_tmLastSawTarget can be united
   3 FLOAT m_tmLastBotTarget = 0.0f, // cooldown for target selection
   4 FLOAT m_tmLastSawTarget = 0.0f, // last time the enemy has been seen
   5 FLOAT m_tmButtonAction = 0.0f, // cooldown for button actions
@@ -60,6 +63,7 @@ properties:
  
  30 INDEX m_iBotWeapon = CT_BOT_WEAPONS, // which weapon is currently prioritized
  31 FLOAT m_tmLastBotWeapon = 0.0f, // cooldown for weapon selection
+ 32 FLOAT m_tmShootTime = -1.0f, // when to shoot the next time
 
  40 FLOAT m_tmLastItemSearch = 0.0f, // item search cooldown
  41 CEntityPointer m_penLastItem,    // last selected item to run towards
@@ -70,6 +74,8 @@ properties:
   ULONG m_ulPointFlags; // last point's flags
 
   SBotSettings m_sbsBot; // bot settings
+
+  SBotThoughts m_btThoughts; // [Cecil] TEMP 2021-06-20: Bot thoughts
 }
 
 components:
@@ -88,11 +94,19 @@ functions:
     m_pbppCurrent = NULL;
     m_pbppTarget = NULL;
     m_ulPointFlags = 0;
-    m_bImportantPoint = FALSE;
+
+    m_tmLastBotTarget = 0.0f;
+    m_tmLastSawTarget = 0.0f;
+    
     m_tmChangePath = 0.0f;
     m_tmPickImportant = 0.0f;
+    m_bImportantPoint = FALSE;
+
     m_tmLastBotWeapon = 0.0f;
-    m_tmLastItemSearch = _pTimer->CurrentTick() + 1.0f; // give some time before picking anything up
+    m_tmShootTime = -1.0f;
+
+    // give some time before picking anything up
+    m_tmLastItemSearch = _pTimer->CurrentTick() + 1.0f;
     m_penLastItem = NULL;
   };
   
@@ -173,11 +187,28 @@ functions:
         m_sbsBot.iTargetType = 2; // enemies and players
       }
     }
+
+    // various player settings
+    CPlayerSettings *pps = (CPlayerSettings *)en_pcCharacter.pc_aubAppearance;
+    
+    // third person view
+    if (m_sbsBot.b3rdPerson) {
+      pps->ps_ulFlags |= PSF_PREFER3RDPERSON;
+    } else {
+      pps->ps_ulFlags &= ~PSF_PREFER3RDPERSON;
+    }
+
+    // change crosshair type
+    if (m_sbsBot.iCrosshair < 0) {
+      pps->ps_iCrossHairType = rand() % 7; // randomize
+    } else {
+      pps->ps_iCrossHairType = m_sbsBot.iCrosshair;
+    }
   };
 
   // [Cecil] 2021-06-16: Perform a button action if possible
   BOOL ButtonAction(void) {
-    if (m_tmButtonAction < _pTimer->CurrentTick()) {
+    if (m_tmButtonAction <= _pTimer->CurrentTick()) {
       m_tmButtonAction = _pTimer->CurrentTick() + 0.2f;
       return TRUE;
     }
@@ -210,7 +241,7 @@ functions:
     CPlayerWeapons *penWeapons = GetPlayerWeapons();
     
     // sniper zoom
-    if (penWeapons->m_iCurrentWeapon == WEAPON_SNIPER && m_sbsBot.bSniperZoom)
+    if (m_sbsBot.bSniperZoom && penWeapons->m_iCurrentWeapon == WEAPON_SNIPER)
     {
       if (ButtonAction()) {
         // zoom in if enemy is visible
@@ -226,53 +257,54 @@ functions:
 
     // pick weapon config
     SBotWeaponConfig *aWeapons = PickWeaponConfig();
+    m_iBotWeapon = CT_BOT_WEAPONS - 1;
 
     // [Cecil] 2021-06-16: Select knife for faster speed if haven't seen the enemy in a while
-    if (!GetSP()->sp_bCooperative && _pTimer->CurrentTick() - m_tmLastSawTarget > 2.0f) {
-      m_iBotWeapon = CT_BOT_WEAPONS - 1;
-
+    if (!GetSP()->sp_bCooperative && _pTimer->CurrentTick() - m_tmLastSawTarget > 2.0f)
+    {
       for (INDEX iWeapon = 0; iWeapon < CT_BOT_WEAPONS; iWeapon++) {
         WeaponType wtType = aWeapons[iWeapon].bw_wtType;
 
         if (wtType == WEAPON_KNIFE) {
           m_iBotWeapon = iWeapon;
+          BotSelectNewWeapon(WEAPON_KNIFE);
           break;
         }
       }
-      
-      BotSelectNewWeapon(WEAPON_KNIFE);
       return;
     }
 
     WeaponType wtSelect = WEAPON_NONE;
     FLOAT fLastDamage = 0.0f;
-    m_iBotWeapon = CT_BOT_WEAPONS - 1;
 
     WeaponType wtType;
-    INDEX iWeaponFlag;
     FLOAT fMin, fMax, fAccuracy;
 
     for (INDEX iWeapon = 0; iWeapon < CT_BOT_WEAPONS; iWeapon++) {
       wtType = aWeapons[iWeapon].bw_wtType;
-      iWeaponFlag = 1 << (wtType - 1);
 
       fMin = aWeapons[iWeapon].bw_fMinDistance;
       fMax = aWeapons[iWeapon].bw_fMaxDistance;
       fAccuracy = aWeapons[iWeapon].bw_fAccuracy;
 
       // skip unexistent weapons
-      if (!(penWeapons->m_iAvailableWeapons & iWeaponFlag)) {
+      if (!WPN_EXISTS(penWeapons, wtType)) {
         continue;
       }
 
-      // check if it's allowed and has ammo
-      if (m_sbsBot.iAllowedWeapons != -1 && !(m_sbsBot.iAllowedWeapons & iWeaponFlag)
-       && penWeapons->HasAmmo((WeaponType)iWeapon)) {
+      // not allowed
+      if (m_sbsBot.iAllowedWeapons != -1 && !(m_sbsBot.iAllowedWeapons & WPN_FLAG(wtType))) {
         continue;
       }
 
       // check if distance is okay
       if (m_fTargetDist > fMax || m_fTargetDist < fMin) {
+        continue;
+      }
+
+      // no ammo
+      if (!GetSP()->sp_bInfiniteAmmo && !WPN_HAS_AMMO(penWeapons, wtType)) {
+        //THOUGHT(CTString(0, "No ammo for %d", WPN_FLAG(wtType)));
         continue;
       }
 
@@ -303,7 +335,7 @@ functions:
     CEntity *penBotTarget = ClosestEnemy(this, m_fTargetDist, sbl);
 
     // select new target only if it doesn't exist or after a cooldown
-    if (ASSERT_ENTITY(m_penTarget) || m_tmLastBotTarget < _pTimer->CurrentTick()) {
+    if (ASSERT_ENTITY(m_penTarget) || m_tmLastBotTarget <= _pTimer->CurrentTick()) {
       m_penTarget = penBotTarget;
       m_tmLastBotTarget = _pTimer->CurrentTick() + m_sbsBot.fTargetCD;
 
@@ -336,16 +368,41 @@ functions:
     // aim at the target
     BotAim(this, pa, sbl);
 
-    // only shoot allowed weapons
-    BOOL bAllowedWeapon = TRUE;
-    if (m_sbsBot.iAllowedWeapons != -1) {
-      bAllowedWeapon = m_sbsBot.iAllowedWeapons & (1 << (GetPlayerWeapons()->m_iCurrentWeapon-1));
-    }
+    // shoot if possible
+    if (m_sbsBot.bShooting) {
+      BOOL bCanShoot = sbl.CanShoot();
+      
+      // only shoot allowed weapons
+      if (m_sbsBot.iAllowedWeapons != -1) {
+        bCanShoot = bCanShoot && m_sbsBot.iAllowedWeapons & WPN_FLAG(GetPlayerWeapons()->m_iCurrentWeapon);
+      }
 
-    if (sbl.CanShoot() && bAllowedWeapon && m_sbsBot.bShooting) {
-      pa.pa_ulButtons |= PLRA_FIRE;
-    } else {
-      pa.pa_ulButtons &= ~PLRA_FIRE;
+      // if allowed to shoot
+      if (bCanShoot) {
+        // enough shooting time
+        if (m_tmShootTime <= 0.0f || m_tmShootTime > _pTimer->CurrentTick()) {
+          pa.pa_ulButtons |= PLRA_FIRE;
+
+        } else if (Abs(m_tmShootTime - _pTimer->CurrentTick()) < 0.05f) {
+          THOUGHT("Stop shooting");
+        }
+
+        // reset shooting time a few ticks later
+        if (m_tmShootTime + 0.05f <= _pTimer->CurrentTick()) {
+          // shooting frequency
+          FLOAT tmShotFreq = sbl.aWeapons[m_iBotWeapon].bw_tmShotFreq;
+
+          // this weapon has a certain shooting frequency
+          if (tmShotFreq > 0.0f) {
+            m_tmShootTime = _pTimer->CurrentTick() + tmShotFreq;
+            THOUGHT(CTString(0, "Shoot for %.2fs", tmShotFreq));
+
+          // no frequency
+          } else {
+            m_tmShootTime = -1.0f;
+          }
+        }
+      }
     }
     
     // search for items

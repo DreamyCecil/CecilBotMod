@@ -50,6 +50,9 @@ enum ESandboxAction {
 
 // [Cecil] 2020-07-28: A structure for bot settings
 struct DECL_DLL SBotSettings {
+  INDEX b3rdPerson; // Set third person view
+  INDEX iCrosshair; // Preferred crosshair (-1 for random)
+
   INDEX bSniperZoom;    // Use sniper zoom or not
   INDEX bShooting;      // Attack or not
   FLOAT fShootAngle;    // Maximum attack angle
@@ -90,6 +93,9 @@ struct DECL_DLL SBotSettings {
 
   // Reset settings
   void Reset(void) {
+    b3rdPerson = TRUE;
+    iCrosshair = -1;
+
     bSniperZoom = TRUE;
     bShooting = TRUE;
     fShootAngle = 15.0f;
@@ -125,7 +131,8 @@ struct DECL_DLL SBotSettings {
   };
 
   #define WRITE_SETTINGS(_Var) \
-    _Var << sbs.bSniperZoom   << sbs.bShooting     << sbs.fShootAngle     << sbs.fAccuracyAngle \
+    _Var << sbs.b3rdPerson    << sbs.iCrosshair \
+         << sbs.bSniperZoom   << sbs.bShooting     << sbs.fShootAngle     << sbs.fAccuracyAngle \
          << sbs.fRotSpeedDist << sbs.fRotSpeedMin  << sbs.fRotSpeedMax    << sbs.fRotSpeedLimit \
          << sbs.fWeaponCD     << sbs.fTargetCD     << sbs.fSpeedMul       << sbs.bStrafe << sbs.bJump \
          << sbs.fPrediction   << sbs.fPredictRnd   << sbs.iAllowedWeapons << sbs.iTargetType \
@@ -133,7 +140,8 @@ struct DECL_DLL SBotSettings {
          << sbs.fWeaponDist   << sbs.fHealthSearch << sbs.fHealthDist     << sbs.fArmorDist << sbs.fAmmoDist
 
   #define READ_SETTINGS(_Var) \
-    _Var >> sbs.bSniperZoom   >> sbs.bShooting     >> sbs.fShootAngle     >> sbs.fAccuracyAngle \
+    _Var >> sbs.b3rdPerson    >> sbs.iCrosshair \
+         >> sbs.bSniperZoom   >> sbs.bShooting     >> sbs.fShootAngle     >> sbs.fAccuracyAngle \
          >> sbs.fRotSpeedDist >> sbs.fRotSpeedMin  >> sbs.fRotSpeedMax    >> sbs.fRotSpeedLimit \
          >> sbs.fWeaponCD     >> sbs.fTargetCD     >> sbs.fSpeedMul       >> sbs.bStrafe >> sbs.bJump \
          >> sbs.fPrediction   >> sbs.fPredictRnd   >> sbs.iAllowedWeapons >> sbs.iTargetType \
@@ -164,6 +172,27 @@ struct DECL_DLL SBotSettings {
 
   #undef WRITE_SETTINGS
   #undef READ_SETTINGS
+};
+
+// [Cecil] TEMP 2021-06-20: Bot thoughts
+struct SBotThoughts {
+  CTString strThoughts[16]; // thoughts
+
+  // Constructor
+  SBotThoughts(void) {
+    for (INDEX i = 0; i < 16; i++) {
+      strThoughts[i] = "";
+    }
+  };
+
+  // Push new thought
+  void Push(const CTString &str) {
+    for (INDEX i = 15; i > 0; i--) {
+      strThoughts[i] = strThoughts[i-1];
+    }
+
+    strThoughts[0] = CTString(0, "[%s] %s", TimeToString(_pTimer->CurrentTick()), str);
+  }
 };
 
 // --- Helper functions

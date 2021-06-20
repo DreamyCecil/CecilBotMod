@@ -103,13 +103,13 @@ static void CECIL_AddBot(CTString *pstrBotName, CTString *pstrBotSkin) {
   }
 
   CPlayerCharacter pcBot;
-  CPlayerSettings *pps = (CPlayerSettings*)pcBot.pc_aubAppearance;
+  CPlayerSettings *pps = (CPlayerSettings *)pcBot.pc_aubAppearance;
 
-  pps->ps_iWeaponAutoSelect = 1; // never select new weapons
+  pps->ps_iWeaponAutoSelect = PS_WAS_NONE; // never select new weapons
   memset(pps->ps_achModelFile, 0, sizeof(pps->ps_achModelFile));
   strncpy(pps->ps_achModelFile, strSkin, sizeof(pps->ps_achModelFile));
 
-  pps->ps_ulFlags |= PSF_PREFER3RDPERSON; // [Cecil] TEMP
+  //pps->ps_ulFlags |= PSF_PREFER3RDPERSON; // [Cecil] TEMP
 
   for (INDEX iGUID = 0; iGUID < 16; iGUID++) {
     pcBot.pc_aubGUID[iGUID] = rand() % 256;
@@ -477,11 +477,19 @@ void CECIL_InitBotMod(void) {
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshLoad(void);"), &CECIL_NavMeshLoad);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshClear(void);"), &CECIL_NavMeshClear);
 
+  // [Cecil] Misc
+  _pShell->DeclareSymbol("user INDEX " MODCOM_NAME("bEntityIDs;"), &MOD_bEntityIDs);
+
+  _pShell->DeclareSymbol("user void " MODCOM_NAME("SetWeapons(INDEX, INDEX);"), &CECIL_SetWeapons);
+
   // [Cecil] Bot editing
   _pShell->DeclareSymbol("user CTString " BOTCOM_NAME("strBotEdit;"), &BOT_strBotEdit);
   _pShell->DeclareSymbol("persistent user CTString " BOTCOM_NAME("strSpawnName;"), &BOT_strSpawnName); // [Cecil] TEMP
 
   _pShell->DeclareSymbol("user void " BOTCOM_NAME("ResetBotConfig(void);"), &CECIL_ResetBotConfig);
+  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("b3rdPerson;"     ), &_sbsBotSettings.b3rdPerson);
+  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("iCrosshair;"     ), &_sbsBotSettings.iCrosshair);
+
   _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bSniperZoom;"    ), &_sbsBotSettings.bSniperZoom);
   _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bShooting;"      ), &_sbsBotSettings.bShooting);
   _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fShootAngle;"    ), &_sbsBotSettings.fShootAngle);
@@ -534,11 +542,6 @@ void CECIL_InitBotMod(void) {
 
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshSelectPoint(void);"), &CECIL_NavMeshSelectPoint);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshConnectionType(void);"), &CECIL_NavMeshConnectionType);
-
-  // [Cecil] Misc
-  _pShell->DeclareSymbol("user INDEX " MODCOM_NAME("bEntityIDs;"), &MOD_bEntityIDs);
-
-  _pShell->DeclareSymbol("user void " MODCOM_NAME("SetWeapons(INDEX, INDEX);"), &CECIL_SetWeapons);
 
   // load bot names
   try {
@@ -827,6 +830,40 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
   }
 };
 
+// [Cecil] Render extras on top of the HUD
+void CECIL_HUDOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjection3D &apr, CDrawPort *pdp) {
+  FLOAT fScaling = (FLOAT)pdp->GetHeight() / 480.0f;
+
+  // [Cecil] TEMP 2021-06-20: Bot thoughts
+  if (penOwner->IsBot()) {
+    pdp->SetFont(_pfdDisplayFont);
+    pdp->SetTextScaling(fScaling);
+    pdp->SetTextAspect(1.0f);
+
+    CPlayerBot *penBot = (CPlayerBot *)penOwner;
+    
+    PIX pixX = 16 * fScaling;
+    PIX pixY = 56 * fScaling;
+    PIX pixThought = 18 * fScaling;
+
+    for (INDEX iThought = 0; iThought < 16; iThought++) {
+      UBYTE ubAlpha = NormFloatToByte(1.0f - iThought / 50.0f);
+      COLOR colText = LerpColor(0xFFFFFF00, 0x7F7F7F00, iThought / 15.0f) | ubAlpha;
+
+      pdp->PutText(penBot->m_btThoughts.strThoughts[iThought], pixX, pixY + iThought*pixThought, colText);
+    }
+
+    // target point
+    if (penBot->m_pbppCurrent != NULL) {
+      CTString strTarget(0, "Target: %d ^caf3f3f%s", penBot->m_pbppCurrent->bpp_iIndex, penBot->m_bImportantPoint ? "(Important)" : "");
+      pdp->PutText(strTarget, pixX, pixY + pixThought*17, 0xCCCCCCFF);
+    }
+
+    CTString strTime(0, "Current: %.2f\nShooting: %.2f", _pTimer->CurrentTick(), penBot->m_tmShootTime);
+    pdp->PutText(strTime, pixX, pixY + pixThought*18, 0xCCCCCCFF);
+  }
+};
+
 // Receive and perform a sandbox action
 void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin, CNetworkMessage &nmMessage) {
   BOOL bLocal = _pNetwork->IsPlayerLocal(pen);
@@ -915,7 +952,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
       nmMessage >> bPlayer;
 
       // add default weapons to the desired one
-      INDEX iSetWeapons = (1 << (WEAPON_KNIFE - 1)) | (1 << (WEAPON_COLT - 1)) | iWeapon;
+      INDEX iSetWeapons = WPN_FLAG(WEAPON_KNIFE) | WPN_FLAG(WEAPON_COLT) | iWeapon;
 
       FOREACHINDYNAMICCONTAINER(wo.wo_cenEntities, CEntity, iten) {
         CEntity *penFound = iten;
@@ -939,7 +976,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
             ((CPlayerWeapons *)penFound)->m_iAvailableWeapons = iSetWeapons;
 
             for (INDEX iAddAmmo = WEAPON_NONE; iAddAmmo < WEAPON_LAST; iAddAmmo++) {
-              INDEX iAddAmmoFlag = 1 << (iAddAmmo - 1);
+              INDEX iAddAmmoFlag = WPN_FLAG(iAddAmmo);
 
               if (iSetWeapons & iAddAmmoFlag) {
                 ((CPlayerWeapons *)penFound)->AddDefaultAmmoForWeapon(iAddAmmo, 0);

@@ -2505,6 +2505,7 @@ functions:
           plLight.pl_PositionVector, _colViewerLight, _colViewerAmbient, 
           penViewer==this && (GetFlags()&ENF_ALIVE), iEye);
       }
+      CECIL_HUDOverlayRender(this, penViewer, apr, pdp); // [Cecil] Extras on top of the HUD
     }
     Stereo_SetBuffer(STEREO_BOTH);
 

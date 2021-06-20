@@ -18,7 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "EntitiesMP/Player.h"
 #include "EntitiesMP/PlayerBot.h"
-#include "EntitiesMP/PlayerWeapons.h"
+
+#include "BotWeapons.h"
 
 // Copied player actions (renamed prefix to avoid conflicts)
 #define PLRA_FIRE            (1L<<0)
@@ -37,36 +38,12 @@ extern FLOAT plr_fSpeedBackward;
 extern FLOAT plr_fSpeedSide;
 extern FLOAT plr_fSpeedUp;
 
-// [Cecil] 2018-10-12: Bot's Weapon Stat Config
-struct SBotWeaponConfig {
-  WeaponType bw_wtType;  // current weapon
-  FLOAT bw_fMinDistance; // min (closest) distance to use it
-  FLOAT bw_fMaxDistance; // max (furthest) distance to use it
-  FLOAT bw_fDamage;      // average damage
-  FLOAT bw_fAccuracy;    // how accurate the weapon is
-  FLOAT bw_fStrafe;      // at what percent of min to max distance to start strafing
-  BOOL  bw_bPredict;     // try to predict position with this weapon or not
-};
-
-// [Cecil] 2018-10-12: Bot Beta Weapon Priority
-#define CT_BOT_WEAPONS WEAPON_LAST
-extern SBotWeaponConfig MOD_botDeathmatchWeapons[CT_BOT_WEAPONS];
-extern SBotWeaponConfig MOD_botCooperativeWeapons[CT_BOT_WEAPONS];
-
 // [Cecil] 2019-05-28: Find nearest NavMesh point
 CBotPathPoint *NearestNavMeshPoint(CPlayer *pen, const FLOAT3D &vCheck, CBotPathPoint *pbppExclude);
 
 // Write and read bot properties
 void BotWrite(CPlayerBot *pen, CTStream *strm);
 void BotRead(CPlayerBot *pen, CTStream *strm);
-
-// Pick weapon config
-inline SBotWeaponConfig *PickWeaponConfig(void) {
-  if (GetSP()->sp_bCooperative || GetSP()->sp_bSinglePlayer) {
-    return MOD_botCooperativeWeapons;
-  }
-  return MOD_botDeathmatchWeapons;
-};
 
 // [Cecil] 2019-06-05: Check if this entity is important for a path point
 BOOL ImportantForNavMesh(CPlayer *penBot, CEntity *penEntity);

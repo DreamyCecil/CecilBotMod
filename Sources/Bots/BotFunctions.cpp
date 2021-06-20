@@ -20,45 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Shortcuts
 #define SBS   (pen->m_sbsBot)
 #define WORLD (_pNetwork->ga_World)
-
-// [Cecil] 2018-10-12: Bot Beta Weapon Priority
-extern SBotWeaponConfig MOD_botDeathmatchWeapons[CT_BOT_WEAPONS] = {
-  //    Weapon Type         Min D    Max D     DMG   Accuracy  Strafe  Predict
-  { WEAPON_SNIPER,          32.0f,  300.0f,  150.0f,  0.95f,   0.30f,   FALSE}, // 13
-  { WEAPON_DOUBLESHOTGUN,    0.0f,   32.0f,  100.0f,  0.60f,   0.50f,   FALSE}, // 5
-  { WEAPON_MINIGUN,          0.0f,  300.0f,   30.0f,  0.85f,   0.25f,   FALSE}, // 7
-  { WEAPON_SINGLESHOTGUN,    0.0f,   24.0f,   70.0f,  0.70f,   0.25f,   FALSE}, // 4
-  { WEAPON_TOMMYGUN,         0.0f,  500.0f,   20.0f,  0.90f,   0.10f,   FALSE}, // 6
-  { WEAPON_LASER,            0.0f,  128.0f,   40.0f,  0.60f,   0.20f,    TRUE}, // 12
-  { WEAPON_IRONCANNON,      16.0f,  128.0f,  300.0f,  0.40f,   0.20f,    TRUE}, // 14
-  { WEAPON_GRENADELAUNCHER, 12.0f,  128.0f,  100.0f,  0.30f,   0.20f,    TRUE}, // 9
-  { WEAPON_ROCKETLAUNCHER,  12.0f,   96.0f,   70.0f,  0.20f,   0.20f,    TRUE}, // 8
-  { WEAPON_FLAMER,           0.0f,   24.0f,   30.0f,  0.80f,   0.50f,    TRUE}, // 11
-  { WEAPON_CHAINSAW,         0.0f,   10.0f,   50.0f,  1.00f,   0.00f,   FALSE}, // 10
-  { WEAPON_KNIFE,            0.0f,    8.0f,   50.0f,  1.00f,   0.00f,   FALSE}, // 1
-  { WEAPON_DOUBLECOLT,       0.0f,  500.0f,   10.0f,  0.70f,   0.00f,   FALSE}, // 3
-  { WEAPON_COLT,             0.0f,  500.0f,   20.0f,  0.85f,   0.00f,   FALSE}, // 2
-  { WEAPON_NONE,             0.0f,    0.0f,    0.0f,  0.00f,   0.00f,   FALSE}, // 0
-};
-
-extern SBotWeaponConfig MOD_botCooperativeWeapons[CT_BOT_WEAPONS] = {
-  //    Weapon Type         Min D    Max D     DMG   Accuracy  Strafe  Predict
-  { WEAPON_IRONCANNON,      24.0f,  128.0f,  200.0f,  0.40f,   0.20f,    TRUE}, // 14
-  { WEAPON_MINIGUN,          0.0f,  500.0f,  200.0f,  0.85f,   0.25f,   FALSE}, // 7
-  { WEAPON_SNIPER,          32.0f,  500.0f,  100.0f,  0.95f,   0.30f,   FALSE}, // 13
-  { WEAPON_LASER,            0.0f,  256.0f,  100.0f,  0.60f,   0.20f,    TRUE}, // 12
-  { WEAPON_GRENADELAUNCHER, 12.0f,  128.0f,  150.0f,  0.40f,   0.20f,    TRUE}, // 9
-  { WEAPON_ROCKETLAUNCHER,  12.0f,   96.0f,  100.0f,  0.20f,   0.20f,    TRUE}, // 8
-  { WEAPON_FLAMER,           0.0f,   24.0f,   60.0f,  0.80f,   0.50f,    TRUE}, // 11
-  { WEAPON_TOMMYGUN,         0.0f,  500.0f,  100.0f,  0.90f,   0.10f,   FALSE}, // 6
-  { WEAPON_DOUBLESHOTGUN,    0.0f,   32.0f,   70.0f,  0.60f,   0.50f,   FALSE}, // 5
-  { WEAPON_SINGLESHOTGUN,    0.0f,   24.0f,   40.0f,  0.70f,   0.25f,   FALSE}, // 4
-  { WEAPON_CHAINSAW,         0.0f,   10.0f,  100.0f,  1.00f,   0.00f,   FALSE}, // 10
-  { WEAPON_KNIFE,            0.0f,    8.0f,   50.0f,  1.00f,   0.00f,   FALSE}, // 1
-  { WEAPON_DOUBLECOLT,       0.0f,  500.0f,   10.0f,  0.70f,   0.00f,   FALSE}, // 3
-  { WEAPON_COLT,             0.0f,  500.0f,   10.0f,  0.85f,   0.00f,   FALSE}, // 2
-  { WEAPON_NONE,             0.0f,    0.0f,    0.0f,  0.00f,   0.00f,   FALSE}, // 0
-};
+#define THOUGHT(_String) (pen->m_btThoughts.Push(_String))
 
 // [Cecil] 2019-05-28: Find nearest NavMesh point
 CBotPathPoint *NearestNavMeshPoint(CPlayer *pen, const FLOAT3D &vCheck, CBotPathPoint *pbppExclude) {
@@ -72,7 +34,9 @@ CBotPathPoint *NearestNavMeshPoint(CPlayer *pen, const FLOAT3D &vCheck, CBotPath
   FOREACHINDYNAMICCONTAINER(_pNavmesh->bnm_cbppPoints, CBotPathPoint, itbpp) {
     CBotPathPoint *pbpp = itbpp;
 
-    FLOAT fDiff = (pbpp->bpp_vPos - vCheck).Length() - pbpp->bpp_fRange; // allows negative values
+    // [Cecil] NOTE: Bot get caught up in points that are closer to them vertically than horizontally
+    //               when checking within the point range - need to ignore the vertical range
+    FLOAT fDiff = (pbpp->bpp_vPos - vCheck).Length(); // - pbpp->bpp_fRange; // allows negative values
     BOOL bNotCurrent = (pen == NULL ? TRUE : !pen->CurrentPoint(pbppExclude));
 
     if (fDiff < fDist && bNotCurrent) {
@@ -211,6 +175,8 @@ void BotItemSearch(CPlayerBot *pen, SBotLogic &sbl) {
       if (penItem != NULL) {
         pen->m_penLastItem = penItem;
         pen->m_tmLastItemSearch = _pTimer->CurrentTick() + SBS.fItemSearchCD;
+
+        THOUGHT(CTString(0, "Going for ^c7f7fff%s", penItem->en_pecClass->ec_pdecDLLClass->dec_strName));
       }
     }
   }
@@ -406,9 +372,6 @@ CEntity *ClosestItemType(CPlayerBot *pen, const CDLLEntityClass &decClass, FLOAT
     return NULL;
   }
 
-  // reset last item
-  pen->m_penLastItem = NULL;
-
   CEntity *penReturn = NULL;
   fDist = MAX_ITEM_DIST;
 
@@ -435,6 +398,14 @@ CEntity *ClosestItemType(CPlayerBot *pen, const CDLLEntityClass &decClass, FLOAT
       penReturn = penCheck;
     }
   }}
+
+  // if it's the same item as before, don't bother
+  if (penReturn == pen->m_penLastItem) {
+    penReturn = NULL;
+  }
+
+  // reset last item
+  pen->m_penLastItem = NULL;
 
   return penReturn;
 };

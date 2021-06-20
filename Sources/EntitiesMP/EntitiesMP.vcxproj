@@ -319,6 +319,7 @@ copy Debug\$(TargetName).lib $(SolutionDir)..\Bin\Debug\ &gt;nul</Command>
   <ItemGroup>
     <ClCompile Include="..\Bots\AdvancedPaths.cpp" />
     <ClCompile Include="..\Bots\BotMovement.cpp" />
+    <ClCompile Include="..\Bots\BotWeapons.cpp" />
     <ClCompile Include="..\Bots\Patcher\patcher.cpp" />
     <ClCompile Include="..\Bots\SandboxCommon.cpp" />
     <ClCompile Include="..\Bots\BotModMain.cpp" />
@@ -582,6 +583,7 @@ copy Debug\$(TargetName).lib $(SolutionDir)..\Bin\Debug\ &gt;nul</Command>
   <ItemGroup>
     <ClInclude Include="..\Bots\AdvancedPaths.h" />
     <ClInclude Include="..\Bots\BotMovement.h" />
+    <ClInclude Include="..\Bots\BotWeapons.h" />
     <ClInclude Include="..\Bots\Patcher\patcher.h" />
     <ClInclude Include="..\Bots\Patcher\patcher_defines.h" />
     <ClInclude Include="..\Bots\SandboxCommon.h" />

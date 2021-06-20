@@ -48,6 +48,8 @@ DECL_DLL void CECIL_BotGameCleanup(void);
 
 // [Cecil] Render extras on top of the world
 void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjection3D &apr, CDrawPort *pdp);
+// [Cecil] Render extras on top of the HUD
+void CECIL_HUDOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjection3D &apr, CDrawPort *pdp);
 
 // Receive and perform a sandbox action
 void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin, CNetworkMessage &nmMessage);

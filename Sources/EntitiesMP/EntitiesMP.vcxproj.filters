@@ -601,6 +601,9 @@
     <ClCompile Include="..\Bots\BotMovement.cpp">
       <Filter>Source Files\Bots sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\Bots\BotWeapons.cpp">
+      <Filter>Source Files\Bots sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\Common.h">
@@ -1585,6 +1588,9 @@
       <Filter>Header Files\Bots headers</Filter>
     </ClInclude>
     <ClInclude Include="..\Bots\BotMovement.h">
+      <Filter>Header Files\Bots headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Bots\BotWeapons.h">
       <Filter>Header Files\Bots headers</Filter>
     </ClInclude>
   </ItemGroup>
