@@ -1147,9 +1147,14 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
 
       } else {
         CBotPathPoint *pbppTarget = _pNavmesh->FindPointByID(iTargetPoint);
-        pbpp->bpp_cbppPoints.Remove(pbppTarget);
 
-        CPrintF("Untargeted point %d from %d\n", iTargetPoint, iCurrentPoint);
+        if (pbpp->bpp_cbppPoints.IsMember(pbppTarget)) {
+          pbpp->bpp_cbppPoints.Remove(pbppTarget);
+          CPrintF("Untargeted point %d from %d\n", iTargetPoint, iCurrentPoint);
+
+        } else {
+          CPrintF("Point %d is not targeted!\n", iTargetPoint);
+        }
       }
     } break;
 

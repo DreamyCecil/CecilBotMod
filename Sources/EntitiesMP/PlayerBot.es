@@ -112,7 +112,9 @@ functions:
   // Bot destructor
   virtual void EndBot(void) {
     // remove from the bot list
-    _cenPlayerBots.Remove(this);
+    if (_cenPlayerBots.IsMember(this)) {
+      _cenPlayerBots.Remove(this);
+    }
   };
 
   // Identify as a bot

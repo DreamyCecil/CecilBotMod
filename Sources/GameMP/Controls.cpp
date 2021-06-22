@@ -259,125 +259,56 @@ void CControls::Load_t( CTFileName fnFile)
 
   // [Cecil] TEMP 2021-06-13: Bot mod buttons
   if (fnFile == CTString("Controls\\System\\Common.ctl")) {
-    #define BOTBUTTON_ADD      "Add NavMesh point"
-    #define BOTBUTTON_DELETE   "Delete NavMesh point"
-    #define BOTBUTTON_INFO     "NavMesh point info"
-    #define BOTBUTTON_SELECT   "NavMesh select point"
-    #define BOTBUTTON_CONNECT  "NavMesh connection type"
-    #define BOTBUTTON_TOPLAYER "NavMesh move to player"
-    #define BOTBUTTON_SNAP     "NavMesh position snapping"
-    #define BOTBUTTON_QUICKBOT "Quick bot add"
-    
-    BOOL bBotAdd = FALSE;
-    BOOL bBotDelete = FALSE;
-    BOOL bBotInfo = FALSE;
-    BOOL bBotSelect = FALSE;
-    BOOL bBotConnect = FALSE;
-    BOOL bBotToPlayer = FALSE;
-    BOOL bBotSnap = FALSE;
-    BOOL bBotQuick = FALSE;
+    // create a button
+    #define CREATE_BOT_BUTTON(_Var, _Name) \
+      CTString strBot##_Var = _Name; \
+      BOOL bBot##_Var = FALSE
 
+    // check the button
+    #define CHECK_BOT_BUTTON(_Var) \
+      if (ba.ba_strName == strBot##_Var) bBot##_Var = TRUE
+
+    // add the button
+    #define ADD_BOT_BUTTON(_Var, _Button, _Command) \
+      if (!bBot##_Var) { \
+        CButtonAction &baBot = AddButtonAction(); \
+        baBot.ba_strName = strBot##_Var; baBot.ba_iFirstKey = _Button; \
+        baBot.ba_strCommandLineWhenPressed = MODCOM_NAME(_Command); \
+        baBot.ba_strCommandLineWhenReleased = ""; \
+        baBot.ba_lnNode.Remove(); ctrl_lhButtonActions.AddHead(baBot.ba_lnNode); \
+      }
+    
+    CREATE_BOT_BUTTON(ADD,      "Add NavMesh point");
+    CREATE_BOT_BUTTON(DELETE,   "Delete NavMesh point");
+    CREATE_BOT_BUTTON(INFO,     "NavMesh point info");
+    CREATE_BOT_BUTTON(SELECT,   "NavMesh select point");
+    CREATE_BOT_BUTTON(CONNECT,  "NavMesh connection type");
+    CREATE_BOT_BUTTON(TOPLAYER, "NavMesh move to player");
+    CREATE_BOT_BUTTON(SNAP,     "NavMesh position snapping");
+    CREATE_BOT_BUTTON(QUICKBOT, "Quick bot add");
+
+    // check if any of the buttons exist
     FOREACHINLIST(CButtonAction, ba_lnNode, ctrl_lhButtonActions, itba) {
       CButtonAction &ba = *itba;
 
-      if (ba.ba_strName == BOTBUTTON_ADD) {
-        bBotAdd = TRUE;
-      } else if (ba.ba_strName == BOTBUTTON_DELETE) {
-        bBotDelete = TRUE;
-      } else if (ba.ba_strName == BOTBUTTON_INFO) {
-        bBotInfo = TRUE;
-      } else if (ba.ba_strName == BOTBUTTON_SELECT) {
-        bBotSelect = TRUE;
-      } else if (ba.ba_strName == BOTBUTTON_CONNECT) {
-        bBotConnect = TRUE;
-      } else if (ba.ba_strName == BOTBUTTON_TOPLAYER) {
-        bBotToPlayer = TRUE;
-      } else if (ba.ba_strName == BOTBUTTON_SNAP) {
-        bBotSnap = TRUE;
-      } else if (ba.ba_strName == BOTBUTTON_QUICKBOT) {
-        bBotQuick = TRUE;
-      }
+      CHECK_BOT_BUTTON(ADD);
+      CHECK_BOT_BUTTON(DELETE);
+      CHECK_BOT_BUTTON(INFO);
+      CHECK_BOT_BUTTON(SELECT);
+      CHECK_BOT_BUTTON(CONNECT);
+      CHECK_BOT_BUTTON(TOPLAYER);
+      CHECK_BOT_BUTTON(SNAP);
+      CHECK_BOT_BUTTON(QUICKBOT);
     }
 
-    if (!bBotQuick) {
-      CButtonAction &baBot = AddButtonAction();
-      baBot.ba_strName = BOTBUTTON_QUICKBOT;
-      baBot.ba_iFirstKey = KID_EQUALS;
-      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("QuickBot();");
-      baBot.ba_strCommandLineWhenReleased = "";
-      baBot.ba_lnNode.Remove();
-      ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);
-    }
-
-    if (!bBotSnap) {
-      CButtonAction &baBot = AddButtonAction();
-      baBot.ba_strName = BOTBUTTON_SNAP;
-      baBot.ba_iFirstKey = KID_NUMSLASH;
-      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("SnapNavMeshPoint(0.25);");
-      baBot.ba_strCommandLineWhenReleased = "";
-      baBot.ba_lnNode.Remove();
-      ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);
-    }
-
-    if (!bBotToPlayer) {
-      CButtonAction &baBot = AddButtonAction();
-      baBot.ba_strName = BOTBUTTON_TOPLAYER;
-      baBot.ba_iFirstKey = KID_NUMMULTIPLY;
-      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("TeleportNavMeshPoint(0.5);");
-      baBot.ba_strCommandLineWhenReleased = "";
-      baBot.ba_lnNode.Remove();
-      ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);
-    }
-
-    if (!bBotConnect) {
-      CButtonAction &baBot = AddButtonAction();
-      baBot.ba_strName = BOTBUTTON_CONNECT;
-      baBot.ba_iFirstKey = KID_NUMDECIMAL;
-      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("NavMeshConnectionType();");
-      baBot.ba_strCommandLineWhenReleased = "";
-      baBot.ba_lnNode.Remove();
-      ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);
-    }
-
-    if (!bBotSelect) {
-      CButtonAction &baBot = AddButtonAction();
-      baBot.ba_strName = BOTBUTTON_SELECT;
-      baBot.ba_iFirstKey = KID_NUM1;
-      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("NavMeshSelectPoint();");
-      baBot.ba_strCommandLineWhenReleased = "";
-      baBot.ba_lnNode.Remove();
-      ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);
-    }
-
-    if (!bBotInfo) {
-      CButtonAction &baBot = AddButtonAction();
-      baBot.ba_strName = BOTBUTTON_INFO;
-      baBot.ba_iFirstKey = KID_NUMENTER;
-      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("NavMeshPointInfo();");
-      baBot.ba_strCommandLineWhenReleased = "";
-      baBot.ba_lnNode.Remove();
-      ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);
-    }
-
-    if (!bBotDelete) {
-      CButtonAction &baBot = AddButtonAction();
-      baBot.ba_strName = BOTBUTTON_DELETE;
-      baBot.ba_iFirstKey = KID_NUMMINUS;
-      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("DeleteNavMeshPoint();");
-      baBot.ba_strCommandLineWhenReleased = "";
-      baBot.ba_lnNode.Remove();
-      ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);
-    }
-
-    if (!bBotAdd) {
-      CButtonAction &baBot = AddButtonAction();
-      baBot.ba_strName = BOTBUTTON_ADD;
-      baBot.ba_iFirstKey = KID_NUMPLUS;
-      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("AddNavMeshPoint(0.5);");
-      baBot.ba_strCommandLineWhenReleased = "";
-      baBot.ba_lnNode.Remove();
-      ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);
-    }
+    ADD_BOT_BUTTON(QUICKBOT, KID_EQUALS,      "QuickBot();");
+    ADD_BOT_BUTTON(SNAP,     KID_NUMSLASH,    "SnapNavMeshPoint(0.25);");
+    ADD_BOT_BUTTON(TOPLAYER, KID_NUMMULTIPLY, "TeleportNavMeshPoint(0.5);");
+    ADD_BOT_BUTTON(CONNECT,  KID_NUMDECIMAL,  "NavMeshConnectionType();");
+    ADD_BOT_BUTTON(SELECT,   KID_NUM1,        "NavMeshSelectPoint();");
+    ADD_BOT_BUTTON(INFO,     KID_NUMENTER,    "NavMeshPointInfo();");
+    ADD_BOT_BUTTON(DELETE,   KID_NUMMINUS,    "DeleteNavMeshPoint();");
+    ADD_BOT_BUTTON(ADD,      KID_NUMPLUS,     "AddNavMeshPoint(0.5);");
   }
 
 /*

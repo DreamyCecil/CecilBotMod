@@ -39,7 +39,7 @@ CBotPathPoint *NearestNavMeshPointPos(const FLOAT3D &vCheck) {
     vPosDiff(2) = 0.0f;
     
     // apply range to horizontal difference
-    FLOAT fDiffH = vPosDiff.Length() - pbpp->bpp_fRange;
+    FLOAT fDiffH = ClampDn(vPosDiff.Length() - pbpp->bpp_fRange, 0.0f);
     FLOAT fDiffV = Abs(pbpp->bpp_vPos(2) - vCheck(2));
 
     // distance to the point
@@ -77,7 +77,7 @@ CBotPathPoint *NearestNavMeshPointBot(CPlayerBot *pen, BOOL bSkipCurrent) {
     vPosDiff(2) = 0.0f;
     
     // apply range to horizontal difference
-    FLOAT fDiffH = vPosDiff.Length() - pbpp->bpp_fRange;
+    FLOAT fDiffH = ClampDn(vPosDiff.Length() - pbpp->bpp_fRange, 0.0f);
     FLOAT fDiffV = Abs(pbpp->bpp_vPos(2) - vBot(2));
 
     // distance to the point
