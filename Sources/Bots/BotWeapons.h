@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "EntitiesMP/PlayerWeapons.h"
 
-// [Cecil] 2018-10-12: Bot's Weapon Stat Config
+// [Cecil] 2018-10-12: Bot's weapon configuration
 struct SBotWeaponConfig {
   WeaponType bw_wtType;   // current weapon
   FLOAT bw_fMinDistance;  // min (closest) distance to use it

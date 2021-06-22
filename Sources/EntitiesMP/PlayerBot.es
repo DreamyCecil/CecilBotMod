@@ -263,6 +263,7 @@ functions:
       return;
     }
 
+    // pick currently suitable weapon
     WeaponType wtSelect = WEAPON_NONE;
     FLOAT fLastDamage = 0.0f;
 
@@ -360,8 +361,8 @@ functions:
     if (m_sbsBot.bShooting) {
       SBotWeaponConfig &bwWeapon = sbl.aWeapons[m_iBotWeapon];
 
-      // allowed to shoot and within range
-      BOOL bCanShoot = sbl.CanShoot() && (m_fTargetDist <= bwWeapon.bw_fMaxDistance);
+      // allowed to shoot
+      BOOL bCanShoot = sbl.CanShoot();
       
       // only shoot allowed weapons
       if (m_sbsBot.iAllowedWeapons != -1) {

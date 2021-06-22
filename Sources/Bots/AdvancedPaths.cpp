@@ -302,6 +302,14 @@ void CBotNavmesh::Load(CWorld &wo) {
 };
 
 void CBotNavmesh::ClearNavMesh(void) {
+  // [Cecil] 2021-06-22: Untarget all bots
+  for (INDEX iBot = 0; iBot < _cenPlayerBots.Count(); iBot++) {
+    CPlayerBot *penBot = _cenPlayerBots.Pointer(iBot);
+
+    penBot->m_pbppCurrent = NULL;
+    penBot->m_pbppTarget = NULL;
+  }
+
   // destroy all path points
   for (INDEX iDeletePoint = 0; iDeletePoint < bnm_cbppPoints.Count(); iDeletePoint++) {
     CBotPathPoint *pbpp = bnm_cbppPoints.Pointer(iDeletePoint);

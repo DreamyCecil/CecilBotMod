@@ -19,6 +19,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "BotFunctions.h"
 #include "BotWeapons.h"
 
+// [Cecil] NOTE: These can be manually adjusted for a specific mod. Order doesn't matter,
+//               it's only for better understanding of the desired priority.
+
 // [Cecil] 2018-10-12: Bot weapon priority (from best to worst)
 extern SBotWeaponConfig _abwDeathmatchWeapons[CT_BOT_WEAPONS] = {
   //    Weapon Type         Min D    Max D     DMG   Accuracy  Strafe  Special  Frequency
