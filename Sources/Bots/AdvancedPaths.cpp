@@ -239,16 +239,10 @@ void CBotNavmesh::Write(CTStream *strm) {
   *strm << bnm_iNextPointID; // next point ID
   *strm << ctPoints; // amount of points
 
-  // no points
-  if (ctPoints <= 0) {
-    return;
-  }
-
   // write points
-  if (ctPoints > 0) {
-    FOREACHINDYNAMICCONTAINER(bnm_cbppPoints, CBotPathPoint, itbpp) {
-      itbpp->Write(strm);
-    }
+  for (INDEX iPoint = 0; iPoint < ctPoints; iPoint++) {
+    CBotPathPoint *pbpp = bnm_cbppPoints.Pointer(iPoint);
+    pbpp->Write(strm);
   }
 };
 
@@ -261,11 +255,6 @@ void CBotNavmesh::Read(CTStream *strm) {
     *strm >> bnm_bGenerated; // read if generated or not
     *strm >> bnm_iNextPointID; // next point ID
     *strm >> ctPoints; // amount of points
-  }
-
-  // no points
-  if (ctPoints <= 0) {
-    return;
   }
 
   // create points
@@ -417,7 +406,6 @@ CBotPathPoint *CBotNavmesh::FindImportantPoint(CPlayer *penBot, const INDEX &iPo
 
 void CBotNavmesh::GenerateNavmesh(CWorld *pwo) {
   if (bnm_bGenerated) {
-    // [Cecil] TEMP
     CPrintF("Already generated!\n");
     return;
   }

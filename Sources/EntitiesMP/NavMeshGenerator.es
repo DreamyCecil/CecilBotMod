@@ -75,13 +75,12 @@ procedures:
       
       m_iPoint++;
 
-      // [Cecil] TEMP
-      _iLastPoint = m_iPoint;
-
       if ((m_iPoint % m_ctLoop) == 0) {
         autowait(0.05f);
       }
     }
+
+    _iLastPoint = m_iPoint; // [Cecil] TEMP
 
     Destroy();
     return;

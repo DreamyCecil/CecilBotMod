@@ -39,6 +39,7 @@ enum ESandboxAction {
   ESA_NAVMESH_CREATE,   // add a new path point
   ESA_NAVMESH_DELETE,   // delete a path point
   ESA_NAVMESH_CONNECT,  // connect two points
+  ESA_NAVMESH_UNTARGET, // untarget one point from another
   ESA_NAVMESH_TELEPORT, // move the point to the player
 
   ESA_NAVMESH_POS,    // change point's position

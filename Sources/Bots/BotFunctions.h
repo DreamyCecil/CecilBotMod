@@ -38,8 +38,10 @@ extern FLOAT plr_fSpeedBackward;
 extern FLOAT plr_fSpeedSide;
 extern FLOAT plr_fSpeedUp;
 
-// [Cecil] 2019-05-28: Find nearest NavMesh point
-CBotPathPoint *NearestNavMeshPoint(CPlayer *pen, const FLOAT3D &vCheck, CBotPathPoint *pbppExclude);
+// [Cecil] 2019-05-28: Find nearest NavMesh point to some position
+CBotPathPoint *NearestNavMeshPointPos(const FLOAT3D &vCheck);
+// [Cecil] 2021-06-21: Find nearest NavMesh point to the bot
+CBotPathPoint *NearestNavMeshPointBot(CPlayerBot *pen, BOOL bSkipCurrent);
 
 // Write and read bot properties
 void BotWrite(CPlayerBot *pen, CTStream *strm);
@@ -88,6 +90,9 @@ struct SBotLogic {
 
 // [Cecil] Cast bot view ray
 BOOL CastBotRay(CPlayerBot *pen, CEntity *penTarget, SBotLogic &sbl, BOOL bPhysical);
+
+// [Cecil] Cast path point ray
+BOOL CastPathPointRay(const FLOAT3D &vSource, const FLOAT3D &vPoint, FLOAT &fDist, BOOL bPhysical);
 
 #define MAX_ITEM_DIST 256.0f
 

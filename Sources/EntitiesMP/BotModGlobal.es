@@ -37,21 +37,43 @@ functions:
   };
 
   void Write_t(CTStream *ostr) {
+    CEntity::Write_t(ostr);
+
     // write navmesh
     _pNavmesh->Write(ostr);
     *ostr << _iLastPoint; // [Cecil] TEMP
 
-    CEntity::Write_t(ostr);
+    // write bots in order
+    *ostr << _cenPlayerBots.Count();
+
+    for (INDEX iBot = 0; iBot < _cenPlayerBots.Count(); iBot++) {
+      CPlayerBot *penBot = _cenPlayerBots.Pointer(iBot);
+      *ostr << (ULONG)penBot->en_ulID;
+    }
   };
 
   void Read_t(CTStream *istr) {
+    CEntity::Read_t(istr);
+
     // read navmesh
     _pNavmesh->Read(istr);
     _pNavmesh->bnm_pwoWorld = GetWorld();
 
     *istr >> _iLastPoint; // [Cecil] TEMP
 
-    CEntity::Read_t(istr);
+    // read bots in order
+    INDEX ctBots;
+    *istr >> ctBots;
+
+    _cenPlayerBots.Clear();
+
+    for (INDEX iBot = 0; iBot < ctBots; iBot++) {
+      ULONG ulID;
+      *istr >> ulID;
+
+      CPlayerBot *penBot = (CPlayerBot *)FindEntityByID(GetWorld(), ulID);
+      _cenPlayerBots.Add(penBot);
+    }
   };
 
 procedures:

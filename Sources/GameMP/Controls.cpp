@@ -323,7 +323,7 @@ void CControls::Load_t( CTFileName fnFile)
       CButtonAction &baBot = AddButtonAction();
       baBot.ba_strName = BOTBUTTON_TOPLAYER;
       baBot.ba_iFirstKey = KID_NUMMULTIPLY;
-      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("TeleportNavMeshPoint(0.25);");
+      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("TeleportNavMeshPoint(0.5);");
       baBot.ba_strCommandLineWhenReleased = "";
       baBot.ba_lnNode.Remove();
       ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);
@@ -373,7 +373,7 @@ void CControls::Load_t( CTFileName fnFile)
       CButtonAction &baBot = AddButtonAction();
       baBot.ba_strName = BOTBUTTON_ADD;
       baBot.ba_iFirstKey = KID_NUMPLUS;
-      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("AddNavMeshPoint(0.25);");
+      baBot.ba_strCommandLineWhenPressed = MODCOM_NAME("AddNavMeshPoint(0.5);");
       baBot.ba_strCommandLineWhenReleased = "";
       baBot.ba_lnNode.Remove();
       ctrl_lhButtonActions.AddHead(baBot.ba_lnNode);

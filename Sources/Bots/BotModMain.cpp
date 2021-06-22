@@ -28,6 +28,8 @@ extern INDEX MOD_iNavMeshConnecting = 0; // connecting mode (0 - disabled, 1 - t
 
 // [Cecil] 2021-06-19: Render entity IDs
 static INDEX MOD_bEntityIDs = FALSE;
+// [Cecil] 2021-06-21: Display bot thoughts
+static INDEX MOD_bBotThoughts = FALSE;
 
 // [Cecil] 2021-06-11: List of bot entities
 extern CDynamicContainer<CPlayerBot> _cenPlayerBots = CDynamicContainer<CPlayerBot>();
@@ -37,9 +39,8 @@ static CStaticArray<CTString> BOT_astrNames;
 static CStaticArray<CTString> BOT_astrSkins;
 
 // [Cecil] 2018-10-15: Bot Editing
-static CTString BOT_strBotEdit = ""; // Name of a bot to edit
-// [Cecil] TEMP
-static CTString BOT_strSpawnName = ""; // Name to spawn with
+static CTString BOT_strBotEdit = ""; // name of a bot to edit
+static CTString BOT_strSpawnName = ""; // name to spawn with
 
 // [Cecil] 2020-07-28: A structure with bot settings
 static SBotSettings _sbsBotSettings;
@@ -109,15 +110,12 @@ static void CECIL_AddBot(CTString *pstrBotName, CTString *pstrBotSkin) {
   memset(pps->ps_achModelFile, 0, sizeof(pps->ps_achModelFile));
   strncpy(pps->ps_achModelFile, strSkin, sizeof(pps->ps_achModelFile));
 
-  //pps->ps_ulFlags |= PSF_PREFER3RDPERSON; // [Cecil] TEMP
-
   for (INDEX iGUID = 0; iGUID < 16; iGUID++) {
     pcBot.pc_aubGUID[iGUID] = rand() % 256;
   }
 
   pcBot.pc_strName = strName;
   pcBot.pc_strTeam = "CECIL_BOTZ";
-  //pcBot.pc_bBot = TRUE;
 
   // create message for adding player data to sessions
   CCecilStreamBlock nsbAddBot = CECIL_BotServerPacket(ESA_ADDBOT);
@@ -357,6 +355,15 @@ static void CECIL_ConnectNavMeshPoint(INDEX iTargetPoint) {
   _pNetwork->SendToServerReliable(nmNavmesh);
 };
 
+// [Cecil] 2021-06-21: Untarget current NavMesh point from another one
+static void CECIL_UntargetNavMeshPoint(INDEX iTargetPoint) {
+  CNetworkMessage nmNavmesh = CECIL_NavMeshClientPacket(ESA_NAVMESH_UNTARGET);
+  nmNavmesh << MOD_iNavMeshPoint;
+  nmNavmesh << iTargetPoint;
+
+  _pNetwork->SendToServerReliable(nmNavmesh);
+};
+
 // [Cecil] 2021-06-18: Move NavMesh point to the player position
 static void CECIL_TeleportNavMeshPoint(FLOAT fOffset) {
   CNetworkMessage nmNavmesh = CECIL_NavMeshClientPacket(ESA_NAVMESH_TELEPORT);
@@ -418,7 +425,7 @@ static void CECIL_NavMeshSelectPoint(void) {
   }
 
   CPlayer *pen = (CPlayer *)CEntity::GetPlayerEntity(LOCAL_PLAYER_INDEX);
-  CBotPathPoint *pbppNearest = NearestNavMeshPoint(NULL, pen->GetPlayerWeapons()->m_vRayHit, NULL);
+  CBotPathPoint *pbppNearest = NearestNavMeshPointPos(pen->GetPlayerWeapons()->m_vRayHit);
       
   // point target selection
   CBotPathPoint *pbppConnect = _pNavmesh->FindPointByID(MOD_iNavMeshPoint);
@@ -479,12 +486,13 @@ void CECIL_InitBotMod(void) {
 
   // [Cecil] Misc
   _pShell->DeclareSymbol("user INDEX " MODCOM_NAME("bEntityIDs;"), &MOD_bEntityIDs);
+  _pShell->DeclareSymbol("persistent user INDEX " MODCOM_NAME("bBotThoughts;"), &MOD_bBotThoughts);
 
   _pShell->DeclareSymbol("user void " MODCOM_NAME("SetWeapons(INDEX, INDEX);"), &CECIL_SetWeapons);
 
   // [Cecil] Bot editing
   _pShell->DeclareSymbol("user CTString " BOTCOM_NAME("strBotEdit;"), &BOT_strBotEdit);
-  _pShell->DeclareSymbol("persistent user CTString " BOTCOM_NAME("strSpawnName;"), &BOT_strSpawnName); // [Cecil] TEMP
+  _pShell->DeclareSymbol("persistent user CTString " BOTCOM_NAME("strSpawnName;"), &BOT_strSpawnName);
 
   _pShell->DeclareSymbol("user void " BOTCOM_NAME("ResetBotConfig(void);"), &CECIL_ResetBotConfig);
   _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("b3rdPerson;"     ), &_sbsBotSettings.b3rdPerson);
@@ -532,6 +540,7 @@ void CECIL_InitBotMod(void) {
   _pShell->DeclareSymbol("user void " MODCOM_NAME("DeleteNavMeshPoint(void);"), &CECIL_DeleteNavMeshPoint);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshPointInfo(void);"), &CECIL_NavMeshPointInfo);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("ConnectNavMeshPoint(INDEX);"), &CECIL_ConnectNavMeshPoint);
+  _pShell->DeclareSymbol("user void " MODCOM_NAME("UntargetNavMeshPoint(INDEX);"), &CECIL_UntargetNavMeshPoint);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("TeleportNavMeshPoint(FLOAT);"), &CECIL_TeleportNavMeshPoint);
 
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshPointPos(FLOAT, FLOAT, FLOAT);"), &CECIL_NavMeshPointPos);
@@ -614,11 +623,6 @@ void CECIL_BotGameStart(CSessionProperties &sp) {
 
   } catch (char *strError) {
     (void)strError;
-
-    // [Cecil] TEMP: No point in generating unconnected points
-    // generate instead
-    //_pNavmesh->GenerateNavmesh(&wo);
-    //_pNavmesh->bnm_bGenerated = TRUE;
   }
 };
 
@@ -644,7 +648,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
   pdp->SetFont(_pfdConsoleFont);
   pdp->SetTextScaling(1.0f);
 
-  // [Cecil] TEMP: NavMesh Rendering
+  // NavMesh rendering
   if (MOD_iRenderNavMesh > 0) {
     if (_pNavmesh->bnm_cbppPoints.Count() > 0)
     {
@@ -652,7 +656,12 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
       const BOOL bIDs = (MOD_iRenderNavMesh > 2);
       const BOOL bFlags = (MOD_iRenderNavMesh > 3);
 
-      const CBotPathPoint *pbppClosest = NearestNavMeshPoint(penOwner, penOwner->GetPlayerWeapons()->m_vRayHit, NULL);
+      const CBotPathPoint *pbppClosest = NULL;
+      
+      // bots don't need to select points
+      if (!penOwner->IsBot()) {
+        pbppClosest = NearestNavMeshPointPos(penOwner->GetPlayerWeapons()->m_vRayHit);
+      }
 
       FOREACHINDYNAMICCONTAINER(_pNavmesh->bnm_cbppPoints, CBotPathPoint, itbpp) {
         CBotPathPoint *pbpp = itbpp;
@@ -706,11 +715,6 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
           
             FLOAT3D vOnScreen1, vOnScreen2;
             FLOAT3D vPoint2 = pbppT->bpp_vPos;
-
-            // [Cecil] TEMP: Show direction to the target
-            /*FLOAT3D vToTarget = (vPoint2 - pbpp->bpp_vPos).Normalize();
-            vToTarget *= ClampUp(4.0f, (vPoint2 - pbpp->bpp_vPos).Length());
-            vPoint2 = pbpp->bpp_vPos + vToTarget;*/
           
             if (ProjectLine(&prProjection, vPoint1, vPoint2, vOnScreen1, vOnScreen2)) {
               pdp->DrawLine(vOnScreen1(1), vOnScreen1(2), vOnScreen2(1), vOnScreen2(2), C_ORANGE|0x7F);
@@ -769,7 +773,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
       }
     }
 
-    // [Cecil] TEMP 2019-06-04: Render bots' target points
+    // [Cecil] 2019-06-04: Render bots' target points
     for (INDEX iBot = 0; iBot < _cenPlayerBots.Count(); iBot++) {
       CPlayerBot *penBot = _cenPlayerBots.Pointer(iBot);
 
@@ -834,8 +838,13 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
 void CECIL_HUDOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjection3D &apr, CDrawPort *pdp) {
   FLOAT fScaling = (FLOAT)pdp->GetHeight() / 480.0f;
 
+  // not a server
+  if (!_pNetwork->IsServer()) {
+    return;
+  }
+
   // [Cecil] TEMP 2021-06-20: Bot thoughts
-  if (penOwner->IsBot()) {
+  if (MOD_bBotThoughts && penOwner->IsBot()) {
     pdp->SetFont(_pfdDisplayFont);
     pdp->SetTextScaling(fScaling);
     pdp->SetTextAspect(1.0f);
@@ -855,12 +864,13 @@ void CECIL_HUDOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjectio
 
     // target point
     if (penBot->m_pbppCurrent != NULL) {
-      CTString strTarget(0, "Target: %d ^caf3f3f%s", penBot->m_pbppCurrent->bpp_iIndex, penBot->m_bImportantPoint ? "(Important)" : "");
+      CTString strTarget(0, "Current Point: ^cffff00%d^r\nTarget Point: ^cff0000%d ^caf3f3f%s", penBot->m_pbppCurrent->bpp_iIndex,
+                         penBot->m_pbppTarget->bpp_iIndex, penBot->m_bImportantPoint ? "(Important)" : "");
       pdp->PutText(strTarget, pixX, pixY + pixThought*17, 0xCCCCCCFF);
     }
 
-    CTString strTime(0, "Current: %.2f\nShooting: %.2f", _pTimer->CurrentTick(), penBot->m_tmShootTime);
-    pdp->PutText(strTime, pixX, pixY + pixThought*18, 0xCCCCCCFF);
+    CTString strTime(0, "Cur Time: %.2f\nShooting: %.2f", _pTimer->CurrentTick(), penBot->m_tmShootTime);
+    pdp->PutText(strTime, pixX, pixY + pixThought*19, 0xCCCCCCFF);
   }
 };
 
@@ -1121,6 +1131,25 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
       } else {
         CBotPathPoint *pbppTarget = _pNavmesh->FindPointByID(iTargetPoint);
         pbpp->Connect(pbppTarget, iConnect);
+
+        CPrintF("Connected points %d and %d (type: %d)\n", iCurrentPoint, iTargetPoint, iConnect);
+      }
+    } break;
+
+    case ESA_NAVMESH_UNTARGET: {
+      INDEX iCurrentPoint, iTargetPoint;
+      nmMessage >> iCurrentPoint >> iTargetPoint;
+
+      CBotPathPoint *pbpp = _pNavmesh->FindPointByID(iCurrentPoint);
+
+      if (pbpp == NULL) {
+        CPrintF("NavMesh point doesn't exist!\n");
+
+      } else {
+        CBotPathPoint *pbppTarget = _pNavmesh->FindPointByID(iTargetPoint);
+        pbpp->bpp_cbppPoints.Remove(pbppTarget);
+
+        CPrintF("Untargeted point %d from %d\n", iTargetPoint, iCurrentPoint);
       }
     } break;
 

@@ -46,7 +46,6 @@ thumbnail "";
 properties:
   1 CEntityPointer m_penTarget, // shooting target
   2 CEntityPointer m_penFollow, // following target
-  // [Cecil] TODO: m_tmLastBotTarget and m_tmLastSawTarget can be united
   3 FLOAT m_tmLastBotTarget = 0.0f, // cooldown for target selection
   4 FLOAT m_tmLastSawTarget = 0.0f, // last time the enemy has been seen
   5 FLOAT m_tmButtonAction = 0.0f, // cooldown for button actions
@@ -256,7 +255,7 @@ functions:
     }
 
     // pick weapon config
-    SBotWeaponConfig *aWeapons = PickWeaponConfig();
+    SBotWeaponConfig *aWeapons = sbl.aWeapons;
     m_iBotWeapon = CT_BOT_WEAPONS - 1;
 
     // [Cecil] 2021-06-16: Select knife for faster speed if haven't seen the enemy in a while
@@ -304,7 +303,6 @@ functions:
 
       // no ammo
       if (!GetSP()->sp_bInfiniteAmmo && !WPN_HAS_AMMO(penWeapons, wtType)) {
-        //THOUGHT(CTString(0, "No ammo for %d", WPN_FLAG(wtType)));
         continue;
       }
 
@@ -345,7 +343,7 @@ functions:
 
     m_penFollow = NULL;
 
-    // [Cecil] TEMP 2019-05-28: Follow players in cooperative
+    // [Cecil] 2019-05-28: Follow players in cooperative
     if (GetSP()->sp_bCooperative || GetSP()->sp_bSinglePlayer) {
       sbl.ubFlags |= BLF_FOLLOWPLAYER;
     }
@@ -370,7 +368,10 @@ functions:
 
     // shoot if possible
     if (m_sbsBot.bShooting) {
-      BOOL bCanShoot = sbl.CanShoot();
+      SBotWeaponConfig &bwWeapon = sbl.aWeapons[m_iBotWeapon];
+
+      // allowed to shoot and within range
+      BOOL bCanShoot = sbl.CanShoot() && (m_fTargetDist <= bwWeapon.bw_fMaxDistance);
       
       // only shoot allowed weapons
       if (m_sbsBot.iAllowedWeapons != -1) {
@@ -390,7 +391,7 @@ functions:
         // reset shooting time a few ticks later
         if (m_tmShootTime + 0.05f <= _pTimer->CurrentTick()) {
           // shooting frequency
-          FLOAT tmShotFreq = sbl.aWeapons[m_iBotWeapon].bw_tmShotFreq;
+          FLOAT tmShotFreq = bwWeapon.bw_tmShotFreq;
 
           // this weapon has a certain shooting frequency
           if (tmShotFreq > 0.0f) {

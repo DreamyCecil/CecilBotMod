@@ -22,8 +22,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define WORLD (_pNetwork->ga_World)
 #define THOUGHT(_String) (pen->m_btThoughts.Push(_String))
 
-// [Cecil] 2019-05-28: Find nearest NavMesh point
-CBotPathPoint *NearestNavMeshPoint(CPlayer *pen, const FLOAT3D &vCheck, CBotPathPoint *pbppExclude) {
+// [Cecil] 2019-05-28: Find nearest NavMesh point to some position
+CBotPathPoint *NearestNavMeshPointPos(const FLOAT3D &vCheck) {
   if (_pNavmesh->bnm_cbppPoints.Count() <= 0) {
     return NULL;
   }
@@ -33,15 +33,61 @@ CBotPathPoint *NearestNavMeshPoint(CPlayer *pen, const FLOAT3D &vCheck, CBotPath
 
   FOREACHINDYNAMICCONTAINER(_pNavmesh->bnm_cbppPoints, CBotPathPoint, itbpp) {
     CBotPathPoint *pbpp = itbpp;
+    
+    // horizontal position difference
+    FLOAT3D vPosDiff = (pbpp->bpp_vPos - vCheck);
+    vPosDiff(2) = 0.0f;
+    
+    // apply range to horizontal difference
+    FLOAT fDiffH = vPosDiff.Length() - pbpp->bpp_fRange;
+    FLOAT fDiffV = Abs(pbpp->bpp_vPos(2) - vCheck(2));
 
-    // [Cecil] NOTE: Bot get caught up in points that are closer to them vertically than horizontally
-    //               when checking within the point range - need to ignore the vertical range
-    FLOAT fDiff = (pbpp->bpp_vPos - vCheck).Length(); // - pbpp->bpp_fRange; // allows negative values
-    BOOL bNotCurrent = (pen == NULL ? TRUE : !pen->CurrentPoint(pbppExclude));
+    // distance to the point
+    FLOAT fToPoint = FLOAT3D(fDiffH, fDiffV, 0.0f).Length();
 
-    if (fDiff < fDist && bNotCurrent) {
+    if (fToPoint < fDist) {
       pbppNearest = pbpp;
-      fDist = fDiff;
+      fDist = fToPoint;
+    }
+  }
+
+  return pbppNearest;
+};
+
+// [Cecil] 2021-06-21: Find nearest NavMesh point to the bot
+CBotPathPoint *NearestNavMeshPointBot(CPlayerBot *pen, BOOL bSkipCurrent) {
+  if (_pNavmesh->bnm_cbppPoints.Count() <= 0) {
+    return NULL;
+  }
+
+  // bot's body center
+  FLOAT3D vBot;
+
+  EntityInfo *peiBot = (EntityInfo *)pen->GetEntityInfo();
+  GetEntityInfoPosition(pen, peiBot->vTargetCenter, vBot);
+
+  FLOAT fDist = 1000.0f;
+  CBotPathPoint *pbppNearest = NULL;
+
+  FOREACHINDYNAMICCONTAINER(_pNavmesh->bnm_cbppPoints, CBotPathPoint, itbpp) {
+    CBotPathPoint *pbpp = itbpp;
+
+    // horizontal position difference
+    FLOAT3D vPosDiff = (pbpp->bpp_vPos - vBot);
+    vPosDiff(2) = 0.0f;
+    
+    // apply range to horizontal difference
+    FLOAT fDiffH = vPosDiff.Length() - pbpp->bpp_fRange;
+    FLOAT fDiffV = Abs(pbpp->bpp_vPos(2) - vBot(2));
+
+    // distance to the point
+    FLOAT fToPoint = FLOAT3D(fDiffH, fDiffV, 0.0f).Length();
+
+    BOOL bNotCurrent = (!bSkipCurrent || !pen->CurrentPoint(pbpp));
+
+    if (fToPoint < fDist && bNotCurrent) {
+      pbppNearest = pbpp;
+      fDist = fToPoint;
     }
   }
 
@@ -73,11 +119,6 @@ void BotWrite(CPlayerBot *pen, CTStream *strm) {
 
 // Read bot properties
 void BotRead(CPlayerBot *pen, CTStream *strm) {
-  // add to the list if not already there
-  if (!_cenPlayerBots.IsMember(pen)) {
-    _cenPlayerBots.Add(pen);
-  }
-
   // read current point
   INDEX iPoint;
   *strm >> iPoint;
@@ -129,6 +170,19 @@ BOOL CastBotRay(CPlayerBot *pen, CEntity *penTarget, SBotLogic &sbl, BOOL bPhysi
 
   return (vTarget - crBot.cr_vHit).Length() <= 1.0f
        && crBot.cr_fHitDistance < 1000.0f; // [Cecil] TEMP: Target is too far
+};
+
+// [Cecil] Cast path point ray
+BOOL CastPathPointRay(const FLOAT3D &vSource, const FLOAT3D &vPoint, FLOAT &fDist, BOOL bPhysical) {
+  CCastRay crBot(NULL, vSource, vPoint);
+
+  crBot.cr_ttHitModels = CCastRay::TT_NONE;
+  crBot.cr_bHitTranslucentPortals = TRUE;
+  crBot.cr_bPhysical = bPhysical;
+  CastRayFlags(crBot, &WORLD, (bPhysical ? BPOF_PASSABLE : 0));
+
+  fDist = (vPoint - crBot.cr_vHit).Length();
+  return fDist <= 1.0f;
 };
 
 // [Cecil] 2021-06-13: Check if it's an enemy player
@@ -325,7 +379,7 @@ CEntity *ClosestEnemy(CPlayerBot *pen, FLOAT &fLast, SBotLogic &sbl) {
 
     FLOAT fHealth = ((CMovableEntity *)penCheck)->GetHealth();
     FLOAT fDist = DistanceToPos(sbl.ViewPos(), vEnemy);
-    BOOL bCurrentVisible = CastBotRay(pen, penCheck, sbl, TRUE); // [Cecil] TEMP: Test for physical polygons
+    BOOL bCurrentVisible = CastBotRay(pen, penCheck, sbl, TRUE);
     CEntity *penTargetEnemy = NULL;
 
     // target's target
@@ -386,7 +440,7 @@ CEntity *ClosestItemType(CPlayerBot *pen, const CDLLEntityClass &decClass, FLOAT
     }
 
     // if not visible
-    if (SBS.bItemVisibility && !CastBotRay(pen, penCheck, sbl, TRUE)) { // [Cecil] TEMP: Test for physical polygons
+    if (SBS.bItemVisibility && !CastBotRay(pen, penCheck, sbl, TRUE)) {
       continue;
     }
 
