@@ -145,7 +145,7 @@ functions:
 
   // Apply action for bots
   virtual void BotApplyAction(CPlayerAction &paAction) {
-    // alive
+    // while alive
     if (GetFlags() & ENF_ALIVE) {
       if (m_penCamera == NULL && m_penActionMarker == NULL) {
         // bot's brain
@@ -158,7 +158,7 @@ functions:
         BotWeapons(paAction, sbl);
       }
 
-    // dead
+    // when dead
     } else {
       // try to respawn
       if (ButtonAction()) {
@@ -239,19 +239,9 @@ functions:
   void BotWeapons(CPlayerAction &pa, SBotLogic &sbl) {
     CPlayerWeapons *penWeapons = GetPlayerWeapons();
     
-    // sniper zoom
-    if (m_sbsBot.bSniperZoom && penWeapons->m_iCurrentWeapon == WEAPON_SNIPER)
-    {
-      if (ButtonAction()) {
-        // zoom in if enemy is visible
-        if (!penWeapons->m_bSniping && sbl.SeeEnemy()) {
-          pa.pa_ulButtons |= PLRA_SNIPER_USE|PLRA_SNIPER_ZOOMIN;
-
-        // zoom out if can't see the enemy
-        } else if (penWeapons->m_bSniping && !sbl.SeeEnemy()) {
-          pa.pa_ulButtons |= PLRA_SNIPER_USE;
-        }
-      }
+    // sniper scope
+    if (m_sbsBot.bSniperZoom && CanUseScope(this)) {
+      UseWeaponScope(this, pa, sbl);
     }
 
     // pick weapon config
@@ -382,7 +372,7 @@ functions:
       if (bCanShoot) {
         // enough shooting time
         if (m_tmShootTime <= 0.0f || m_tmShootTime > _pTimer->CurrentTick()) {
-          pa.pa_ulButtons |= PLRA_FIRE;
+          FireWeapon(this, pa, sbl);
 
         } else if (Abs(m_tmShootTime - _pTimer->CurrentTick()) < 0.05f) {
           THOUGHT("Stop shooting");

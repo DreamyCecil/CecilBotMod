@@ -20,16 +20,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // [Cecil] 2018-10-12: Bot's Weapon Stat Config
 struct SBotWeaponConfig {
-  WeaponType bw_wtType;  // current weapon
-  FLOAT bw_fMinDistance; // min (closest) distance to use it
-  FLOAT bw_fMaxDistance; // max (furthest) distance to use it
-  FLOAT bw_fDamage;      // average damage
-  FLOAT bw_fAccuracy;    // how accurate the weapon is
-  FLOAT bw_fStrafe;      // at what percent of min to max distance to start strafing
-  FLOAT bw_tmShotFreq;   // how frequently to spam the fire button (-1 or NO_FREQ to hold)
+  WeaponType bw_wtType;   // current weapon
+  FLOAT bw_fMinDistance;  // min (closest) distance to use it
+  FLOAT bw_fMaxDistance;  // max (furthest) distance to use it
+  FLOAT bw_fDamage;       // average damage
+  FLOAT bw_fAccuracy;     // how accurate the weapon is
+  FLOAT bw_fStrafe;       // at what percent of min to max distance to start strafing
+  FLOAT bw_fSpecialRange; // at what percentage from max distance to use a special attack (negative for "closer than %", positive for "further than %")
+  FLOAT bw_tmShotFreq;    // how frequently to spam the fire button (-1 or NO_FREQ to hold)
 };
 
 #define CT_BOT_WEAPONS WEAPON_LAST
+#define NO_SPEC (0.0f)
 #define NO_FREQ (-1.0f)
 
 // [Cecil] 2018-10-12: Bot weapon priority (from best to worst)
@@ -44,6 +46,8 @@ inline SBotWeaponConfig *PickWeaponConfig(void) {
   return _abwDeathmatchWeapons;
 };
 
+// --- Customizable helper functions
+
 // Weapon flag from the weapon index
 #define WPN_FLAG(_Weapon) (1 << (_Weapon - 1))
 
@@ -52,3 +56,15 @@ inline SBotWeaponConfig *PickWeaponConfig(void) {
 
 // Weapon has ammo
 #define WPN_HAS_AMMO(_Plw, _Weapon) (_Plw->HasAmmo((WeaponType)_Weapon))
+
+// Currently zooming in with a scope or not
+BOOL UsingScope(CPlayerBot *pen);
+
+// Able to use the scope or not
+BOOL CanUseScope(CPlayerBot *pen);
+
+// Use weapon scope for a bot now
+void UseWeaponScope(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl);
+
+// Fire the weapon now
+void FireWeapon(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl);

@@ -1,3 +1,15 @@
+# Bot Integration
+
+This document should walk you through simple steps that will help you integrate bots into your own mod.
+
+Keep in mind that if your mod has many drastic changes to gameplay mechanics, don't be afraid of rewriting bot code to your liking.
+
+Simple guide to developer comments:
+- `[Cecil] <date>` - indicates specifically when a certain feature has been introduced.
+- `[Cecil] TEMP` - temporary feature that can be applied permanently or removed at a later time.
+- `[Cecil] TODO` - notes to self about features that need to be implemented.
+- `[Cecil] NOTE` - important note about a certain feature. Advised to search for them for extra help with integration.
+
 ## All projects
 
 - `Bots` folder should be present at the very root of mod sources (alongside Engine, EntitiesMP etc.).

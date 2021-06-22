@@ -243,7 +243,7 @@ void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
     // randomize every half a second
     if (pen->m_tmBotAccuracy <= tmNow) {
       // more accurate with the sniper
-      FLOAT fAccuracyMul = (WEAPON->m_bSniping ? 0.2f : 1.0f) * SBS.fAccuracyAngle;
+      FLOAT fAccuracyMul = (UsingScope(pen) ? 0.2f : 1.0f) * SBS.fAccuracyAngle;
 
       // invisible targets are hard to aim at
       if (pen->m_penTarget->GetFlags() & ENF_INVISIBLE) {
