@@ -203,6 +203,11 @@ inline BOOL CBotPathPoint::operator==(const CBotPathPoint &bppOther) const {
 
 // Make a connection with a specific point
 void CBotPathPoint::Connect(CBotPathPoint *pbppPoint, INDEX iType) {
+  // same point
+  if (pbppPoint == this) {
+    return;
+  }
+
   // connect to the target
   if (iType == 1 || iType == 2) {
     if (!bpp_cbppPoints.IsMember(pbppPoint)) {

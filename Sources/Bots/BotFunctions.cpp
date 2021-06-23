@@ -444,8 +444,11 @@ CEntity *ClosestItemType(CPlayerBot *pen, const CDLLEntityClass &decClass, FLOAT
       continue;
     }
 
-    FLOAT3D vItem = penCheck->GetPlacement().pl_PositionVector;
-    FLOAT fDistToItem = DistanceToPos(sbl.ViewPos(), vItem);
+    // multiply vertical difference (further distance)
+    FLOAT3D vPosDiff = (penCheck->GetPlacement().pl_PositionVector - sbl.ViewPos());
+    vPosDiff(2) *= 3.0f;
+
+    FLOAT fDistToItem = vPosDiff.Length();
 
     if (fDistToItem < fDist) {
       fDist = fDistToItem;

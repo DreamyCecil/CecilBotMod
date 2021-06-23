@@ -60,6 +60,8 @@ class DECL_DLL CBotPathPoint {
     FLOAT bpp_fRange;  // walking radius of a point
     ULONG bpp_ulFlags; // special point flags
     INDEX bpp_iImportant; // important entity ID
+    // [Cecil] TODO: Add defending time which would force bots to stay on important points for some time
+    //FLOAT bpp_fDefendTime;
 
     // Polygon of this point
     CBotPathPolygon *bpp_bppoPolygon;

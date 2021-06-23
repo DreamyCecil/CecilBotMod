@@ -400,8 +400,8 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
     }
   }
 
-  // vertical movement
-  if (Abs(fVerticalMove) > 0.1f && pen->ButtonAction()) {
+  // vertical movement (holding crouch or spamming jump)
+  if (fVerticalMove < -0.1f || (fVerticalMove > 0.1f && pen->ButtonAction())) {
     vBotMovement(2) = fVerticalMove;
   } else {
     vBotMovement(2) = 0.0f;
