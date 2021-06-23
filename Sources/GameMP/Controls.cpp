@@ -285,6 +285,8 @@ void CControls::Load_t( CTFileName fnFile)
     CREATE_BOT_BUTTON(CONNECT,  "NavMesh connection type");
     CREATE_BOT_BUTTON(TOPLAYER, "NavMesh move to player");
     CREATE_BOT_BUTTON(SNAP,     "NavMesh position snapping");
+    CREATE_BOT_BUTTON(INCRANGE, "NavMesh increase range");
+    CREATE_BOT_BUTTON(DECRANGE, "NavMesh decrease range");
     CREATE_BOT_BUTTON(QUICKBOT, "Quick bot add");
 
     // check if any of the buttons exist
@@ -298,10 +300,14 @@ void CControls::Load_t( CTFileName fnFile)
       CHECK_BOT_BUTTON(CONNECT);
       CHECK_BOT_BUTTON(TOPLAYER);
       CHECK_BOT_BUTTON(SNAP);
+      CHECK_BOT_BUTTON(INCRANGE);
+      CHECK_BOT_BUTTON(DECRANGE);
       CHECK_BOT_BUTTON(QUICKBOT);
     }
 
     ADD_BOT_BUTTON(QUICKBOT, KID_EQUALS,      "QuickBot();");
+    ADD_BOT_BUTTON(DECRANGE, KID_PAGEDOWN,    "AddNavMeshPointRange(-1.0);");
+    ADD_BOT_BUTTON(INCRANGE, KID_PAGEUP,      "AddNavMeshPointRange(1.0);");
     ADD_BOT_BUTTON(SNAP,     KID_NUMSLASH,    "SnapNavMeshPoint(0.25);");
     ADD_BOT_BUTTON(TOPLAYER, KID_NUMMULTIPLY, "TeleportNavMeshPoint(0.5);");
     ADD_BOT_BUTTON(CONNECT,  KID_NUMDECIMAL,  "NavMeshConnectionType();");

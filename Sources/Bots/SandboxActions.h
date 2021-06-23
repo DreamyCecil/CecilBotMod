@@ -13,12 +13,17 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
-// [Cecil] 2021-06-11: Bot mod headers
-#include "Bots/SandboxCommon.h"
+#pragma once
 
-// [Cecil] 2021-06-16: Logic pre-declaration
-struct SBotLogic;
+// [Cecil] 2021-06-11: Player bot
+#include "EntitiesMP/Player.h"
 
-#include "Bots/AdvancedPaths.h"
-#include "Bots/BotModMain.h"
-#include "Bots/SandboxActions.h"
+// [Cecil] 2021-06-18: Bot mod command prefixes
+#define MODCOM_PREFIX "MOD_"
+#define MODCOM_NAME(_Command) MODCOM_PREFIX _Command
+
+#define BOTCOM_PREFIX "BOT_"
+#define BOTCOM_NAME(_Command) BOTCOM_PREFIX _Command
+
+// Receive and perform a sandbox action
+void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin, CNetworkMessage &nmMessage);

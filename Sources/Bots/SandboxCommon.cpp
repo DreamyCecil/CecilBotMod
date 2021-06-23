@@ -37,7 +37,7 @@ INDEX FractionNumbers(FLOAT fNumber) {
   return iNumbers;
 };
 
-// [Cecil] 2019-06-02: Converts float number into the string
+// [Cecil] 2019-06-02: Convert float number into the string without extra zeros
 inline CTString FloatToStr(const FLOAT &f) {
   CTString str;
   str.PrintF("%.*f", FractionNumbers(f), f);

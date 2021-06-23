@@ -52,7 +52,7 @@ Change current player weapons and "Give Weapons" property of all CPlayerMarkers:
 ```
 
 - `MOD_iNavMeshPoint` - currently selected NavMesh point by its ID
-- `MOD_NavMeshSelectPoint()` - select closest NavMesh point to the player's crosshair position
+- `MOD_NavMeshSelectPoint()` - select closest NavMesh point to the player's crosshair position or target already selected point (if `MOD_iNavMeshConnecting` is not `0`)
 
 ---
 - `MOD_NavMeshConnectionType()` - change NavMesh connection type (see `MOD_iNavMeshConnecting`)
@@ -76,3 +76,16 @@ Change current player weapons and "Give Weapons" property of all CPlayerMarkers:
 - `MOD_NavMeshPointFlags(mask)` - set NavMesh point flags as a base 10 bit mask (e.g. 21 = 16 + 4 + 1)
 - `MOD_NavMeshPointEntity(entity ID)` - set NavMesh point entity by its ID (-1 for none)
 - `MOD_NavMeshPointRange(range)` - change NavMesh point range
+
+## Key Shortcuts
+
+- `=` - quickly add one bot
+- `Num .` - change NavMesh connection type (from `0` to `3`)
+- `Num 1` - select closest NavMesh point to the crosshair (or target it if connection type is not `0`)
+- `Num +` - add a new NavMesh point
+- `Num -` - delete selected NavMesh point
+- `Num *` - move NavMesh point to the player position
+- `Num /` - snap NavMesh point position to `0.25` grid
+- `Pg Up` - increase NavMesh point range by `1`
+- `Pg Dn` - decrease NavMesh point range by `1`
+- `Num Enter` - display information about a NavMesh point

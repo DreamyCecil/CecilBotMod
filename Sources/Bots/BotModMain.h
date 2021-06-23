@@ -19,13 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "EntitiesMP/Player.h"
 #include "EntitiesMP/PlayerBot.h"
 
-// [Cecil] 2021-06-18: Bot mod command prefixes
-#define MODCOM_PREFIX "MOD_"
-#define MODCOM_NAME(_Command) MODCOM_PREFIX _Command
-
-#define BOTCOM_PREFIX "BOT_"
-#define BOTCOM_NAME(_Command) BOTCOM_PREFIX _Command
-
 // [Cecil] 2019-05-28: NavMesh commands
 extern INDEX MOD_iRenderNavMesh;
 extern INDEX MOD_iNavMeshPoint;
@@ -50,6 +43,3 @@ DECL_DLL void CECIL_BotGameCleanup(void);
 void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjection3D &apr, CDrawPort *pdp);
 // [Cecil] Render extras on top of the HUD
 void CECIL_HUDOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjection3D &apr, CDrawPort *pdp);
-
-// Receive and perform a sandbox action
-void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin, CNetworkMessage &nmMessage);

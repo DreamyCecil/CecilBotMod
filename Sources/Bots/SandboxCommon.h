@@ -201,7 +201,7 @@ struct SBotThoughts {
 // [Cecil] 2019-06-02: Function from Serious Gang mod that returns amount of numbers in the fraction
 DECL_DLL INDEX FractionNumbers(FLOAT fNumber);
 
-// [Cecil] 2019-06-02: Converts float number into the string
+// [Cecil] 2019-06-02: Convert float number into the string without extra zeros
 DECL_DLL inline CTString FloatToStr(const FLOAT &f);
 
 // [Cecil] 2019-06-04: Convert unsigned long into a binary number
