@@ -431,6 +431,11 @@ static void CECIL_NavMeshSelectPoint(void) {
 
   CPlayer *pen = (CPlayer *)CEntity::GetPlayerEntity(LOCAL_PLAYER_INDEX);
   CBotPathPoint *pbppNearest = NearestNavMeshPointPos(pen->GetPlayerWeapons()->m_vRayHit);
+
+  // no point
+  if (pbppNearest == NULL) {
+    return;
+  }
       
   // point target selection
   CBotPathPoint *pbppConnect = _pNavmesh->FindPointByID(MOD_iNavMeshPoint);
@@ -483,41 +488,42 @@ extern void CECIL_InitSandboxActions(void) {
   _pShell->DeclareSymbol("persistent user CTString " BOTCOM_NAME("strSpawnName;"), &BOT_strSpawnName);
 
   _pShell->DeclareSymbol("user void " BOTCOM_NAME("ResetBotConfig(void);"), &CECIL_ResetBotConfig);
-  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("b3rdPerson;"     ), &_sbsBotSettings.b3rdPerson);
-  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("iCrosshair;"     ), &_sbsBotSettings.iCrosshair);
+  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("b3rdPerson;"      ), &_sbsBotSettings.b3rdPerson);
+  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("iCrosshair;"      ), &_sbsBotSettings.iCrosshair);
 
-  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bSniperZoom;"    ), &_sbsBotSettings.bSniperZoom);
-  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bShooting;"      ), &_sbsBotSettings.bShooting);
-  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fShootAngle;"    ), &_sbsBotSettings.fShootAngle);
-  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fAccuracyAngle;" ), &_sbsBotSettings.fAccuracyAngle);
+  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bSniperZoom;"     ), &_sbsBotSettings.bSniperZoom);
+  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bShooting;"       ), &_sbsBotSettings.bShooting);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fShootAngle;"     ), &_sbsBotSettings.fShootAngle);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fAccuracyAngle;"  ), &_sbsBotSettings.fAccuracyAngle);
 
-  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fRotSpeedDist;"  ), &_sbsBotSettings.fRotSpeedDist);
-  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fRotSpeedMin;"   ), &_sbsBotSettings.fRotSpeedMin);
-  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fRotSpeedMax;"   ), &_sbsBotSettings.fRotSpeedMax);
-  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fRotSpeedLimit;" ), &_sbsBotSettings.fRotSpeedLimit);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fRotSpeedDist;"   ), &_sbsBotSettings.fRotSpeedDist);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fRotSpeedMin;"    ), &_sbsBotSettings.fRotSpeedMin);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fRotSpeedMax;"    ), &_sbsBotSettings.fRotSpeedMax);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fRotSpeedLimit;"  ), &_sbsBotSettings.fRotSpeedLimit);
 
-  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fWeaponCD;"      ), &_sbsBotSettings.fWeaponCD);
-  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fTargetCD;"      ), &_sbsBotSettings.fTargetCD);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fWeaponCD;"       ), &_sbsBotSettings.fWeaponCD);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fTargetCD;"       ), &_sbsBotSettings.fTargetCD);
 
-  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fSpeedMul;"      ), &_sbsBotSettings.fSpeedMul);
-  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bStrafe;"        ), &_sbsBotSettings.bStrafe);
-  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bJump;"          ), &_sbsBotSettings.bJump);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fSpeedMul;"       ), &_sbsBotSettings.fSpeedMul);
+  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bStrafe;"         ), &_sbsBotSettings.bStrafe);
+  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bJump;"           ), &_sbsBotSettings.bJump);
 
-  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fPrediction;"    ), &_sbsBotSettings.fPrediction);
-  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fPredictRnd;"    ), &_sbsBotSettings.fPredictRnd);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fPrediction;"     ), &_sbsBotSettings.fPrediction);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fPredictRnd;"     ), &_sbsBotSettings.fPredictRnd);
 
-  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("iAllowedWeapons;"), &_sbsBotSettings.iAllowedWeapons);
-  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("iTargetType;"    ), &_sbsBotSettings.iTargetType);
-  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bTargetSearch;"  ), &_sbsBotSettings.bTargetSearch);
-  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bItemSearch;"    ), &_sbsBotSettings.bItemSearch);
-  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fItemSearchCD;"  ), &_sbsBotSettings.fItemSearchCD);
+  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("iAllowedWeapons;" ), &_sbsBotSettings.iAllowedWeapons);
+  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("iTargetType;"     ), &_sbsBotSettings.iTargetType);
+  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bTargetSearch;"   ), &_sbsBotSettings.bTargetSearch);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fImportantChance;"), &_sbsBotSettings.fImportantChance);
+  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bItemSearch;"     ), &_sbsBotSettings.bItemSearch);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fItemSearchCD;"   ), &_sbsBotSettings.fItemSearchCD);
 
-  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bItemVisibility;"), &_sbsBotSettings.bItemVisibility);
-  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fWeaponDist;"    ), &_sbsBotSettings.fWeaponDist);
-  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fHealthSearch;"  ), &_sbsBotSettings.fHealthSearch);
-  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fHealthDist;"    ), &_sbsBotSettings.fHealthDist);
-  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fArmorDist;"     ), &_sbsBotSettings.fArmorDist);
-  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fAmmoDist;"      ), &_sbsBotSettings.fAmmoDist);
+  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bItemVisibility;" ), &_sbsBotSettings.bItemVisibility);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fWeaponDist;"     ), &_sbsBotSettings.fWeaponDist);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fHealthSearch;"   ), &_sbsBotSettings.fHealthSearch);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fHealthDist;"     ), &_sbsBotSettings.fHealthDist);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fArmorDist;"      ), &_sbsBotSettings.fArmorDist);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fAmmoDist;"       ), &_sbsBotSettings.fAmmoDist);
 
   // [Cecil] NavMesh editing
   _pShell->DeclareSymbol("persistent user INDEX " MODCOM_NAME("iRenderNavMesh;"), &MOD_iRenderNavMesh);

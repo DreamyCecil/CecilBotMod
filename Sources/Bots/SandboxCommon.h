@@ -74,11 +74,12 @@ struct DECL_DLL SBotSettings {
   FLOAT fPrediction; // Position prediction multiplier
   FLOAT fPredictRnd; // Prediction randomness
   
-  INDEX iAllowedWeapons; // Allowed weapons for the bot (-1 = everything is allowed)
-  INDEX iTargetType;     // Target type (0 - players, 1 - enemies, 2 - both)
-  INDEX bTargetSearch;   // Search for a target or not
-  INDEX bItemSearch;     // Search for items or not
-  FLOAT fItemSearchCD;   // Item search cooldown
+  INDEX iAllowedWeapons;  // Allowed weapons for the bot (-1 = everything is allowed)
+  INDEX iTargetType;      // Target type (0 - players, 1 - enemies, 2 - both)
+  INDEX bTargetSearch;    // Search for a target or not
+  FLOAT fImportantChance; // How often to pick important points
+  INDEX bItemSearch;      // Search for items or not
+  FLOAT fItemSearchCD;    // Item search cooldown
   
   INDEX bItemVisibility; // Check for item's visibility or not
   FLOAT fWeaponDist;     // Weapon search distance
@@ -120,6 +121,7 @@ struct DECL_DLL SBotSettings {
     iAllowedWeapons = -1;
     iTargetType = -1;
     bTargetSearch = TRUE;
+    fImportantChance = 0.2f;
     bItemSearch = TRUE;
     fItemSearchCD = 5.0f;
   
@@ -137,8 +139,9 @@ struct DECL_DLL SBotSettings {
          << sbs.fRotSpeedDist << sbs.fRotSpeedMin  << sbs.fRotSpeedMax    << sbs.fRotSpeedLimit \
          << sbs.fWeaponCD     << sbs.fTargetCD     << sbs.fSpeedMul       << sbs.bStrafe << sbs.bJump \
          << sbs.fPrediction   << sbs.fPredictRnd   << sbs.iAllowedWeapons << sbs.iTargetType \
-         << sbs.bTargetSearch << sbs.bItemSearch   << sbs.fItemSearchCD   << sbs.bItemVisibility \
-         << sbs.fWeaponDist   << sbs.fHealthSearch << sbs.fHealthDist     << sbs.fArmorDist << sbs.fAmmoDist
+         << sbs.bTargetSearch << sbs.fImportantChance \
+         << sbs.bItemSearch   << sbs.fItemSearchCD << sbs.bItemVisibility << sbs.fHealthSearch \
+         << sbs.fWeaponDist   << sbs.fHealthDist   << sbs.fArmorDist      << sbs.fAmmoDist
 
   #define READ_SETTINGS(_Var) \
     _Var >> sbs.b3rdPerson    >> sbs.iCrosshair \
@@ -146,8 +149,9 @@ struct DECL_DLL SBotSettings {
          >> sbs.fRotSpeedDist >> sbs.fRotSpeedMin  >> sbs.fRotSpeedMax    >> sbs.fRotSpeedLimit \
          >> sbs.fWeaponCD     >> sbs.fTargetCD     >> sbs.fSpeedMul       >> sbs.bStrafe >> sbs.bJump \
          >> sbs.fPrediction   >> sbs.fPredictRnd   >> sbs.iAllowedWeapons >> sbs.iTargetType \
-         >> sbs.bTargetSearch >> sbs.bItemSearch   >> sbs.fItemSearchCD   >> sbs.bItemVisibility \
-         >> sbs.fWeaponDist   >> sbs.fHealthSearch >> sbs.fHealthDist     >> sbs.fArmorDist >> sbs.fAmmoDist
+         >> sbs.bTargetSearch >> sbs.fImportantChance \
+         >> sbs.bItemSearch   >> sbs.fItemSearchCD >> sbs.bItemVisibility >> sbs.fHealthSearch \
+         >> sbs.fWeaponDist   >> sbs.fHealthDist   >> sbs.fArmorDist      >> sbs.fAmmoDist
 
   // Stream operations
   friend CTStream &operator<<(CTStream &strm, SBotSettings &sbs) {

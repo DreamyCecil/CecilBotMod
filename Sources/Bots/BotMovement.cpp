@@ -50,8 +50,8 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
 
     // select important points sometimes
     if (!pen->m_bImportantPoint && pen->m_tmPickImportant <= _pTimer->CurrentTick()) {
-      // 20% chance to select it
-      if (pen->IRnd() % 5 == 0) {
+      // compare chance
+      if (SBS.fImportantChance > 0.0f && pen->FRnd() <= SBS.fImportantChance) {
         CBotPathPoint *pbppImportant = _pNavmesh->FindImportantPoint(pen, -1);
 
         if (pbppImportant != NULL) {
