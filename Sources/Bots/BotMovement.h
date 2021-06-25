@@ -18,6 +18,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "BotFunctions.h"
 
+// [Cecil] 2021-06-25: Too long since the last position change
+BOOL NoPosChange(CPlayerBot *pen);
+
 // [Cecil] 2021-06-14: Try to find some path
 void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl);
 

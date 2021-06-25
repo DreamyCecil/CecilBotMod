@@ -187,6 +187,15 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
               }
             }
           }
+
+          // connect with next important point
+          if (pbpp->bpp_pbppNext != NULL) {
+            FLOAT3D vOnScreen1, vNextPointOnScreen;
+
+            if (ProjectLine(&prProjection, vPoint1, pbpp->bpp_pbppNext->bpp_vPos, vOnScreen1, vNextPointOnScreen)) {
+              pdp->DrawLine(vOnScreen1(1), vOnScreen1(2), vNextPointOnScreen(1), vNextPointOnScreen(2), 0x0000FFFF);
+            }
+          }
         }
         
         // selected point

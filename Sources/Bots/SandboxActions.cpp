@@ -334,7 +334,8 @@ static void CECIL_NavMeshPointInfo(void) {
   CPrintF("Pos:    %.2f, %.2f, %.2f\n", pbpp->bpp_vPos(1), pbpp->bpp_vPos(2), pbpp->bpp_vPos(3));
   CPrintF("Range:  %.2f\n", pbpp->bpp_fRange);
   CPrintF("Flags:  %s\n", ULongToBinary(pbpp->bpp_ulFlags));
-  CPrintF("Entity: %s\n", (penImportant == NULL) ? "<none>" : penImportant->GetName());
+  CPrintF("Entity: \"%s\"\n", (penImportant == NULL) ? "<none>" : penImportant->GetName());
+  CPrintF("Next:   %d\n", (pbpp->bpp_pbppNext == NULL) ? -1 : pbpp->bpp_pbppNext->bpp_iIndex);
 };
 
 // [Cecil] 2021-06-12: Connect current NavMesh point to another one
@@ -406,6 +407,15 @@ static void CECIL_NavMeshPointRange(FLOAT fRange) {
   CNetworkMessage nmNavmesh = CECIL_NavMeshClientPacket(ESA_NAVMESH_RANGE);
   nmNavmesh << MOD_iNavMeshPoint;
   nmNavmesh << fRange;
+
+  _pNetwork->SendToServerReliable(nmNavmesh);
+};
+
+// [Cecil] 2021-06-25: Change NavMesh point next important point
+static void CECIL_NavMeshPointNext(INDEX iNextPoint) {
+  CNetworkMessage nmNavmesh = CECIL_NavMeshClientPacket(ESA_NAVMESH_NEXT);
+  nmNavmesh << MOD_iNavMeshPoint;
+  nmNavmesh << iNextPoint;
 
   _pNetwork->SendToServerReliable(nmNavmesh);
 };
@@ -542,6 +552,7 @@ extern void CECIL_InitSandboxActions(void) {
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshPointFlags(INDEX);"), &CECIL_NavMeshPointFlags);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshPointEntity(INDEX);"), &CECIL_NavMeshPointEntity);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshPointRange(FLOAT);"), &CECIL_NavMeshPointRange);
+  _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshPointNext(INDEX);"), &CECIL_NavMeshPointNext);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("AddNavMeshPointRange(FLOAT);"), &CECIL_AddNavMeshPointRange);
 
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshSelectPoint(void);"), &CECIL_NavMeshSelectPoint);
@@ -995,6 +1006,24 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
         pbpp->bpp_fRange = fRange;
 
         CPrintF("Changed point's range from %s to %s\n", FloatToStr(fOldRange), FloatToStr(fRange));
+      }
+    } break;
+
+    case ESA_NAVMESH_NEXT: {
+      INDEX iCurrentPoint, iNextPoint;
+      nmMessage >> iCurrentPoint >> iNextPoint;
+
+      CBotPathPoint *pbpp = _pNavmesh->FindPointByID(iCurrentPoint);
+
+      if (pbpp == NULL) {
+        CPrintF("NavMesh point doesn't exist!\n");
+
+      } else {
+        INDEX iLastNext = (pbpp->bpp_pbppNext == NULL) ? -1 : pbpp->bpp_pbppNext->bpp_iIndex;
+        pbpp->bpp_pbppNext = _pNavmesh->FindPointByID(iNextPoint);
+
+        INDEX iNewNext = (pbpp->bpp_pbppNext == NULL) ? -1 : pbpp->bpp_pbppNext->bpp_iIndex;
+        CPrintF("Point's next important point: %d -> %d\n", iLastNext, iNewNext);
       }
     } break;
 

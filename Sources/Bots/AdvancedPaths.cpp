@@ -97,10 +97,12 @@ void CBotPathPolygon::Read(CTStream *strm) {
 // Constructor & Destructor
 CBotPathPoint::CBotPathPoint(void) {
   bpp_iIndex = -1;
-  bpp_vPos = FLOAT3D(0, 0, 0);
+  bpp_vPos = FLOAT3D(0.0f, 0.0f, 0.0f);
   bpp_fRange = 1.0f; // normal range for walking points
   bpp_ulFlags = 0;
   bpp_iImportant = -1;
+  bpp_pbppNext = NULL;
+
   bpp_bppoPolygon = NULL;
 };
 
@@ -117,13 +119,20 @@ CBotPathPoint::~CBotPathPoint(void) {
 
 // Writing & Reading
 void CBotPathPoint::Write(CTStream *strm) {
-  strm->WriteID_t("NMP3"); // NavMesh Point v3
+  strm->WriteID_t("NMP4"); // NavMesh Point v4
 
   *strm << bpp_iIndex;
   *strm << bpp_vPos;
   *strm << bpp_fRange;
   *strm << bpp_ulFlags;
   *strm << bpp_iImportant;
+
+  // write next important point
+  if (bpp_pbppNext != NULL) {
+    *strm << _pNavmesh->bnm_cbppPoints.Index(bpp_pbppNext);
+  } else {
+    *strm << INDEX(-1);
+  }
 
   // write possible connections
   *strm << (bpp_cbppPoints.Count());
@@ -158,7 +167,7 @@ void CBotPathPoint::Read(CTStream *strm) {
     *strm >> bpp_ulFlags;
     *strm >> bpp_iImportant;
 
-  } else {
+  } else if (strm->PeekID_t() == CChunkID("NMP3")) {
     strm->ExpectID_t("NMP3"); // NavMesh Point v3
 
     *strm >> bpp_iIndex;
@@ -166,6 +175,25 @@ void CBotPathPoint::Read(CTStream *strm) {
     *strm >> bpp_fRange;
     *strm >> bpp_ulFlags;
     *strm >> bpp_iImportant;
+
+  } else {
+    strm->ExpectID_t("NMP4"); // NavMesh Point v4
+
+    *strm >> bpp_iIndex;
+    *strm >> bpp_vPos;
+    *strm >> bpp_fRange;
+    *strm >> bpp_ulFlags;
+    *strm >> bpp_iImportant;
+
+    // read next important point
+    INDEX iNext;
+    *strm >> iNext;
+
+    if (iNext != -1) {
+      bpp_pbppNext = &_pNavmesh->bnm_cbppPoints[iNext];
+    } else {
+      bpp_pbppNext = NULL;
+    }
   }
 
   // read possible connections

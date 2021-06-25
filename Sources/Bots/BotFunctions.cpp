@@ -17,6 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "StdH.h"
 #include "BotFunctions.h"
 
+#include "EntitiesMP/Switch.h"
+
 // Shortcuts
 #define SBS   (pen->m_sbsBot)
 #define WORLD (_pNetwork->ga_World)
@@ -143,11 +145,28 @@ void BotRead(CPlayerBot *pen, CTStream *strm) {
 
 // [Cecil] 2019-06-05: Check if this entity is important for a path point
 BOOL ImportantForNavMesh(CPlayer *penBot, CEntity *penEntity) {
+  // is item pickable
   if (IsDerivedFromDllClass(penEntity, CItem_DLLClass)) {
     return IsItemPickable(penBot, (CItem *)penEntity);
+
+  // is switch usable
+  } else if (IsOfDllClass(penEntity, CSwitch_DLLClass)) {
+    return ((CSwitch &)*penEntity).m_bUseable;
   }
 
   return FALSE;
+};
+
+// [Cecil] 2021-06-25: Use important entity
+void UseImportantEntity(CPlayer *penBot, CEntity *penEntity) {
+  if (!ASSERT_ENTITY(penEntity)) {
+    return;
+  }
+
+  // press the switch
+  if (IsOfDllClass(penEntity, CSwitch_DLLClass) && ((CSwitch &)*penEntity).m_bUseable) {
+    SendToTarget(penEntity, EET_TRIGGER, penBot);
+  }
 };
 
 // [Cecil] Cast bot view ray

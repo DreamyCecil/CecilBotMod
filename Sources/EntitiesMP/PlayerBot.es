@@ -49,6 +49,8 @@ properties:
   3 FLOAT m_tmLastBotTarget = 0.0f, // cooldown for target selection
   4 FLOAT m_tmLastSawTarget = 0.0f, // last time the enemy has been seen
   5 FLOAT m_tmButtonAction = 0.0f, // cooldown for button actions
+  6 FLOAT m_tmPosChange = 0.0f, // last time bot has significantly moved
+  7 FLOAT3D m_vLastPos = FLOAT3D(0.0f, 0.0f, 0.0f), // last bot position
  
  10 FLOAT m_fTargetDist = 1000.0f, // how far is the following target
  11 FLOAT m_fSideDir = -1.0f,      // prioritize going left or right
@@ -96,6 +98,8 @@ functions:
 
     m_tmLastBotTarget = 0.0f;
     m_tmLastSawTarget = 0.0f;
+    m_tmPosChange = _pTimer->CurrentTick();
+    m_vLastPos = GetPlacement().pl_PositionVector;
     
     m_tmChangePath = 0.0f;
     m_tmPickImportant = 0.0f;
@@ -317,6 +321,11 @@ functions:
 
   void BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
     const FLOAT3D &vBotPos = GetPlacement().pl_PositionVector;
+
+    if (DistanceToPos(vBotPos, m_vLastPos) > 2.0f) {
+      m_tmPosChange = _pTimer->CurrentTick();
+      m_vLastPos = vBotPos;
+    }
 
     // set bot's absolute viewpoint
     sbl.plBotView = en_plViewpoint;

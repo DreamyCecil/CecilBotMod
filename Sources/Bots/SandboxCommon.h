@@ -47,6 +47,7 @@ enum ESandboxAction {
   ESA_NAVMESH_FLAGS,  // change point's flags
   ESA_NAVMESH_ENTITY, // change point's entity
   ESA_NAVMESH_RANGE,  // change point's range
+  ESA_NAVMESH_NEXT,   // chabge point's next important point
 };
 
 // [Cecil] 2020-07-28: A structure for bot settings

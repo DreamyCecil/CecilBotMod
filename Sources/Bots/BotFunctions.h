@@ -50,6 +50,9 @@ void BotRead(CPlayerBot *pen, CTStream *strm);
 // [Cecil] 2019-06-05: Check if this entity is important for a path point
 BOOL ImportantForNavMesh(CPlayer *penBot, CEntity *penEntity);
 
+// [Cecil] 2021-06-25: Use important entity
+void UseImportantEntity(CPlayer *penBot, CEntity *penEntity);
+
 // [Cecil] 2021-06-14: Bot logic flags
 #define BLF_ENEMYEXISTS  (1 << 0)
 #define BLF_SEEENEMY     (1 << 1)

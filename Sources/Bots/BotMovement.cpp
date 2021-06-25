@@ -25,6 +25,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define WORLD  (_pNetwork->ga_World)
 #define THOUGHT(_String) (pen->m_btThoughts.Push(_String))
 
+// [Cecil] 2021-06-25: Too long since the last position change
+BOOL NoPosChange(CPlayerBot *pen) {
+  return (_pTimer->CurrentTick() - pen->m_tmPosChange > 1.0f);
+};
+
 // [Cecil] 2021-06-14: Try to find some path
 void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
   if (_pNavmesh->bnm_cbppPoints.Count() <= 0) {
@@ -87,16 +92,27 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
       pen->m_bImportantPoint = FALSE;
     }
 
-    // reset important point if reached it
+    // if reached the important point
     if (bReachedImportantPoint) {
-      pen->m_bImportantPoint = FALSE;
+      // use important entity
+      CEntity *penImportant = FindEntityByID(&WORLD, pen->m_pbppTarget->bpp_iImportant);
+      UseImportantEntity(pen, penImportant);
 
-      THOUGHT("^caf3f3fReached important point");
+      // reset important point
+      if (pen->m_pbppTarget->bpp_pbppNext == NULL) {
+        pen->m_bImportantPoint = FALSE;
+        THOUGHT("^caf3f3fReached important point");
+
+      // proceed to the next important point
+      } else {
+        pen->m_pbppTarget = pen->m_pbppTarget->bpp_pbppNext;
+        THOUGHT("^c3f3fafNext important point");
+      }
     }
   }
 
   // able to select new target point
-  BOOL bChangeTargetPoint = (pen->m_pbppCurrent == NULL || pen->m_tmChangePath <= _pTimer->CurrentTick());
+  BOOL bChangeTargetPoint = (pen->m_pbppCurrent == NULL || pen->m_tmChangePath <= _pTimer->CurrentTick() || NoPosChange(pen));
   CBotPathPoint *pbppReached = NULL;
 
   // if timer is up and there's a point
@@ -389,7 +405,9 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
   }
 
   // try to avoid obstacles
-  if (pen->m_pbppCurrent == NULL && WEAPON->m_fRayHitDistance < 4.0f
+  BOOL bNowhereToGo = (pen->m_pbppCurrent == NULL || NoPosChange(pen));
+
+  if (bNowhereToGo && WEAPON->m_fRayHitDistance < 4.0f
    && !IsDerivedFromDllClass(WEAPON->m_penRayHit, CMovableEntity_DLLClass)) {
     // only jump if following players
     if (sbl.SeePlayer()) {
