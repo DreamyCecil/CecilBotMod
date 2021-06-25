@@ -91,7 +91,7 @@ void CECIL_BotGameCleanup(void) {
 // [Cecil] Render extras on top of the world
 void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjection3D &apr, CDrawPort *pdp) {
   // not a server
-  if (!_pNetwork->IsServer()) {
+  if (!_pNetwork->IsServer() && !_pNetwork->IsPlayingDemo()) {
     return;
   }
 
@@ -301,7 +301,7 @@ void CECIL_HUDOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjectio
   FLOAT fScaling = (FLOAT)pdp->GetHeight() / 480.0f;
 
   // not a server
-  if (!_pNetwork->IsServer()) {
+  if (!_pNetwork->IsServer() && !_pNetwork->IsPlayingDemo()) {
     return;
   }
 

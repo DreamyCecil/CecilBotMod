@@ -183,7 +183,7 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
     }
 
     if (pen->m_pbppCurrent != NULL) {
-      THOUGHT(strThought);
+      //THOUGHT(strThought);
     }
 
     pen->m_tmChangePath = _pTimer->CurrentTick() + 5.0f;
@@ -362,12 +362,12 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
 
       // if going for the item
       if (!sbl.Following() && sbl.ItemExists()) {
-        // jump if it's higher and close
-        bShouldJump = vVertical.Length() > 1.0f && vDelta.Length() < 8.0f;
+        // always jump
+        bShouldJump = TRUE;
 
       } else {
         // jump if it's higher and not an item
-        bShouldJump = vVertical.Length() > 1.0f && !sbl.ItemExists(); //!sbl.Following() && !sbl.ItemExists();
+        bShouldJump = vVertical.Length() > 1.0f && !sbl.ItemExists();
       }
 
       bShouldFollow = TRUE;
