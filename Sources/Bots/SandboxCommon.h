@@ -180,27 +180,6 @@ struct DECL_DLL SBotSettings {
   #undef READ_SETTINGS
 };
 
-// [Cecil] TEMP 2021-06-20: Bot thoughts
-struct SBotThoughts {
-  CTString strThoughts[16]; // thoughts
-
-  // Constructor
-  SBotThoughts(void) {
-    for (INDEX i = 0; i < 16; i++) {
-      strThoughts[i] = "";
-    }
-  };
-
-  // Push new thought
-  void Push(const CTString &str) {
-    for (INDEX i = 15; i > 0; i--) {
-      strThoughts[i] = strThoughts[i-1];
-    }
-
-    strThoughts[0] = CTString(0, "[%s] %s", TimeToString(_pTimer->CurrentTick()), str);
-  }
-};
-
 // --- Helper functions
 
 // [Cecil] 2019-06-02: Function from Serious Gang mod that returns amount of numbers in the fraction

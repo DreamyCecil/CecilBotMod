@@ -16,27 +16,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // [Cecil] 2019-06-04: This file is for functions primarily used by PlayerBot class
 #pragma once
 
-#include "EntitiesMP/Player.h"
 #include "EntitiesMP/PlayerBot.h"
 
 #include "BotWeapons.h"
-
-// Copied player actions (renamed prefix to avoid conflicts)
-#define PLRA_FIRE            (1L<<0)
-#define PLRA_RELOAD          (1L<<1)
-#define PLRA_USE             (1L<<5)
-#define PLRA_3RD_PERSON_VIEW (1L<<7)
-#define PLRA_USE_HELD        (1L<<9)
-#define PLRA_SNIPER_ZOOMIN   (1L<<10)
-#define PLRA_SNIPER_ZOOMOUT  (1L<<11)
-#define PLRA_SNIPER_USE      (1L<<12)
-#define PLRA_FIREBOMB        (1L<<13)
-
-// Player speed
-extern FLOAT plr_fSpeedForward;
-extern FLOAT plr_fSpeedBackward;
-extern FLOAT plr_fSpeedSide;
-extern FLOAT plr_fSpeedUp;
 
 // [Cecil] 2019-05-28: Find nearest NavMesh point to some position
 CBotPathPoint *NearestNavMeshPointPos(const FLOAT3D &vCheck);

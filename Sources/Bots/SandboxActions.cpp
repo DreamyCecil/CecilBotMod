@@ -640,11 +640,11 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
           penNewBot->UpdateBot(sbsSettings);
           penNewBot->Initialize();
 
+          CPrintF(TRANS("Added bot '%s^r'\n"), penNewBot->GetPlayerName());
+
         } catch (char *strError) {
           FatalError(TRANS("Cannot load PlayerBot class:\n%s"), strError);
         }
-
-        CPrintF(TRANS("Added bot '%s^r'\n"), penNewBot->GetPlayerName());
 
       } else {
         CPrintF(TRANS("Player entity with the given character already exists!\n"));
@@ -693,7 +693,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
       nmMessage >> bPlayer;
 
       // add default weapons to the desired one
-      INDEX iSetWeapons = WPN_FLAG(WEAPON_KNIFE) | WPN_FLAG(WEAPON_COLT) | iWeapon;
+      INDEX iSetWeapons = WPN_DEFAULT_MASK | iWeapon;
 
       FOREACHINDYNAMICCONTAINER(wo.wo_cenEntities, CEntity, iten) {
         CEntity *penFound = iten;
@@ -725,7 +725,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
             }
 
             // force change from the current weapon
-            ((CPlayerWeapons *)penFound)->WeaponSelectOk(WEAPON_COLT);
+            ((CPlayerWeapons *)penFound)->WeaponSelectOk(WPN_DEFAULT_2);
             penFound->SendEvent(EBegin());
           }
         }

@@ -15,6 +15,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // [Cecil] 2021-06-11: Bot mod headers
 #include "Bots/SandboxCommon.h"
+#include "Bots/PlayerCommon.h"
 
 // [Cecil] 2021-06-16: Logic pre-declaration
 struct SBotLogic;

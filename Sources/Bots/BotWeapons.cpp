@@ -82,11 +82,11 @@ void UseWeaponScope(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
 
   // zoom in if enemy is visible
   if (!UsingScope(pen) && sbl.SeeEnemy()) {
-    pa.pa_ulButtons |= PLRA_SNIPER_USE|PLRA_SNIPER_ZOOMIN;
+    pa.pa_ulButtons |= PLACT_SNIPER_USE|PLACT_SNIPER_ZOOMIN;
 
   // zoom out if can't see the enemy
   } else if (UsingScope(pen) && !sbl.SeeEnemy()) {
-    pa.pa_ulButtons |= PLRA_SNIPER_USE;
+    pa.pa_ulButtons |= PLACT_SNIPER_USE;
   }
 };
 
@@ -116,6 +116,6 @@ void FireWeapon(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
 
   // just shoot
   } else {
-    pa.pa_ulButtons |= PLRA_FIRE;
+    pa.pa_ulButtons |= PLACT_FIRE;
   }
 };

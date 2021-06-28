@@ -168,7 +168,7 @@ functions:
     } else {
       // try to respawn
       if (ButtonAction()) {
-        paAction.pa_ulButtons |= PLRA_FIRE;
+        paAction.pa_ulButtons |= PLACT_FIRE;
       }
     }
   };
@@ -260,9 +260,9 @@ functions:
       for (INDEX iWeapon = 0; iWeapon < CT_BOT_WEAPONS; iWeapon++) {
         WeaponType wtType = aWeapons[iWeapon].bw_wtType;
 
-        if (wtType == WEAPON_KNIFE) {
+        if (wtType == WPN_DEFAULT_1) {
           m_iBotWeapon = iWeapon;
-          BotSelectNewWeapon(WEAPON_KNIFE);
+          BotSelectNewWeapon(WPN_DEFAULT_1);
           break;
         }
       }

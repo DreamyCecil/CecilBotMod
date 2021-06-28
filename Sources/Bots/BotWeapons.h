@@ -48,8 +48,15 @@ inline SBotWeaponConfig *PickWeaponConfig(void) {
 
 // --- Customizable helper functions
 
+// Default weapons
+#define WPN_DEFAULT_1 WEAPON_KNIFE // increases running speed in deathmatch
+#define WPN_DEFAULT_2 WEAPON_COLT
+
 // Weapon flag from the weapon index
 #define WPN_FLAG(_Weapon) (1 << (_Weapon - 1))
+
+// Default weapon set
+#define WPN_DEFAULT_MASK (WPN_FLAG(WPN_DEFAULT_1) | WPN_FLAG(WPN_DEFAULT_2))
 
 // Has this weapon
 #define WPN_EXISTS(_Plw, _Weapon) (_Plw->m_iAvailableWeapons & WPN_FLAG(_Weapon))

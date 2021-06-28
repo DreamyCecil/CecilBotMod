@@ -15,6 +15,27 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
+// [Cecil] TEMP 2021-06-20: Bot thoughts
+struct SBotThoughts {
+  CTString strThoughts[16]; // thoughts
+
+  // Constructor
+  SBotThoughts(void) {
+    for (INDEX i = 0; i < 16; i++) {
+      strThoughts[i] = "";
+    }
+  };
+
+  // Push new thought
+  void Push(const CTString &str) {
+    for (INDEX i = 15; i > 0; i--) {
+      strThoughts[i] = strThoughts[i-1];
+    }
+
+    strThoughts[0] = CTString(0, "[%s] %s", TimeToString(_pTimer->CurrentTick()), str);
+  }
+};
+
 // [Cecil] 2021-06-11: Player bot
 #include "EntitiesMP/Player.h"
 #include "EntitiesMP/PlayerBot.h"

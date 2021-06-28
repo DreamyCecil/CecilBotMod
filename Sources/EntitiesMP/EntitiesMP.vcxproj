@@ -586,6 +586,7 @@ copy Debug\$(TargetName).lib $(SolutionDir)..\Bin\Debug\ &gt;nul</Command>
     <ClInclude Include="..\Bots\BotWeapons.h" />
     <ClInclude Include="..\Bots\Patcher\patcher.h" />
     <ClInclude Include="..\Bots\Patcher\patcher_defines.h" />
+    <ClInclude Include="..\Bots\PlayerCommon.h" />
     <ClInclude Include="..\Bots\SandboxActions.h" />
     <ClInclude Include="..\Bots\SandboxCommon.h" />
     <ClInclude Include="..\Bots\BotModMain.h" />

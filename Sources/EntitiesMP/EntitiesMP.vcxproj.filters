@@ -1599,6 +1599,9 @@
     <ClInclude Include="..\Bots\SandboxActions.h">
       <Filter>Header Files\Bots headers</Filter>
     </ClInclude>
+    <ClInclude Include="..\Bots\PlayerCommon.h">
+      <Filter>Header Files\Bots headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="NavigationMarker.es">
