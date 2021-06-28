@@ -214,6 +214,10 @@ DECL_DLL FLOAT3D VerticalDiff(FLOAT3D vPosDiff, const FLOAT3D &vGravityDir);
 // [Cecil] 2021-06-14: Determine position difference on the same plane
 DECL_DLL FLOAT3D PositionDiff(const FLOAT3D &v1, const FLOAT3D &v2, const FLOAT3D &vGravityDir);
 
+// [Cecil] 2021-06-28: Get relative angles from the directed placement
+DECL_DLL FLOAT GetRelH(const CPlacement3D &pl);
+DECL_DLL FLOAT GetRelP(const CPlacement3D &pl);
+
 // [Cecil] 2020-07-29: Do the ray casting with specific passable flags
 DECL_DLL void CastRayFlags(CCastRay &cr, CWorld *pwoWorld, ULONG ulPass);
 

@@ -440,7 +440,7 @@ static void CECIL_NavMeshSelectPoint(void) {
   }
 
   CPlayer *pen = (CPlayer *)CEntity::GetPlayerEntity(LOCAL_PLAYER_INDEX);
-  CBotPathPoint *pbppNearest = NearestNavMeshPointPos(pen->GetPlayerWeapons()->m_vRayHit);
+  CBotPathPoint *pbppNearest = NearestNavMeshPointPos(pen, pen->GetPlayerWeapons()->m_vRayHit);
 
   // no point
   if (pbppNearest == NULL) {

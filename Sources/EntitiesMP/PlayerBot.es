@@ -413,7 +413,6 @@ functions:
 
     // follow players
     if (sbl.FollowPlayer()) {
-
       FLOAT fDistToPlayer = -1.0f;
       CEntity *penPlayer = ClosestRealPlayer(this, vBotPos, fDistToPlayer);
       
@@ -437,22 +436,16 @@ functions:
 
         // look at the player
         if (!sbl.SeeEnemy() && sbl.SeePlayer()) {
-          // calculate an angle
-          FLOAT3D vToTarget = penPlayer->GetPlacement().pl_PositionVector - sbl.ViewPos();
-          vToTarget.Normalize();
+          // relative position
+          CPlacement3D plToPlayer = sbl.plBotView;
+          plToPlayer.pl_PositionVector = penPlayer->GetPlacement().pl_PositionVector - plToPlayer.pl_PositionVector;
 
-          ANGLE3D aToTarget;
-          DirectionVectorToAnglesNoSnap(vToTarget, aToTarget);
-
-          // reset vertical angle
-          aToTarget(2) = 0.0f;
-
-          // angle difference
-          aToTarget -= sbl.ViewAng();
+          // angle towards the target (negate pitch)
+          FLOAT2D vToPlayer = FLOAT2D(GetRelH(plToPlayer), -sbl.ViewAng()(2));
 
           // set rotation speed
-          sbl.aAim(1) = NormalizeAngle(aToTarget(1)) / 0.5f;
-          sbl.aAim(2) = NormalizeAngle(aToTarget(2)) / 0.5f;
+          sbl.aAim(1) = vToPlayer(1) / 0.5f;
+          sbl.aAim(2) = vToPlayer(2) / 0.5f;
         }
       }
     }

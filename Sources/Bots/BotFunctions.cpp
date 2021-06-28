@@ -25,27 +25,30 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define THOUGHT(_String) (pen->m_btThoughts.Push(_String))
 
 // [Cecil] 2019-05-28: Find nearest NavMesh point to some position
-CBotPathPoint *NearestNavMeshPointPos(const FLOAT3D &vCheck) {
+CBotPathPoint *NearestNavMeshPointPos(CMovableEntity *pen, const FLOAT3D &vCheck) {
   if (_pNavmesh->bnm_cbppPoints.Count() <= 0) {
     return NULL;
   }
+
+  // gravity direction
+  FLOAT3D vGravityDir = (pen != NULL ? pen->en_vGravityDir : FLOAT3D(0.0f, -1.0f, 0.0f));
 
   FLOAT fDist = 1000.0f;
   CBotPathPoint *pbppNearest = NULL;
 
   FOREACHINDYNAMICCONTAINER(_pNavmesh->bnm_cbppPoints, CBotPathPoint, itbpp) {
     CBotPathPoint *pbpp = itbpp;
-    
-    // horizontal position difference
     FLOAT3D vPosDiff = (pbpp->bpp_vPos - vCheck);
-    vPosDiff(2) = 0.0f;
+
+    // vertical and horizontal position differences
+    FLOAT3D vDiffV = VerticalDiff(vPosDiff, vGravityDir);
+    FLOAT3D vDiffH = vPosDiff + vDiffV;
     
     // apply range to horizontal difference
-    FLOAT fDiffH = ClampDn(vPosDiff.Length() - pbpp->bpp_fRange, 0.0f);
-    FLOAT fDiffV = Abs(pbpp->bpp_vPos(2) - vCheck(2));
+    FLOAT fDiffH = ClampDn(vDiffH.Length() - pbpp->bpp_fRange, 0.0f);
 
     // distance to the point
-    FLOAT fToPoint = FLOAT3D(fDiffH, fDiffV, 0.0f).Length();
+    FLOAT fToPoint = FLOAT3D(fDiffH, vDiffV.Length(), 0.0f).Length();
 
     if (fToPoint < fDist) {
       pbppNearest = pbpp;
@@ -73,17 +76,17 @@ CBotPathPoint *NearestNavMeshPointBot(CPlayerBot *pen, BOOL bSkipCurrent) {
 
   FOREACHINDYNAMICCONTAINER(_pNavmesh->bnm_cbppPoints, CBotPathPoint, itbpp) {
     CBotPathPoint *pbpp = itbpp;
-
-    // horizontal position difference
     FLOAT3D vPosDiff = (pbpp->bpp_vPos - vBot);
-    vPosDiff(2) = 0.0f;
+
+    // vertical and horizontal position differences
+    FLOAT3D vDiffV = VerticalDiff(vPosDiff, pen->en_vGravityDir);
+    FLOAT3D vDiffH = vPosDiff + vDiffV;
     
     // apply range to horizontal difference
-    FLOAT fDiffH = ClampDn(vPosDiff.Length() - pbpp->bpp_fRange, 0.0f);
-    FLOAT fDiffV = Abs(pbpp->bpp_vPos(2) - vBot(2));
+    FLOAT fDiffH = ClampDn(vDiffH.Length() - pbpp->bpp_fRange, 0.0f);
 
     // distance to the point
-    FLOAT fToPoint = FLOAT3D(fDiffH, fDiffV, 0.0f).Length();
+    FLOAT fToPoint = FLOAT3D(fDiffH, vDiffV.Length(), 0.0f).Length();
 
     BOOL bNotCurrent = (!bSkipCurrent || !pen->CurrentPoint(pbpp));
 

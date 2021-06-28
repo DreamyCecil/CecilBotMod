@@ -113,7 +113,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
       
       // bots don't need to select points
       if (!penOwner->IsBot()) {
-        pbppClosest = NearestNavMeshPointPos(penOwner->GetPlayerWeapons()->m_vRayHit);
+        pbppClosest = NearestNavMeshPointPos(penOwner, penOwner->GetPlayerWeapons()->m_vRayHit);
       }
 
       FOREACHINDYNAMICCONTAINER(_pNavmesh->bnm_cbppPoints, CBotPathPoint, itbpp) {
@@ -137,8 +137,8 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
         // range and connections
         if (bConnections) {
           // range
-          for (INDEX iRange = 0; iRange < 4; iRange++) {
-            FLOAT3D vRangeDir = FLOAT3D(CosFast(iRange * 45.0f), 0.0f, SinFast(iRange * 45.0f)) * pbpp->bpp_fRange;
+          for (INDEX iRange = 0; iRange < 3; iRange++) {
+            FLOAT3D vRangeDir = FLOAT3D(CosFast(iRange * 60.0f), 0.0f, SinFast(iRange * 60.0f)) * pbpp->bpp_fRange;
             
             FLOAT3D vRangeEnd1, vRangeEnd2;
             prProjection.ProjectCoordinate(vPoint1 + vRangeDir, vRangeEnd1);

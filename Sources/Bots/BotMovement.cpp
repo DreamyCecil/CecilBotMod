@@ -84,8 +84,7 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
       FLOAT3D vPointDiff = (pen->m_pbppTarget->bpp_vPos - vBotPos);
       
       // close to the point
-      FLOAT &fRange = pen->m_pbppTarget->bpp_fRange;
-      bReachedImportantPoint = (vPointDiff.Length() < fRange);
+      bReachedImportantPoint = (vPointDiff.Length() < pen->m_pbppTarget->bpp_fRange);
 
     // lost target point
     } else {
@@ -143,7 +142,8 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
 
     // if not following the important point, select new one if possible
     if (!pen->m_bImportantPoint && bSelectTarget) {
-      pen->m_pbppTarget = NearestNavMeshPointPos(penTarget->GetPlacement().pl_PositionVector);
+      CMovableEntity *penMovableTarget = (penTarget->GetPhysicsFlags() & EPF_MOVABLE ? (CMovableEntity *)penTarget : NULL);
+      pen->m_pbppTarget = NearestNavMeshPointPos(penMovableTarget, penTarget->GetPlacement().pl_PositionVector);
     }
 
     CTString strThought; // [Cecil] TEMP
@@ -194,24 +194,21 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
 void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
   // [Cecil] 2021-06-16: Aim in the walking direction on a path if haven't seen the enemy in a while
   if (pen->m_pbppCurrent != NULL && _pTimer->CurrentTick() - pen->m_tmLastSawTarget > 2.0f) {
-    // calculate an angle
-    FLOAT3D vToTarget = pen->en_vCurrentTranslationAbsolute;
-    vToTarget.SafeNormalize();
+    // relative position
+    CPlacement3D plToDir = CPlacement3D(pen->en_vCurrentTranslationAbsolute, sbl.ViewAng());
 
-    ANGLE3D aToTarget;
-    DirectionVectorToAnglesNoSnap(vToTarget, aToTarget);
-    aToTarget(2) = ClampUp(aToTarget(2), 0.0f); // don't look up
+    // angle towards the target (negate pitch)
+    FLOAT2D vToTarget = FLOAT2D(GetRelH(plToDir), -sbl.ViewAng()(2));
+    FLOAT fPitch = GetRelP(plToDir);
 
-    // don't look down for some time
-    if (pen->m_fFallTime < 1.0f) {
-      aToTarget(2) = ClampDn(aToTarget(2), 0.0f);
+    // look down after some time
+    if (pen->m_fFallTime > 1.0f && fPitch < 0.0f) {
+      vToTarget(2) = fPitch;
     }
 
-    aToTarget = aToTarget - sbl.ViewAng();
-
     // set rotation speed
-    sbl.aAim(1) = Clamp(NormalizeAngle(aToTarget(1)) * 0.3f, -50.0f, 50.0f) / _pTimer->TickQuantum;
-    sbl.aAim(2) = Clamp(NormalizeAngle(aToTarget(2)) * 0.3f, -50.0f, 50.0f) / _pTimer->TickQuantum;
+    sbl.aAim(1) = Clamp(vToTarget(1) * 0.3f, -50.0f, 50.0f) / _pTimer->TickQuantum;
+    sbl.aAim(2) = Clamp(vToTarget(2) * 0.3f, -50.0f, 50.0f) / _pTimer->TickQuantum;
     return;
   }
 
@@ -244,13 +241,13 @@ void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
   if (IS_PLAYER(pen->m_penTarget)) {
     vEnemy += FLOAT3D(0, 0.25f, 0) * pen->m_penTarget->GetRotationMatrix();
   }
-      
-  // calculate an angle
-  FLOAT3D vToTarget = vEnemy - sbl.ViewPos();
-  vToTarget.Normalize();
 
-  ANGLE3D aToTarget;
-  DirectionVectorToAnglesNoSnap(vToTarget, aToTarget);
+  // relative position
+  CPlacement3D plToTarget = sbl.plBotView;
+  plToTarget.pl_PositionVector = vEnemy - plToTarget.pl_PositionVector;
+
+  // angle towards the target
+  FLOAT2D vToTarget = FLOAT2D(GetRelH(plToTarget), GetRelP(plToTarget));
 
   // update accuracy angles
   if (SBS.fAccuracyAngle > 0.0f) {
@@ -269,11 +266,10 @@ void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
       pen->m_vAccuracy = FLOAT3D(pen->FRnd() - 0.5f, pen->FRnd() - 0.5f, 0.0f) * fAccuracyMul;
       pen->m_tmBotAccuracy = tmNow + 0.5f;
     }
-  }
 
-  aToTarget = aToTarget - sbl.ViewAng();
-  aToTarget(1) = NormalizeAngle(aToTarget(1)) + pen->m_vAccuracy(1);
-  aToTarget(2) = NormalizeAngle(aToTarget(2)) + pen->m_vAccuracy(2);
+    vToTarget(1) += pen->m_vAccuracy(1);
+    vToTarget(2) += pen->m_vAccuracy(2);
+  }
       
   // limit to one tick, otherwise aim will go too far and miss
   const FLOAT fDistRotSpeed = ClampDn(SBS.fRotSpeedDist, 0.05f);      // 400
@@ -286,16 +282,16 @@ void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
 
   // max speed
   if (fSpeedLimit >= 0.0f) {
-    aToTarget(1) = Clamp(aToTarget(1), -fSpeedLimit, fSpeedLimit);
-    aToTarget(2) = Clamp(aToTarget(2), -fSpeedLimit, fSpeedLimit);
+    vToTarget(1) = Clamp(vToTarget(1), -fSpeedLimit, fSpeedLimit);
+    vToTarget(2) = Clamp(vToTarget(2), -fSpeedLimit, fSpeedLimit);
   }
 
   // set rotation speed
-  sbl.aAim(1) = aToTarget(1) / fRotationSpeed;
-  sbl.aAim(2) = aToTarget(2) / fRotationSpeed;
+  sbl.aAim(1) = vToTarget(1) / fRotationSpeed;
+  sbl.aAim(2) = vToTarget(2) / fRotationSpeed;
 
   // try to shoot
-  if (Abs(aToTarget(1)) < SBS.fShootAngle && Abs(aToTarget(2)) < SBS.fShootAngle) {
+  if (Abs(vToTarget(1)) < SBS.fShootAngle && Abs(vToTarget(2)) < SBS.fShootAngle) {
     // shoot if the enemy is visible or the crosshair is on them
     BOOL bTargetingEnemy = WEAPON->m_penRayHit == pen->m_penTarget;
 
@@ -348,17 +344,14 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
     vBotMovement = FLOAT3D(pen->m_fSideDir, 0.0f, 0.0f);
 
   } else {
-    FLOAT3D vDelta = FLOAT3D(0.0f, 0.0f, 0.0f);
+    CPlacement3D plDelta = pen->GetPlacement();
     BOOL bShouldFollow = FALSE;
     BOOL bShouldJump = FALSE;
     BOOL bShouldCrouch = FALSE;
     
     // run towards the following target
     if (pen->m_penFollow != NULL) {
-      vDelta = (pen->m_penFollow->GetPlacement().pl_PositionVector - vBotPos);
-
-      // check vertical difference
-      FLOAT3D vVertical = VerticalDiff(vDelta, pen->en_vGravityDir);
+      plDelta.pl_PositionVector = (pen->m_penFollow->GetPlacement().pl_PositionVector - vBotPos);
 
       // if going for the item
       if (!sbl.Following() && sbl.ItemExists()) {
@@ -366,6 +359,9 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
         bShouldJump = TRUE;
 
       } else {
+        // check vertical difference
+        FLOAT3D vVertical = VerticalDiff(plDelta.pl_PositionVector, pen->en_vGravityDir);
+
         // jump if it's higher and not an item
         bShouldJump = vVertical.Length() > 1.0f && !sbl.ItemExists();
       }
@@ -375,7 +371,7 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
     
     // run towards the point if nothing to pickup
     if (pen->m_pbppCurrent != NULL && !sbl.ItemExists()) {
-      vDelta = (pen->m_pbppCurrent->bpp_vPos - vBotPos);
+      plDelta.pl_PositionVector = (pen->m_pbppCurrent->bpp_vPos - vBotPos);
       bShouldJump = pen->m_ulPointFlags & PPF_JUMP;
       bShouldCrouch = pen->m_ulPointFlags & PPF_CROUCH;
 
@@ -383,11 +379,11 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
     }
 
     // set the speed if there's a place to go
-    if (bShouldFollow && vDelta.Length() > 0.0f) {
-      ANGLE aDH = pen->GetRelativeHeading(vDelta.Normalize());
+    if (bShouldFollow && plDelta.pl_PositionVector.Length() > 0.0f) {
+      FLOAT aDeltaHeading = GetRelH(plDelta);
 
       FLOAT3D vRunDir;
-      AnglesToDirectionVector(ANGLE3D(aDH, 0.0f, 0.0f), vRunDir);
+      AnglesToDirectionVector(ANGLE3D(aDeltaHeading, 0.0f, 0.0f), vRunDir);
       vBotMovement = vRunDir;
 
       // crouch if needed instead of jumping
@@ -408,7 +404,7 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
   BOOL bNowhereToGo = (pen->m_pbppCurrent == NULL || NoPosChange(pen));
 
   if (bNowhereToGo && WEAPON->m_fRayHitDistance < 4.0f
-   && !IsDerivedFromDllClass(WEAPON->m_penRayHit, CMovableEntity_DLLClass)) {
+   && !(WEAPON->m_penRayHit->GetPhysicsFlags() & EPF_MOVABLE)) {
     // only jump if following players
     if (sbl.SeePlayer()) {
       fVerticalMove = 1.0f;

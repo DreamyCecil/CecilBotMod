@@ -148,6 +148,47 @@ FLOAT3D PositionDiff(const FLOAT3D &v1, const FLOAT3D &v2, const FLOAT3D &vGravi
   return vPosDiff;
 };
 
+// [Cecil] 2021-06-28: Get relative angles from the directed placement
+FLOAT GetRelH(const CPlacement3D &pl) {
+  FLOATmatrix3D mRot;
+  MakeRotationMatrixFast(mRot, pl.pl_OrientationAngle);
+  
+  FLOAT3D vDir = FLOAT3D(pl.pl_PositionVector).SafeNormalize();
+
+  // get front component of vector
+  FLOAT fFront = -vDir(1) * mRot(1, 3)
+                 -vDir(2) * mRot(2, 3)
+                 -vDir(3) * mRot(3, 3);
+
+  // get left component of vector
+  FLOAT fLeft = -vDir(1) * mRot(1, 1)
+                -vDir(2) * mRot(2, 1)
+                -vDir(3) * mRot(3, 1);
+
+  // relative heading is arctan of angle between front and left
+  return ATan2(fLeft, fFront);
+};
+
+FLOAT GetRelP(const CPlacement3D &pl) {
+  FLOATmatrix3D mRot;
+  MakeRotationMatrixFast(mRot, pl.pl_OrientationAngle);
+  
+  FLOAT3D vDir = FLOAT3D(pl.pl_PositionVector).SafeNormalize();
+
+  // get front component of vector
+  FLOAT fFront = -vDir(1) * mRot(1, 3)
+                 -vDir(2) * mRot(2, 3)
+                 -vDir(3) * mRot(3, 3);
+
+  // get up component of vector
+  FLOAT fUp = +vDir(1) * mRot(1, 2)
+              +vDir(2) * mRot(2, 2)
+              +vDir(3) * mRot(3, 2);
+
+  // relative pitch is arctan of angle between front and up
+  return ATan2(fUp, fFront);
+};
+
 // [Cecil] 2020-07-29: Do the ray casting with specific passable flags
 void CastRayFlags(CCastRay &cr, CWorld *pwoWorld, ULONG ulPass) {
   // initially no polygon is found
