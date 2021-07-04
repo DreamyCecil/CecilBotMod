@@ -100,7 +100,7 @@ CBotPathPoint::CBotPathPoint(void) {
   bpp_vPos = FLOAT3D(0.0f, 0.0f, 0.0f);
   bpp_fRange = 1.0f; // normal range for walking points
   bpp_ulFlags = 0;
-  bpp_iImportant = -1;
+  bpp_penImportant = NULL;
   bpp_pbppNext = NULL;
 
   bpp_bppoPolygon = NULL;
@@ -125,7 +125,12 @@ void CBotPathPoint::Write(CTStream *strm) {
   *strm << bpp_vPos;
   *strm << bpp_fRange;
   *strm << bpp_ulFlags;
-  *strm << bpp_iImportant;
+
+  if (bpp_penImportant != NULL) {
+    *strm << INDEX(bpp_penImportant->en_ulID);
+  } else {
+    *strm << INDEX(-1);
+  }
 
   // write next important point
   if (bpp_pbppNext != NULL) {
@@ -152,6 +157,9 @@ void CBotPathPoint::Write(CTStream *strm) {
 };
 
 void CBotPathPoint::Read(CTStream *strm) {
+  INDEX iImportantEntity = -1;
+  INDEX iNext = -1;
+
   if (strm->PeekID_t() == CChunkID("NMP1")) {
     strm->ExpectID_t("NMP1"); // NavMesh Point v1
 
@@ -165,7 +173,7 @@ void CBotPathPoint::Read(CTStream *strm) {
     *strm >> bpp_iIndex;
     *strm >> bpp_vPos;
     *strm >> bpp_ulFlags;
-    *strm >> bpp_iImportant;
+    *strm >> iImportantEntity;
 
   } else if (strm->PeekID_t() == CChunkID("NMP3")) {
     strm->ExpectID_t("NMP3"); // NavMesh Point v3
@@ -174,7 +182,7 @@ void CBotPathPoint::Read(CTStream *strm) {
     *strm >> bpp_vPos;
     *strm >> bpp_fRange;
     *strm >> bpp_ulFlags;
-    *strm >> bpp_iImportant;
+    *strm >> iImportantEntity;
 
   } else {
     strm->ExpectID_t("NMP4"); // NavMesh Point v4
@@ -183,17 +191,18 @@ void CBotPathPoint::Read(CTStream *strm) {
     *strm >> bpp_vPos;
     *strm >> bpp_fRange;
     *strm >> bpp_ulFlags;
-    *strm >> bpp_iImportant;
-
-    // read next important point
-    INDEX iNext;
+    *strm >> iImportantEntity;
     *strm >> iNext;
+  }
 
-    if (iNext != -1) {
-      bpp_pbppNext = &_pNavmesh->bnm_cbppPoints[iNext];
-    } else {
-      bpp_pbppNext = NULL;
-    }
+  // set important entity
+  bpp_penImportant = FindEntityByID(&_pNetwork->ga_World, iImportantEntity);
+  
+  // set next important point
+  if (iNext != -1) {
+    bpp_pbppNext = &_pNavmesh->bnm_cbppPoints[iNext];
+  } else {
+    bpp_pbppNext = NULL;
   }
 
   // read possible connections
@@ -406,11 +415,11 @@ CBotPathPoint *CBotNavmesh::FindImportantPoint(CPlayer *penBot, const INDEX &iPo
     CBotPathPoint *pbpp = itbpp;
 
     // not important
-    if (pbpp->bpp_iImportant == -1) {
+    if (pbpp->bpp_penImportant == NULL) {
       continue;
     }
 
-    CEntity *penEntity = FindEntityByID(bnm_pwoWorld, pbpp->bpp_iImportant);
+    CEntity *penEntity = pbpp->bpp_penImportant;
     
     // not important at the moment
     if (penEntity == NULL || !ImportantForNavMesh(penBot, penEntity)) {

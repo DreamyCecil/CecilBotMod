@@ -26,10 +26,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 uses "EntitiesMP/Player";
 uses "EntitiesMP/PlayerWeapons";
 
-uses "EntitiesMP/EnemyBase";
-uses "EntitiesMP/CannonStatic";
-uses "EntitiesMP/CannonRotating";
-
 uses "EntitiesMP/AmmoItem";
 uses "EntitiesMP/AmmoPack";
 uses "EntitiesMP/ArmorItem";

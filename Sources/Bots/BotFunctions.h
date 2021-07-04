@@ -90,6 +90,9 @@ BOOL IsEnemyMonster(CEntity *pen);
 // [Cecil] 2021-06-17: Search for an item
 void BotItemSearch(CPlayerBot *pen, SBotLogic &sbl);
 
+// [Cecil] 2021-06-28: Distance to a specific item type
+FLOAT GetItemDist(CPlayerBot *pen, CEntity *penItem);
+
 // [Cecil] 2021-06-14: Determine the closest item
 CEntity *GetClosestItem(CPlayerBot *pen, FLOAT &fItemDist, SBotLogic &sbl);
 

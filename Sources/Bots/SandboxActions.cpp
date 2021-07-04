@@ -328,7 +328,7 @@ static void CECIL_NavMeshPointInfo(void) {
 
   CPrintF("^cffffff%d\n", pbpp->bpp_iIndex); // point index on top
 
-  CEntity *penImportant = FindEntityByID(&_pNetwork->ga_World, pbpp->bpp_iImportant);
+  CEntity *penImportant = pbpp->bpp_penImportant;
   
   CPrintF("Connections: %d\n", pbpp->bpp_cbppPoints.Count());
   CPrintF("Pos:    %.2f, %.2f, %.2f\n", pbpp->bpp_vPos(1), pbpp->bpp_vPos(2), pbpp->bpp_vPos(3));
@@ -984,7 +984,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
         CPrintF("NavMesh point doesn't exist!\n");
 
       } else {
-        pbpp->bpp_iImportant = iEntityID;
+        pbpp->bpp_penImportant = FindEntityByID(&wo, iEntityID);
 
         CPrintF("Changed point's entity to %d\n", iEntityID);
       }

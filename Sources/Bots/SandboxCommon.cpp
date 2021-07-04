@@ -15,6 +15,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // [Cecil] 2019-06-02: This file is for common elements and functions from the mod
 #include "StdH.h"
+#include "Bots/BotFunctions.h"
 
 #include "EntitiesMP/Item.h"
 
@@ -101,6 +102,11 @@ BOOL ProjectLine(CProjection3D *ppr, FLOAT3D vPoint1, FLOAT3D vPoint2, FLOAT3D &
 
 // [Cecil] 2018-10-28: Finds an entity by its ID
 CEntity *FindEntityByID(CWorld *pwo, const INDEX &iEntityID) {
+  // invalid ID
+  if (iEntityID < 0) {
+    return NULL;
+  }
+
   // for each entity
   FOREACHINDYNAMICCONTAINER(pwo->wo_cenEntities, CEntity, iten) {
     CEntity *pen = iten;
@@ -121,6 +127,11 @@ CEntity *FindEntityByID(CWorld *pwo, const INDEX &iEntityID) {
 
 // [Cecil] 2021-06-14: Check if item is pickable
 BOOL IsItemPickable(class CPlayer *pen, class CItem *penItem) {
+  // [Cecil] TEMP: Too far
+  if (DistanceTo(pen, penItem) > GetItemDist((CPlayerBot *)pen, penItem)) {
+    return FALSE;
+  }
+
   BOOL bPicked = (pen == NULL ? FALSE : (1 << CECIL_PlayerIndex(pen)) & penItem->m_ulPickedMask);
 
   return !bPicked && (penItem->en_RenderType == CEntity::RT_MODEL
@@ -138,14 +149,9 @@ FLOAT3D VerticalDiff(FLOAT3D vPosDiff, const FLOAT3D &vGravityDir) {
 };
 
 // [Cecil] 2021-06-14: Determine position difference on the same plane
-FLOAT3D PositionDiff(const FLOAT3D &v1, const FLOAT3D &v2, const FLOAT3D &vGravityDir) {
-  // absolute difference
-  FLOAT3D vPosDiff = (v1 - v2);
-
+FLOAT3D HorizontalDiff(FLOAT3D vPosDiff, const FLOAT3D &vGravityDir) {
   // remove vertical difference
-  vPosDiff += VerticalDiff(vPosDiff, vGravityDir);
-
-  return vPosDiff;
+  return vPosDiff + VerticalDiff(vPosDiff, vGravityDir);
 };
 
 // [Cecil] 2021-06-28: Get relative angles from the directed placement

@@ -175,8 +175,8 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
           }}
 
           // connect with important entity
-          if (pbpp->bpp_iImportant != -1) {
-            CEntity *penImportant = FindEntityByID(penOwner->GetWorld(), pbpp->bpp_iImportant);
+          if (pbpp->bpp_penImportant != NULL) {
+            CEntity *penImportant = pbpp->bpp_penImportant;
             FLOAT3D vEntity = penImportant->GetPlacement().pl_PositionVector;
 
             if (penImportant != NULL) {

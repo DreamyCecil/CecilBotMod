@@ -174,6 +174,11 @@ void UseImportantEntity(CPlayer *penBot, CEntity *penEntity) {
 
 // [Cecil] Cast bot view ray
 BOOL CastBotRay(CPlayerBot *pen, CEntity *penTarget, SBotLogic &sbl, BOOL bPhysical) {
+  // [Cecil] TEMP: Target is too far
+  if (DistanceTo(pen, penTarget) > 1000.0f) {
+    return FALSE;
+  }
+
   FLOAT3D vBody = FLOAT3D(0.0f, 0.0f, 0.0f);
 
   // target's body center
@@ -190,8 +195,7 @@ BOOL CastBotRay(CPlayerBot *pen, CEntity *penTarget, SBotLogic &sbl, BOOL bPhysi
   crBot.cr_bPhysical = bPhysical;
   CastRayFlags(crBot, pen->GetWorld(), (bPhysical ? BPOF_PASSABLE : 0));
 
-  return (vTarget - crBot.cr_vHit).Length() <= 1.0f
-       && crBot.cr_fHitDistance < 1000.0f; // [Cecil] TEMP: Target is too far
+  return (vTarget - crBot.cr_vHit).Length() <= 0.1f;
 };
 
 // [Cecil] Cast path point ray
@@ -268,8 +272,38 @@ void BotItemSearch(CPlayerBot *pen, SBotLogic &sbl) {
     } else {
       pen->m_penLastItem = NULL;
       pen->m_tmLastItemSearch = 0.0f;
+
+      THOUGHT("^c7f7fffItem is no longer pickable");
     }
   }
+};
+
+// [Cecil] 2021-06-28: Distance to a specific item type
+FLOAT GetItemDist(CPlayerBot *pen, CEntity *penItem) {
+  // weapons and powerups
+  if (IsOfDllClass(penItem, CWeaponItem_DLLClass)
+   || IsOfDllClass(penItem, CPowerUpItem_DLLClass)) {
+    return SBS.fWeaponDist;
+  }
+
+  // health
+  if (IsOfDllClass(penItem, CHealthItem_DLLClass)) {
+    return SBS.fHealthDist;
+  }
+
+  // armor
+  if (IsOfDllClass(penItem, CArmorItem_DLLClass)) {
+    return SBS.fArmorDist;
+  }
+
+  // ammo
+  if (IsOfDllClass(penItem, CAmmoItem_DLLClass)
+   || IsOfDllClass(penItem, CAmmoPack_DLLClass)) {
+    return SBS.fAmmoDist;
+  }
+
+  // max distance
+  return 64.0f;
 };
 
 // [Cecil] 2021-06-14: Determine the closest item

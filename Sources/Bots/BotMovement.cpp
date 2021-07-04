@@ -94,8 +94,7 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
     // if reached the important point
     if (bReachedImportantPoint) {
       // use important entity
-      CEntity *penImportant = FindEntityByID(&WORLD, pen->m_pbppTarget->bpp_iImportant);
-      UseImportantEntity(pen, penImportant);
+      UseImportantEntity(pen, pen->m_pbppTarget->bpp_penImportant);
 
       // reset important point
       if (pen->m_pbppTarget->bpp_pbppNext == NULL) {
@@ -183,7 +182,7 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
     }
 
     if (pen->m_pbppCurrent != NULL) {
-      //THOUGHT(strThought);
+      THOUGHT(strThought);
     }
 
     pen->m_tmChangePath = _pTimer->CurrentTick() + 5.0f;
@@ -193,7 +192,11 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
 // [Cecil] 2021-06-15: Set bot aim
 void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
   // [Cecil] 2021-06-16: Aim in the walking direction on a path if haven't seen the enemy in a while
-  if (pen->m_pbppCurrent != NULL && _pTimer->CurrentTick() - pen->m_tmLastSawTarget > 2.0f) {
+  if (pen->m_pbppCurrent != NULL && _pTimer->CurrentTick() - pen->m_tmLastSawTarget > 2.0f)
+  {
+    // running speed
+    FLOAT3D vRunDir = HorizontalDiff(pen->en_vCurrentTranslationAbsolute, pen->en_vGravityDir);
+    
     // relative position
     CPlacement3D plToDir = CPlacement3D(pen->en_vCurrentTranslationAbsolute, sbl.ViewAng());
 
@@ -207,8 +210,11 @@ void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
     }
 
     // set rotation speed
-    sbl.aAim(1) = Clamp(vToTarget(1) * 0.3f, -50.0f, 50.0f) / _pTimer->TickQuantum;
-    sbl.aAim(2) = Clamp(vToTarget(2) * 0.3f, -50.0f, 50.0f) / _pTimer->TickQuantum;
+    if (vRunDir.Length() >= 2.0f) {
+      sbl.aAim(1) = Clamp(vToTarget(1) * 0.3f, -30.0f, 30.0f) / _pTimer->TickQuantum;
+    }
+    sbl.aAim(2) = Clamp(vToTarget(2) * 0.3f, -30.0f, 30.0f) / _pTimer->TickQuantum;
+
     return;
   }
 
@@ -332,11 +338,11 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
   SBotWeaponConfig &bwWeapon = sbl.aWeapons[pen->m_iBotWeapon]; // current weapon config
 
   // strafe further if lower health
-  FLOAT fHealthRatio = Clamp(100.0f - pen->GetHealth(), 0.0f, 100.0f)/100.0f;
-  const FLOAT fStrafeDist = (bwWeapon.bw_fMaxDistance - bwWeapon.bw_fMinDistance) * bwWeapon.bw_fStrafe;
+  FLOAT fHealthRatio = Clamp(100.0f - pen->GetHealth(), 0.0f, 100.0f) / 100.0f;
+  const FLOAT fStrafeRange = (bwWeapon.bw_fMaxDistance - bwWeapon.bw_fMinDistance) * bwWeapon.bw_fStrafe;
 
   // avoid the target in front of the bot
-  FLOAT fStrafe = Clamp(fStrafeDist * fHealthRatio, 5.0f, 16.0f);
+  FLOAT fStrafe = Clamp(fStrafeRange * fHealthRatio, 2.0f, 16.0f);
 
   if (SBS.bStrafe && pen->m_fTargetDist < (bwWeapon.bw_fMinDistance + fStrafe)
    && (pen->m_penFollow == NULL || pen->m_penFollow == pen->m_penTarget || sbl.Following())) {
@@ -353,17 +359,15 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
     if (pen->m_penFollow != NULL) {
       plDelta.pl_PositionVector = (pen->m_penFollow->GetPlacement().pl_PositionVector - vBotPos);
 
-      // if going for the item
-      if (!sbl.Following() && sbl.ItemExists()) {
-        // always jump
-        bShouldJump = TRUE;
+      // check vertical difference
+      FLOAT3D vVertical = VerticalDiff(plDelta.pl_PositionVector, pen->en_vGravityDir);
 
-      } else {
-        // check vertical difference
-        FLOAT3D vVertical = VerticalDiff(plDelta.pl_PositionVector, pen->en_vGravityDir);
+      // jump if it's higher
+      bShouldJump = (vVertical.Length() > 1.0f);
 
-        // jump if it's higher and not an item
-        bShouldJump = vVertical.Length() > 1.0f && !sbl.ItemExists();
+      // jump if going for an item and not the player
+      if (sbl.ItemExists()) {
+        bShouldJump &= !sbl.Following();
       }
 
       bShouldFollow = TRUE;
@@ -371,31 +375,46 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
     
     // run towards the point if nothing to pickup
     if (pen->m_pbppCurrent != NULL && !sbl.ItemExists()) {
-      plDelta.pl_PositionVector = (pen->m_pbppCurrent->bpp_vPos - vBotPos);
-      bShouldJump = pen->m_ulPointFlags & PPF_JUMP;
-      bShouldCrouch = pen->m_ulPointFlags & PPF_CROUCH;
+      // close to the target
+      FLOAT3D vTargetDelta = (pen->m_pbppTarget->bpp_vPos - vBotPos);
 
-      bShouldFollow = TRUE;
+      if (vTargetDelta.Length() > 8.0f) {
+        plDelta.pl_PositionVector = (pen->m_pbppCurrent->bpp_vPos - vBotPos);
+        bShouldJump = pen->m_ulPointFlags & PPF_JUMP;
+        bShouldCrouch = pen->m_ulPointFlags & PPF_CROUCH;
+
+        bShouldFollow = TRUE;
+      }
     }
 
     // set the speed if there's a place to go
     if (bShouldFollow && plDelta.pl_PositionVector.Length() > 0.0f) {
       FLOAT aDeltaHeading = GetRelH(plDelta);
 
-      FLOAT3D vRunDir;
-      AnglesToDirectionVector(ANGLE3D(aDeltaHeading, 0.0f, 0.0f), vRunDir);
-      vBotMovement = vRunDir;
+      // compare directional difference
+      FLOAT3D vHor = HorizontalDiff(plDelta.pl_PositionVector, pen->en_vGravityDir);
+      FLOAT3D vVer = VerticalDiff(plDelta.pl_PositionVector, pen->en_vGravityDir);
 
-      // crouch if needed instead of jumping
-      if (bShouldCrouch) {
-        fVerticalMove = -1.0f;
-
-      // jump if allowed
-      } else if (bShouldJump && SBS.bJump) {
-        fVerticalMove = 1.0f;
+      // stop moving if it's too high up
+      if (vHor.Length() < 1.0f && vVer.Length() > 4.0f) {
+        vBotMovement = FLOAT3D(0.0f, 0.0f, 0.0f);
 
       } else {
-        fVerticalMove = 0.0f;
+        FLOAT3D vRunDir;
+        AnglesToDirectionVector(ANGLE3D(aDeltaHeading, 0.0f, 0.0f), vRunDir);
+        vBotMovement = vRunDir;
+
+        // crouch if needed instead of jumping
+        if (bShouldCrouch) {
+          fVerticalMove = -1.0f;
+
+        // jump if allowed
+        } else if (bShouldJump && SBS.bJump) {
+          fVerticalMove = 1.0f;
+
+        } else {
+          fVerticalMove = 0.0f;
+        }
       }
     }
   }

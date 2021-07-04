@@ -212,7 +212,7 @@ DECL_DLL BOOL IsItemPickable(class CPlayer *pen, class CItem *penItem);
 DECL_DLL FLOAT3D VerticalDiff(FLOAT3D vPosDiff, const FLOAT3D &vGravityDir);
 
 // [Cecil] 2021-06-14: Determine position difference on the same plane
-DECL_DLL FLOAT3D PositionDiff(const FLOAT3D &v1, const FLOAT3D &v2, const FLOAT3D &vGravityDir);
+DECL_DLL FLOAT3D HorizontalDiff(FLOAT3D vPosDiff, const FLOAT3D &vGravityDir);
 
 // [Cecil] 2021-06-28: Get relative angles from the directed placement
 DECL_DLL FLOAT GetRelH(const CPlacement3D &pl);
