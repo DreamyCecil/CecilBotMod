@@ -27,7 +27,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // [Cecil] 2021-06-25: Too long since the last position change
 BOOL NoPosChange(CPlayerBot *pen) {
-  return (_pTimer->CurrentTick() - pen->m_tmPosChange > 1.0f);
+  if (_pTimer->CurrentTick() - pen->m_tmPosChange > 1.0f) {
+    pen->m_tmPosChange = _pTimer->CurrentTick();
+    return TRUE;
+  }
+  return FALSE;
 };
 
 // [Cecil] 2021-06-14: Try to find some path
@@ -43,16 +47,24 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
 
   // go to the player
   if (sbl.Following()) {
-    // if can't see him
+    // if can't see them
     if (!sbl.SeePlayer()) {
       penTarget = pen->m_penFollow;
+      bSeeTarget = TRUE;
     }
+
+  // go to the item
+  } else if (sbl.ItemExists()) {
+    penTarget = pen->m_penFollow;
+    bSeeTarget = TRUE;
 
   // go to the enemy
   } else {
     penTarget = pen->m_penTarget;
     bSeeTarget = sbl.SeeEnemy();
+  }
 
+  if (!sbl.Following()) {
     // select important points sometimes
     if (!pen->m_bImportantPoint && pen->m_tmPickImportant <= _pTimer->CurrentTick()) {
       // compare chance
@@ -62,6 +74,7 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
         if (pbppImportant != NULL) {
           pen->m_pbppTarget = pbppImportant;
           pen->m_bImportantPoint = TRUE;
+          THOUGHT(CTString(0, "New important point: ^caf3f3f%d", pbppImportant->bpp_iIndex));
         }
       }
 
@@ -198,7 +211,7 @@ void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
     FLOAT3D vRunDir = HorizontalDiff(pen->en_vCurrentTranslationAbsolute, pen->en_vGravityDir);
     
     // relative position
-    CPlacement3D plToDir = CPlacement3D(pen->en_vCurrentTranslationAbsolute, sbl.ViewAng());
+    CPlacement3D plToDir(pen->en_vCurrentTranslationAbsolute, sbl.ViewAng());
 
     // angle towards the target (negate pitch)
     FLOAT2D vToTarget = FLOAT2D(GetRelH(plToDir), -sbl.ViewAng()(2));
@@ -279,8 +292,8 @@ void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
       
   // limit to one tick, otherwise aim will go too far and miss
   const FLOAT fDistRotSpeed = ClampDn(SBS.fRotSpeedDist, 0.05f);      // 400
-  const FLOAT fMinRotSpeed = ClampDn(SBS.fRotSpeedMin, 0.05f);        // 0.05f
-  const FLOAT fMaxRotSpeed = ClampDn(SBS.fRotSpeedMax, fMinRotSpeed); // 0.2f
+  const FLOAT fMinRotSpeed = ClampDn(SBS.fRotSpeedMin, 0.05f);        // 0.05
+  const FLOAT fMaxRotSpeed = ClampDn(SBS.fRotSpeedMax, fMinRotSpeed); // 0.2
   const FLOAT fSpeedLimit = SBS.fRotSpeedLimit;                       // 30
 
   // clamp the speed
@@ -304,15 +317,6 @@ void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
     if (sbl.SeeEnemy() || bTargetingEnemy) {
       sbl.ubFlags |= BLF_CANSHOOT;
     }
-
-    // [Cecil] TEMP: Don't shoot if there's an obstacle in the way
-    /*if (!bTargetingEnemy) {
-      FLOAT3D vTargetView = vEnemy - sbl.ViewPos();
-
-      if (WEAPON->m_fRayHitDistance <= 4.0f && WEAPON->m_fRayHitDistance < vTargetView.Length()) {
-        sbl.ubFlags &= ~BLF_CANSHOOT;
-      }
-    }*/
   }
 };
 
@@ -342,7 +346,7 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
   const FLOAT fStrafeRange = (bwWeapon.bw_fMaxDistance - bwWeapon.bw_fMinDistance) * bwWeapon.bw_fStrafe;
 
   // avoid the target in front of the bot
-  FLOAT fStrafe = Clamp(fStrafeRange * fHealthRatio, 2.0f, 16.0f);
+  FLOAT fStrafe = Clamp(fStrafeRange * fHealthRatio, 3.0f, 16.0f);
 
   if (SBS.bStrafe && pen->m_fTargetDist < (bwWeapon.bw_fMinDistance + fStrafe)
    && (pen->m_penFollow == NULL || pen->m_penFollow == pen->m_penTarget || sbl.Following())) {
@@ -357,7 +361,12 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
     
     // run towards the following target
     if (pen->m_penFollow != NULL) {
-      plDelta.pl_PositionVector = (pen->m_penFollow->GetPlacement().pl_PositionVector - vBotPos);
+      // back off if needed
+      if (sbl.BackOff()) {
+        plDelta.pl_PositionVector = (vBotPos - pen->m_penFollow->GetPlacement().pl_PositionVector);
+      } else {
+        plDelta.pl_PositionVector = (pen->m_penFollow->GetPlacement().pl_PositionVector - vBotPos);
+      }
 
       // check vertical difference
       FLOAT3D vVertical = VerticalDiff(plDelta.pl_PositionVector, pen->en_vGravityDir);
@@ -373,12 +382,10 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
       bShouldFollow = TRUE;
     }
     
-    // run towards the point if nothing to pickup
-    if (pen->m_pbppCurrent != NULL && !sbl.ItemExists()) {
-      // close to the target
-      FLOAT3D vTargetDelta = (pen->m_pbppTarget->bpp_vPos - vBotPos);
-
-      if (vTargetDelta.Length() > 8.0f) {
+    // run towards the point
+    if (pen->m_pbppCurrent != NULL) {
+      // ignore the point if there's an item (if it exists and current point is target point)
+      if (!sbl.ItemExists() || pen->m_pbppCurrent != pen->m_pbppTarget) {
         plDelta.pl_PositionVector = (pen->m_pbppCurrent->bpp_vPos - vBotPos);
         bShouldJump = pen->m_ulPointFlags & PPF_JUMP;
         bShouldCrouch = pen->m_ulPointFlags & PPF_CROUCH;

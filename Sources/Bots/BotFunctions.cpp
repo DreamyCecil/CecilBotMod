@@ -150,7 +150,7 @@ void BotRead(CPlayerBot *pen, CTStream *strm) {
 BOOL ImportantForNavMesh(CPlayer *penBot, CEntity *penEntity) {
   // is item pickable
   if (IsDerivedFromDllClass(penEntity, CItem_DLLClass)) {
-    return IsItemPickable(penBot, (CItem *)penEntity);
+    return IsItemPickable(penBot, (CItem *)penEntity, FALSE);
 
   // is switch usable
   } else if (IsOfDllClass(penEntity, CSwitch_DLLClass)) {
@@ -264,7 +264,7 @@ void BotItemSearch(CPlayerBot *pen, SBotLogic &sbl) {
   // has some item
   if (pen->m_penLastItem != NULL) {
     // item is pickable
-    if (IsItemPickable(pen, (CItem *)&*pen->m_penLastItem)) {
+    if (IsItemPickable(pen, (CItem *)&*pen->m_penLastItem, TRUE)) {
       sbl.ubFlags |= BLF_ITEMEXISTS;
       pen->m_penFollow = pen->m_penLastItem;
 
@@ -491,7 +491,7 @@ CEntity *ClosestItemType(CPlayerBot *pen, const CDLLEntityClass &decClass, FLOAT
 
     // if not an item or already picked up
     if (!IsDerivedFromDllClass(penCheck, decClass)
-     || !IsItemPickable(pen, (CItem *)penCheck)) {
+     || !IsItemPickable(pen, (CItem *)penCheck, TRUE)) {
       continue;
     }
 

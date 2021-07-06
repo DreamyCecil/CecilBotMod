@@ -43,6 +43,7 @@ void UseImportantEntity(CPlayer *penBot, CEntity *penEntity);
 #define BLF_FOLLOWPLAYER (1 << 4)
 #define BLF_FOLLOWING    (1 << 5)
 #define BLF_SEEPLAYER    (1 << 6)
+#define BLF_BACKOFF      (1 << 7)
 
 // [Cecil] 2021-06-14: Bot logic settings
 struct SBotLogic {
@@ -54,9 +55,10 @@ struct SBotLogic {
   ANGLE3D aAim;  // in which direction bot needs to aim
 
   // Constructor
-  SBotLogic(void) : ubFlags(0), peiTarget(NULL), aAim(0.0f, 0.0f, 0.0f) {
+  SBotLogic(void) : ubFlags(0), peiTarget(NULL),  aAim(0.0f, 0.0f, 0.0f),
+    plBotView(FLOAT3D(0.0f, 0.0f, 0.0f), ANGLE3D(0.0f, 0.0f, 0.0f))
+  {
     aWeapons = PickWeaponConfig();
-    plBotView = CPlacement3D(FLOAT3D(0.0f, 0.0f, 0.0f), ANGLE3D(0.0f, 0.0f, 0.0f));
   };
 
   // Viewpoint functions
@@ -71,6 +73,7 @@ struct SBotLogic {
   inline BOOL FollowPlayer(void) { return ubFlags & BLF_FOLLOWPLAYER; };
   inline BOOL Following(void)    { return ubFlags & BLF_FOLLOWING; };
   inline BOOL SeePlayer(void)    { return ubFlags & BLF_SEEPLAYER; };
+  inline BOOL BackOff(void)      { return ubFlags & BLF_BACKOFF; };
 };
 
 // [Cecil] Cast bot view ray

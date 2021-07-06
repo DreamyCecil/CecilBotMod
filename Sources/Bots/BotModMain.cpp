@@ -66,7 +66,7 @@ void CECIL_BotGameStart(CSessionProperties &sp) {
   CWorld &wo = _pNetwork->ga_World;
 
   // [Cecil] 2021-06-12: Global bot mod entity
-  CPlacement3D plEntity = CPlacement3D(FLOAT3D(0.0f, 0.0f, 0.0f), ANGLE3D(0.0f, 0.0f, 0.0f));
+  CPlacement3D plEntity(FLOAT3D(0.0f, 0.0f, 0.0f), ANGLE3D(0.0f, 0.0f, 0.0f));
   CEntity *penNew = wo.CreateEntity_t(plEntity, CTFILENAME("Classes\\BotModGlobal.ecl"));
   penNew->Initialize();
 

@@ -126,9 +126,9 @@ CEntity *FindEntityByID(CWorld *pwo, const INDEX &iEntityID) {
 };
 
 // [Cecil] 2021-06-14: Check if item is pickable
-BOOL IsItemPickable(class CPlayer *pen, class CItem *penItem) {
+BOOL IsItemPickable(class CPlayer *pen, class CItem *penItem, const BOOL &bCheckDist) {
   // [Cecil] TEMP: Too far
-  if (DistanceTo(pen, penItem) > GetItemDist((CPlayerBot *)pen, penItem)) {
+  if (bCheckDist && DistanceTo(pen, penItem) > GetItemDist((CPlayerBot *)pen, penItem)) {
     return FALSE;
   }
 

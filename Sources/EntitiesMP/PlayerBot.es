@@ -420,7 +420,7 @@ functions:
         sbl.ubFlags |= BLF_SEEPLAYER;
 
         // follow the player
-        if (fDistToPlayer > 3.0f) {
+        if (fDistToPlayer > 5.0f) {
           m_penFollow = penPlayer;
           sbl.ubFlags |= BLF_FOLLOWING;
 
@@ -428,16 +428,19 @@ functions:
           if (fDistToPlayer > 100.0f || !CastBotRay(this, penPlayer, sbl, TRUE)) {
             sbl.ubFlags &= ~BLF_SEEPLAYER;
           }
+
+        } else if (fDistToPlayer < 2.0f) {
+          m_penFollow = penPlayer;
+          sbl.ubFlags |= BLF_BACKOFF;
         }
 
         // look at the player
         if (!sbl.SeeEnemy() && sbl.SeePlayer()) {
           // relative position
-          CPlacement3D plToPlayer = sbl.plBotView;
-          plToPlayer.pl_PositionVector = penPlayer->GetPlacement().pl_PositionVector - plToPlayer.pl_PositionVector;
+          CPlacement3D plToPlayer(penPlayer->GetPlacement().pl_PositionVector - vBotPos, sbl.ViewAng());
 
-          // angle towards the target (negate pitch)
-          FLOAT2D vToPlayer = FLOAT2D(GetRelH(plToPlayer), -sbl.ViewAng()(2));
+          // angle towards the target
+          FLOAT2D vToPlayer = FLOAT2D(GetRelH(plToPlayer), GetRelP(plToPlayer));
 
           // set rotation speed
           sbl.aAim(1) = vToPlayer(1) / 0.5f;

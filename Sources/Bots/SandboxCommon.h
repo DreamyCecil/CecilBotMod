@@ -206,7 +206,7 @@ inline FLOAT DistanceToPos(FLOAT3D vPos1, FLOAT3D vPos2) {
 };
 
 // [Cecil] 2021-06-14: Check if item is pickable
-DECL_DLL BOOL IsItemPickable(class CPlayer *pen, class CItem *penItem);
+DECL_DLL BOOL IsItemPickable(class CPlayer *pen, class CItem *penItem, const BOOL &bCheckDist);
 
 // [Cecil] 2021-06-16: Determine vertical position difference
 DECL_DLL FLOAT3D VerticalDiff(FLOAT3D vPosDiff, const FLOAT3D &vGravityDir);
