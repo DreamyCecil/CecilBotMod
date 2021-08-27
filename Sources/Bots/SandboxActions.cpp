@@ -253,17 +253,15 @@ static void CECIL_GenerateNavMesh(INDEX iPoints) {
 // [Cecil] 2019-05-28: Quick functions for NavMesh states
 static void CECIL_NavMeshSave(void) {
   CPrintF(MODCOM_NAME("NavMeshSave:\n"));
+  CWorld &wo = _pNetwork->ga_World;
+  
+  // save NavMesh locally
+  try {
+    _pNavmesh->Save(wo);
 
-  if (!_pNetwork->IsServer()) {
-    CPrintF("  <not a server>\n");
-    return;
+  } catch (char *strError) {
+    CPrintF("%s\n", strError);
   }
-
-  CCecilStreamBlock nsbNavMesh = CECIL_BotServerPacket(ESA_NAVMESH_STATE);
-  nsbNavMesh << (INDEX)0; // Save state
-
-  // put the message in buffer to be sent to all sessions
-  CECIL_AddBlockToAllSessions(nsbNavMesh);
 };
 
 static void CECIL_NavMeshLoad(void) {
@@ -274,8 +272,7 @@ static void CECIL_NavMeshLoad(void) {
     return;
   }
   
-  CCecilStreamBlock nsbNavMesh = CECIL_BotServerPacket(ESA_NAVMESH_STATE);
-  nsbNavMesh << (INDEX)1; // Load state
+  CCecilStreamBlock nsbNavMesh = CECIL_BotServerPacket(ESA_NAVMESH_LOAD);
 
   // put the message in buffer to be sent to all sessions
   CECIL_AddBlockToAllSessions(nsbNavMesh);
@@ -762,26 +759,14 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
     } break;
 
     // NavMesh state
-    case ESA_NAVMESH_STATE: {
-      INDEX iLoad;
-      nmMessage >> iLoad;
-        
+    case ESA_NAVMESH_LOAD: {
+      // load the NavMesh
       try {
-        // load NavMesh
-        if (iLoad) {
-          _pNavmesh->Load(wo);
-
-        // save NavMesh
-        } else {
-          _pNavmesh->Save(wo);
-        }
+        _pNavmesh->Load(wo);
 
       } catch (char *strError) {
         CPrintF("%s\n", strError);
-
-        if (iLoad) {
-          _pNavmesh->ClearNavMesh();
-        }
+        _pNavmesh->ClearNavMesh();
       }
     } break;
     

@@ -32,7 +32,7 @@ enum ESandboxAction {
   ESA_SETWEAPONS, // change all weapons in the world
 
   ESA_NAVMESH_GEN,   // generate Navigation Mesh
-  ESA_NAVMESH_STATE, // save or load the NavMesh
+  ESA_NAVMESH_LOAD,  // load the NavMesh
   ESA_NAVMESH_CLEAR, // clear the NavMesh
   
   // [Cecil] 2019-11-07: NavMesh Editing Actions
