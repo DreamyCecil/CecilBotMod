@@ -42,6 +42,7 @@ struct SBotThoughts {
 
 // [Cecil] 2019-05-28: NavMesh commands
 extern INDEX MOD_iRenderNavMesh;
+extern FLOAT MOD_fNavMeshRenderRange;
 extern INDEX MOD_iNavMeshPoint;
 extern INDEX MOD_iNavMeshConnecting;
 

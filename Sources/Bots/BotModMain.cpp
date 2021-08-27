@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // [Cecil] 2019-05-28: NavMesh Commands
 extern INDEX MOD_iRenderNavMesh = 0; // NavMesh render mode (0 - disabled, 1 - points, 2 - connections, 3 - IDs, 4 - flags)
+extern FLOAT MOD_fNavMeshRenderRange = 0.0f; // NavMesh point rendering range (0 - infinite)
 extern INDEX MOD_iNavMeshPoint = -1; // currently selected NavMesh point
 extern INDEX MOD_iNavMeshConnecting = 0; // connecting mode (0 - disabled, 1 - to point, 2 - to each other, 3 - others to this one)
 
@@ -130,6 +131,20 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
 
         vPointOnScreen(2) = -vPointOnScreen(2) + pdp->GetHeight();
 
+        // point opacity based on distance to the viewer
+        UBYTE ubPointAlpha = 0xFF;
+
+        if (MOD_fNavMeshRenderRange > 0.0f) {
+          FLOAT fViewDist = (penViewer->GetPlacement().pl_PositionVector - vPoint1).Length();
+          FLOAT fPointAlpha = 1.0f - Clamp((fViewDist - MOD_fNavMeshRenderRange) / MOD_fNavMeshRenderRange, 0.0f, 1.0f);
+
+          ubPointAlpha = NormFloatToByte(fPointAlpha);
+        }
+
+        if (ubPointAlpha <= 2) {
+          continue;
+        }
+
         // highlight closest point for selection
         BOOL bClosestPoint = (pbppClosest == pbpp);
         CBotPathPoint *pbppSelected = _pNavmesh->FindPointByID(MOD_iNavMeshPoint);
@@ -156,7 +171,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
             vRangeEnd1(2) = -vRangeEnd1(2) + pdp->GetHeight();
             vRangeEnd2(2) = -vRangeEnd2(2) + pdp->GetHeight();
 
-            pdp->DrawLine(vRangeEnd1(1), vRangeEnd1(2), vRangeEnd2(1), vRangeEnd2(2), 0x00FFFF9F);
+            pdp->DrawLine(vRangeEnd1(1), vRangeEnd1(2), vRangeEnd2(1), vRangeEnd2(2), 0x00FFFF00 | UBYTE(ubPointAlpha * 0.625f));
           }
 
           // connections
@@ -170,7 +185,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
             FLOAT3D vPoint2 = pbppT->bpp_vPos;
           
             if (ProjectLine(&prProjection, vPoint1, vPoint2, vOnScreen1, vOnScreen2)) {
-              pdp->DrawLine(vOnScreen1(1), vOnScreen1(2), vOnScreen2(1), vOnScreen2(2), C_ORANGE|0x7F);
+              pdp->DrawLine(vOnScreen1(1), vOnScreen1(2), vOnScreen2(1), vOnScreen2(2), C_ORANGE | UBYTE(ubPointAlpha * 0.5f));
             }
           }}
 
@@ -183,7 +198,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
               FLOAT3D vOnScreen1, vEntityOnScreen;
 
               if (ProjectLine(&prProjection, vPoint1, vEntity, vOnScreen1, vEntityOnScreen)) {
-                pdp->DrawLine(vOnScreen1(1), vOnScreen1(2), vEntityOnScreen(1), vEntityOnScreen(2), 0x00FF00FF);
+                pdp->DrawLine(vOnScreen1(1), vOnScreen1(2), vEntityOnScreen(1), vEntityOnScreen(2), 0x00FF0000 | ubPointAlpha);
               }
             }
           }
@@ -193,22 +208,22 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
             FLOAT3D vOnScreen1, vNextPointOnScreen;
 
             if (ProjectLine(&prProjection, vPoint1, pbpp->bpp_pbppNext->bpp_vPos, vOnScreen1, vNextPointOnScreen)) {
-              pdp->DrawLine(vOnScreen1(1), vOnScreen1(2), vNextPointOnScreen(1), vNextPointOnScreen(2), 0x0000FFFF);
+              pdp->DrawLine(vOnScreen1(1), vOnScreen1(2), vNextPointOnScreen(1), vNextPointOnScreen(2), 0x0000FF00 | ubPointAlpha);
             }
           }
         }
         
         // selected point
         if (pbppSelected == pbpp) {
-          pdp->DrawPoint(vPointOnScreen(1), vPointOnScreen(2), 0xFF0000FF, 10);
+          pdp->DrawPoint(vPointOnScreen(1), vPointOnScreen(2), 0xFF000000 | ubPointAlpha, 10);
 
         // point for selection
         } else if (bClosestPoint) {
-          pdp->DrawPoint(vPointOnScreen(1), vPointOnScreen(2), 0x009900FF, 10);
+          pdp->DrawPoint(vPointOnScreen(1), vPointOnScreen(2), 0x00990000 | ubPointAlpha, 10);
 
         // normal point
         } else {
-          pdp->DrawPoint(vPointOnScreen(1), vPointOnScreen(2), 0xFFFF00FF, 5);
+          pdp->DrawPoint(vPointOnScreen(1), vPointOnScreen(2), 0xFFFF0000 | ubPointAlpha, 5);
         }
 
         // point IDs
@@ -230,7 +245,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
             #undef POINT_DESC
           }
 
-          pdp->PutTextC(strPoint, vPointOnScreen(1), vPointOnScreen(2) + 16, 0xFFFFFFFF);
+          pdp->PutTextC(strPoint, vPointOnScreen(1), vPointOnScreen(2) + 16, 0xFFFFFF00 | ubPointAlpha);
         }
       }
     }

@@ -51,6 +51,7 @@ Change current player weapons and "Give Weapons" property of all CPlayerMarkers:
   4 - display flags
 ```
 
+- `MOD_fNavMeshRenderRange` - NavMesh point rendering range (`0` for infinite)
 - `MOD_iNavMeshPoint` - currently selected NavMesh point by its ID
 - `MOD_NavMeshSelectPoint()` - select closest NavMesh point to the player's crosshair position or target already selected point (if `MOD_iNavMeshConnecting` is not `0`)
 

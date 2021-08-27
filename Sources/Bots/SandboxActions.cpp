@@ -296,6 +296,11 @@ static void CECIL_NavMeshClear(INDEX iPoints) {
 
 // [Cecil] 2019-05-28: Add new NavMesh point with vertical offset
 static void CECIL_AddNavMeshPoint(FLOAT fOffset) {
+  // editing is disabled
+  if (MOD_iRenderNavMesh <= 0) {
+    return;
+  }
+
   CNetworkMessage nmNavmesh = CECIL_NavMeshClientPacket(ESA_NAVMESH_CREATE);
   nmNavmesh << MOD_iNavMeshPoint;
   nmNavmesh << MOD_iNavMeshConnecting;
@@ -306,6 +311,11 @@ static void CECIL_AddNavMeshPoint(FLOAT fOffset) {
 
 // [Cecil] 2019-05-28: Delete NavMesh point
 static void CECIL_DeleteNavMeshPoint(void) {
+  // editing is disabled
+  if (MOD_iRenderNavMesh <= 0) {
+    return;
+  }
+
   CNetworkMessage nmNavmesh = CECIL_NavMeshClientPacket(ESA_NAVMESH_DELETE);
   nmNavmesh << MOD_iNavMeshPoint;
 
@@ -337,6 +347,11 @@ static void CECIL_NavMeshPointInfo(void) {
 
 // [Cecil] 2021-06-12: Connect current NavMesh point to another one
 static void CECIL_ConnectNavMeshPoint(INDEX iTargetPoint) {
+  // editing is disabled
+  if (MOD_iRenderNavMesh <= 0) {
+    return;
+  }
+
   CNetworkMessage nmNavmesh = CECIL_NavMeshClientPacket(ESA_NAVMESH_CONNECT);
   nmNavmesh << MOD_iNavMeshPoint;
   nmNavmesh << iTargetPoint;
@@ -347,6 +362,11 @@ static void CECIL_ConnectNavMeshPoint(INDEX iTargetPoint) {
 
 // [Cecil] 2021-06-21: Untarget current NavMesh point from another one
 static void CECIL_UntargetNavMeshPoint(INDEX iTargetPoint) {
+  // editing is disabled
+  if (MOD_iRenderNavMesh <= 0) {
+    return;
+  }
+
   CNetworkMessage nmNavmesh = CECIL_NavMeshClientPacket(ESA_NAVMESH_UNTARGET);
   nmNavmesh << MOD_iNavMeshPoint;
   nmNavmesh << iTargetPoint;
@@ -356,6 +376,11 @@ static void CECIL_UntargetNavMeshPoint(INDEX iTargetPoint) {
 
 // [Cecil] 2021-06-18: Move NavMesh point to the player position
 static void CECIL_TeleportNavMeshPoint(FLOAT fOffset) {
+  // editing is disabled
+  if (MOD_iRenderNavMesh <= 0) {
+    return;
+  }
+
   CNetworkMessage nmNavmesh = CECIL_NavMeshClientPacket(ESA_NAVMESH_TELEPORT);
   nmNavmesh << MOD_iNavMeshPoint;
   nmNavmesh << fOffset;
@@ -365,6 +390,11 @@ static void CECIL_TeleportNavMeshPoint(FLOAT fOffset) {
 
 // [Cecil] 2021-06-18: Change NavMesh point absolute position
 static void CECIL_NavMeshPointPos(FLOAT fX, FLOAT fY, FLOAT fZ) {
+  // editing is disabled
+  if (MOD_iRenderNavMesh <= 0) {
+    return;
+  }
+
   CNetworkMessage nmNavmesh = CECIL_NavMeshClientPacket(ESA_NAVMESH_POS);
   nmNavmesh << MOD_iNavMeshPoint;
   nmNavmesh << fX << fY << fZ;
@@ -374,6 +404,11 @@ static void CECIL_NavMeshPointPos(FLOAT fX, FLOAT fY, FLOAT fZ) {
 
 // [Cecil] 2021-06-18: Snap NavMesh point position to a custom-sized grid
 static void CECIL_SnapNavMeshPoint(FLOAT fGridSize) {
+  // editing is disabled
+  if (MOD_iRenderNavMesh <= 0) {
+    return;
+  }
+
   CNetworkMessage nmNavmesh = CECIL_NavMeshClientPacket(ESA_NAVMESH_SNAP);
   nmNavmesh << MOD_iNavMeshPoint;
   nmNavmesh << fGridSize;
@@ -383,6 +418,11 @@ static void CECIL_SnapNavMeshPoint(FLOAT fGridSize) {
 
 // [Cecil] 2019-06-04: Change NavMesh point flags
 static void CECIL_NavMeshPointFlags(INDEX iFlags) {
+  // editing is disabled
+  if (MOD_iRenderNavMesh <= 0) {
+    return;
+  }
+
   CNetworkMessage nmNavmesh = CECIL_NavMeshClientPacket(ESA_NAVMESH_FLAGS);
   nmNavmesh << MOD_iNavMeshPoint;
   nmNavmesh << iFlags;
@@ -392,6 +432,11 @@ static void CECIL_NavMeshPointFlags(INDEX iFlags) {
 
 // [Cecil] 2019-06-05: Change NavMesh point important entity
 static void CECIL_NavMeshPointEntity(INDEX iEntityID) {
+  // editing is disabled
+  if (MOD_iRenderNavMesh <= 0) {
+    return;
+  }
+
   CNetworkMessage nmNavmesh = CECIL_NavMeshClientPacket(ESA_NAVMESH_ENTITY);
   nmNavmesh << MOD_iNavMeshPoint;
   nmNavmesh << iEntityID;
@@ -401,6 +446,11 @@ static void CECIL_NavMeshPointEntity(INDEX iEntityID) {
 
 // [Cecil] 2019-06-06: Change NavMesh point range
 static void CECIL_NavMeshPointRange(FLOAT fRange) {
+  // editing is disabled
+  if (MOD_iRenderNavMesh <= 0) {
+    return;
+  }
+
   CNetworkMessage nmNavmesh = CECIL_NavMeshClientPacket(ESA_NAVMESH_RANGE);
   nmNavmesh << MOD_iNavMeshPoint;
   nmNavmesh << fRange;
@@ -410,6 +460,11 @@ static void CECIL_NavMeshPointRange(FLOAT fRange) {
 
 // [Cecil] 2021-06-25: Change NavMesh point next important point
 static void CECIL_NavMeshPointNext(INDEX iNextPoint) {
+  // editing is disabled
+  if (MOD_iRenderNavMesh <= 0) {
+    return;
+  }
+
   CNetworkMessage nmNavmesh = CECIL_NavMeshClientPacket(ESA_NAVMESH_NEXT);
   nmNavmesh << MOD_iNavMeshPoint;
   nmNavmesh << iNextPoint;
@@ -419,6 +474,11 @@ static void CECIL_NavMeshPointNext(INDEX iNextPoint) {
 
 // [Cecil] 2021-06-23: Add NavMesh point range
 static void CECIL_AddNavMeshPointRange(FLOAT fRange) {
+  // editing is disabled
+  if (MOD_iRenderNavMesh <= 0) {
+    return;
+  }
+
   CBotPathPoint *pbpp = _pNavmesh->FindPointByID(MOD_iNavMeshPoint);
 
   if (pbpp == NULL) {
@@ -432,6 +492,11 @@ static void CECIL_AddNavMeshPointRange(FLOAT fRange) {
 
 // [Cecil] 2019-05-28: NavMesh Point Selection
 static void CECIL_NavMeshSelectPoint(void) {
+  // editing is disabled
+  if (MOD_iRenderNavMesh <= 0) {
+    return;
+  }
+
   if (LOCAL_PLAYER_INDEX == -1) {
     return;
   }
@@ -534,6 +599,7 @@ extern void CECIL_InitSandboxActions(void) {
 
   // [Cecil] NavMesh editing
   _pShell->DeclareSymbol("persistent user INDEX " MODCOM_NAME("iRenderNavMesh;"), &MOD_iRenderNavMesh);
+  _pShell->DeclareSymbol("persistent user FLOAT " MODCOM_NAME("fNavMeshRenderRange;"), &MOD_fNavMeshRenderRange);
   _pShell->DeclareSymbol("user INDEX " MODCOM_NAME("iNavMeshPoint;"), &MOD_iNavMeshPoint);
   _pShell->DeclareSymbol("user INDEX " MODCOM_NAME("iNavMeshConnecting;"), &MOD_iNavMeshConnecting);
 
