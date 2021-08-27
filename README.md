@@ -1,4 +1,4 @@
-# Bot Mod
+# Cecil's Bot Mod
 This is the source code of a mod for classic Serious Sam: The Second Encounter v1.07 that adds customizable bots to multiplayer games (both Cooperative and Deathmatch modes).
 Based on [Serious Sam SDK v1.07 for Visual Studio 2013](https://github.com/DreamyCecil/SeriousSam_SDK107)
 
@@ -21,7 +21,7 @@ There are two ways to start the mod:
 1. Create a `.des` file in your Mods directory under the same name as this repository, open it in any text editor and type your mod name in it. Then you'll be able to launch your mod from the game's `Mods` list.
 2. Run `ModStart.bat` or `EditorStart.bat` from the Bin folder to open the editor or the mod.
 
-When running a selected project, make sure the mod in project properties **Debugging** -> **Command Arguments** is set to your mod name instead of `BotMod` (example: `+game MyBots`).
+When running a selected project, make sure the mod in project properties **Debugging** -> **Command Arguments** is set to your mod name instead of `CecilBotMod` (example: `+game MyBots`).
 
 License
 -------
