@@ -5,6 +5,8 @@ Based on [Serious Sam SDK v1.07 for Visual Studio 2013](https://github.com/Dream
 - [Bot integration help file](https://github.com/DreamyCecil/CecilBotMod/blob/master/BotIntegration.md#bot-integration)
 - [Mod commands help file](https://github.com/DreamyCecil/CecilBotMod/blob/master/ModCommandsHelp.md#bot-mod)
 
+<img src="https://i.imgur.com/7ZzR1gM.jpg">
+
 Building
 --------
 
