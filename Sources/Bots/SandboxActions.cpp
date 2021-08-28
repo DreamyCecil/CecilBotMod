@@ -30,6 +30,10 @@ extern INDEX MOD_bBotThoughts = FALSE;
 static CStaticArray<CTString> BOT_astrNames;
 static CStaticArray<CTString> BOT_astrSkins;
 
+// [Cecil] 2021-08-28: Names and skins for the current game
+static CDynamicContainer<CTString> BOT_cnCurrentNames;
+static CDynamicContainer<CTString> BOT_cnCurrentSkins;
+
 // [Cecil] 2018-10-15: Bot Editing
 static CTString BOT_strBotEdit = ""; // name of a bot to edit
 static CTString BOT_strSpawnName = ""; // name to spawn with
@@ -61,6 +65,26 @@ static CCecilStreamBlock CECIL_BotServerPacket(const INDEX &iAction) {
 
 // --- Bot manipulation
 
+// [Cecil] 2021-08-28: Populate current bot names
+extern void CopyBotNames(void) {
+  // clear current names
+  BOT_cnCurrentNames.Clear();
+
+  for (int i = 0; i < BOT_astrNames.Count(); i++) {
+    BOT_cnCurrentNames.Add(&BOT_astrNames[i]);
+  }
+};
+
+// [Cecil] 2021-08-28: Populate current bot skins
+extern void CopyBotSkins(void) {
+  // clear current skins
+  BOT_cnCurrentSkins.Clear();
+
+  for (int i = 0; i < BOT_astrSkins.Count(); i++) {
+    BOT_cnCurrentSkins.Add(&BOT_astrSkins[i]);
+  }
+};
+
 // [Cecil] 2018-10-15: Config reset
 static void CECIL_ResetBotConfig(void) {
   CPrintF(BOTCOM_NAME("ResetBotConfig:\n"));
@@ -81,18 +105,38 @@ static void CECIL_AddBot(CTString *pstrBotName, CTString *pstrBotSkin) {
     return;
   }
   
-  // pick random name and skin
-  const INDEX ctNames = BOT_astrNames.Count();
-  const INDEX ctSkins = BOT_astrSkins.Count();
-  CTString strName = (ctNames > 0) ? BOT_astrNames[rand() % ctNames] : "Bot";
-  CTString strSkin = (ctSkins > 0) ? BOT_astrSkins[rand() % ctSkins] : "SeriousSam";
+  // pick random name if none
+  if (strBotName == "") {
+    INDEX ctNames = BOT_cnCurrentNames.Count();
 
-  // replace random name and skin
-  if (strBotName != "") {
-    strName = strBotName;
+    // restore names
+    if (ctNames <= 1) {
+      CopyBotNames();
+      ctNames = BOT_cnCurrentNames.Count();
+    }
+
+    CTString *pstrName = BOT_cnCurrentNames.Pointer(rand() % ctNames);
+    strBotName = (ctNames > 0) ? *pstrName : "Bot";
+
+    // remove this name from the list
+    BOT_cnCurrentNames.Remove(pstrName);
   }
-  if (strBotSkin != "") {
-    strSkin = strBotSkin;
+  
+  // pick random skin if none
+  if (strBotSkin == "") {
+    INDEX ctSkins = BOT_cnCurrentSkins.Count();
+
+    // restore skins
+    if (ctSkins <= 0) {
+      CopyBotSkins();
+      ctSkins = BOT_cnCurrentSkins.Count();
+    }
+
+    CTString *pstrSkin = BOT_cnCurrentSkins.Pointer(rand() % ctSkins);
+    strBotSkin = (ctSkins > 0) ? *pstrSkin : "SeriousSam";
+
+    // remove this skin from the list
+    //BOT_cnCurrentSkins.Remove(pstrSkin);
   }
 
   CPlayerCharacter pcBot;
@@ -100,13 +144,13 @@ static void CECIL_AddBot(CTString *pstrBotName, CTString *pstrBotSkin) {
 
   pps->ps_iWeaponAutoSelect = PS_WAS_NONE; // never select new weapons
   memset(pps->ps_achModelFile, 0, sizeof(pps->ps_achModelFile));
-  strncpy(pps->ps_achModelFile, strSkin, sizeof(pps->ps_achModelFile));
+  strncpy(pps->ps_achModelFile, strBotSkin.str_String, sizeof(pps->ps_achModelFile));
 
   for (INDEX iGUID = 0; iGUID < 16; iGUID++) {
     pcBot.pc_aubGUID[iGUID] = rand() % 256;
   }
 
-  pcBot.pc_strName = strName;
+  pcBot.pc_strName = strBotName;
   pcBot.pc_strTeam = "CECIL_BOTZ";
 
   // create message for adding player data to sessions

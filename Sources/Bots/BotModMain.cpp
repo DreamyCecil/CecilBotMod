@@ -78,6 +78,12 @@ void CECIL_BotGameStart(CSessionProperties &sp) {
   } catch (char *strError) {
     (void)strError;
   }
+
+  // [Cecil] 2021-08-28: Set current bot names and skins
+  extern void CopyBotNames(void);
+  extern void CopyBotSkins(void);
+  CopyBotNames();
+  CopyBotSkins();
 };
 
 // [Cecil] 2021-06-12: Bot game cleanup
