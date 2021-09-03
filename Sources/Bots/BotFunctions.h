@@ -85,10 +85,10 @@ BOOL CastPathPointRay(const FLOAT3D &vSource, const FLOAT3D &vPoint, FLOAT &fDis
 #define MAX_ITEM_DIST 256.0f
 
 // [Cecil] 2021-06-13: Check if it's an enemy player
-BOOL IsEnemyPlayer(CEntity *pen);
+BOOL IsEnemyPlayer(CPlayerBot *penBot, CEntity *penEnemy);
 
 // [Cecil] 2021-06-19: Check if it's a monster enemy
-BOOL IsEnemyMonster(CEntity *pen);
+BOOL IsEnemyMonster(CPlayerBot *penBot, CEntity *penEnemy);
 
 // [Cecil] 2021-06-17: Search for an item
 void BotItemSearch(CPlayerBot *pen, SBotLogic &sbl);

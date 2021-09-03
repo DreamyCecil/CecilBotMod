@@ -1,7 +1,7 @@
 ## Bot Mod
 
-- `MOD_QuickBot()` - quick bot addition (uses `BOT_strSpawnName`)
-- `MOD_AddBot(name, AMC filename)` - bot addition with custom name and player skin (empty strings for random)
+- `MOD_QuickBot()` - quick bot addition (uses `BOT_strSpawnName` and `BOT_strSpawnTeam`)
+- `MOD_AddBot(name, AMC filename, team)` - bot addition with custom name and player skin (empty strings for random) and also team (empty string for no team)
 - `MOD_RemoveBot(name)` - remove bots with a certain name from the game
 - `MOD_RemoveAllBots()` - remove all bots from the game
 - `MOD_BotUpdate()` - update settings for all bots (if `BOT_strBotEdit` isn't blank, only updates bots with that name)
@@ -9,6 +9,7 @@
 ---
 - `BOT_strBotEdit` - name of a bot for editing its settings (leave blank for all bots)
 - `BOT_strSpawnName` - quick add bots with this specific name
+- `BOT_strSpawnTeam` - quick add bots in this specific team
 - `BOT_ResetBotConfig()` - reset all bot settings to default values
 
 For specific bot behaviour customization go to `Options -> Advanced options -> Bot Mod Customization` in game (all commands start with `BOT_`)

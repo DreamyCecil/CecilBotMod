@@ -212,17 +212,29 @@ BOOL CastPathPointRay(const FLOAT3D &vSource, const FLOAT3D &vPoint, FLOAT &fDis
 };
 
 // [Cecil] 2021-06-13: Check if it's an enemy player
-BOOL IsEnemyPlayer(CEntity *pen) {
-  // simple class type check
-  return IS_PLAYER(pen);
+BOOL IsEnemyPlayer(CPlayerBot *penBot, CEntity *penEnemy) {
+  // not a player
+  if (!IS_PLAYER(penEnemy)) {
+    return FALSE;
+  }
+
+  const CTString &strTeam = penBot->en_pcCharacter.GetTeam();
+
+  // no team has been set
+  if (strTeam == "") {
+    return TRUE;
+  }
+
+  // different teams
+  return (strTeam != ((CPlayer *)penEnemy)->en_pcCharacter.GetTeam());
 };
 
 // [Cecil] 2021-06-19: Check if it's a monster enemy
-BOOL IsEnemyMonster(CEntity *pen) {
+BOOL IsEnemyMonster(CPlayerBot *penBot, CEntity *penEnemy) {
   // simple class type check
-  return IsDerivedFromDllClass(pen, CEnemyBase_DLLClass)
-      /*&& !IsOfDllClass(pen, CCannonStatic_DLLClass)
-      && !IsOfDllClass(pen, CCannonRotating_DLLClass)*/;
+  return IsDerivedFromDllClass(penEnemy, CEnemyBase_DLLClass)
+      /*&& !IsOfDllClass(penEnemy, CCannonStatic_DLLClass)
+      && !IsOfDllClass(penEnemy, CCannonRotating_DLLClass)*/;
 };
 
 // [Cecil] 2021-06-17: Search for an item
@@ -409,7 +421,7 @@ CEntity *ClosestEnemy(CPlayerBot *pen, FLOAT &fLast, SBotLogic &sbl) {
     CEntity *penCheck = iten;
 
     // if enemy (but not cannons - usually hard to reach)
-    if (SBS.iTargetType >= 1 && IsEnemyMonster(penCheck)) {
+    if (SBS.iTargetType >= 1 && IsEnemyMonster(pen, penCheck)) {
       // if not alive
       CEnemyBase *penEnemy = (CEnemyBase *)penCheck;
 
@@ -418,7 +430,7 @@ CEntity *ClosestEnemy(CPlayerBot *pen, FLOAT &fLast, SBotLogic &sbl) {
       }
 
     // if player and it's not a coop or a singleplayer game
-    } else if (SBS.iTargetType != 1 && IsEnemyPlayer(penCheck)) {
+    } else if (SBS.iTargetType != 1 && IsEnemyPlayer(pen, penCheck)) {
       // if not alive
       CPlayer *penEnemy = (CPlayer *)penCheck;
 

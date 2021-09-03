@@ -37,6 +37,7 @@ static CDynamicContainer<CTString> BOT_cnCurrentSkins;
 // [Cecil] 2018-10-15: Bot Editing
 static CTString BOT_strBotEdit = ""; // name of a bot to edit
 static CTString BOT_strSpawnName = ""; // name to spawn with
+static CTString BOT_strSpawnTeam = ""; // team to spawn in
 
 // [Cecil] 2020-07-28: A structure with bot settings
 static SBotSettings _sbsBotSettings;
@@ -94,7 +95,7 @@ static void CECIL_ResetBotConfig(void) {
 };
 
 // [Cecil] 2018-10-09: Bot adding
-static void CECIL_AddBot(CTString *pstrBotName, CTString *pstrBotSkin) {
+static void CECIL_AddBot(CTString *pstrBotName, CTString *pstrBotSkin, CTString *pstrBotTeam) {
   CTString strBotName = *pstrBotName;
   CTString strBotSkin = *pstrBotSkin;
 
@@ -151,7 +152,7 @@ static void CECIL_AddBot(CTString *pstrBotName, CTString *pstrBotSkin) {
   }
 
   pcBot.pc_strName = strBotName;
-  pcBot.pc_strTeam = "CECIL_BOTZ";
+  pcBot.pc_strTeam = *pstrBotTeam;
 
   // create message for adding player data to sessions
   CCecilStreamBlock nsbAddBot = CECIL_BotServerPacket(ESA_ADDBOT);
@@ -165,7 +166,8 @@ static void CECIL_AddBot(CTString *pstrBotName, CTString *pstrBotSkin) {
 static void CECIL_QuickBot(void) {
   CTString strName = BOT_strSpawnName;
   CTString strSkin = "";
-  CECIL_AddBot(&strName, &strSkin);
+  CTString strTeam = BOT_strSpawnTeam;
+  CECIL_AddBot(&strName, &strSkin, &strTeam);
 };
 
 // [Cecil] 2018-10-14: Bot removing
@@ -583,7 +585,7 @@ static void CECIL_NavMeshConnectionType(void) {
 extern void CECIL_InitSandboxActions(void) {
   // [Cecil] Bot mod
   _pShell->DeclareSymbol("user void " MODCOM_NAME("QuickBot(void);"), &CECIL_QuickBot);
-  _pShell->DeclareSymbol("user void " MODCOM_NAME("AddBot(CTString, CTString);"), &CECIL_AddBot);
+  _pShell->DeclareSymbol("user void " MODCOM_NAME("AddBot(CTString, CTString, CTString);"), &CECIL_AddBot);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("RemoveBot(CTString);"), &CECIL_RemoveBot);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("RemoveAllBots(void);"), &CECIL_RemoveAllBots);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("BotUpdate(void);"), &CECIL_BotUpdate);
@@ -602,6 +604,7 @@ extern void CECIL_InitSandboxActions(void) {
   // [Cecil] Bot editing
   _pShell->DeclareSymbol("user CTString " BOTCOM_NAME("strBotEdit;"), &BOT_strBotEdit);
   _pShell->DeclareSymbol("persistent user CTString " BOTCOM_NAME("strSpawnName;"), &BOT_strSpawnName);
+  _pShell->DeclareSymbol("persistent user CTString " BOTCOM_NAME("strSpawnTeam;"), &BOT_strSpawnTeam);
 
   _pShell->DeclareSymbol("user void " BOTCOM_NAME("ResetBotConfig(void);"), &CECIL_ResetBotConfig);
   _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("b3rdPerson;"      ), &_sbsBotSettings.b3rdPerson);
