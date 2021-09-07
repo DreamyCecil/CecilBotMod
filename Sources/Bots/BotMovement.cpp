@@ -348,6 +348,8 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
   // avoid the target in front of the bot
   FLOAT fStrafe = Clamp(fStrafeRange * fHealthRatio, 3.0f, 16.0f);
 
+  BOOL bInLiquid = (pen->m_pstState == PST_SWIM || pen->m_pstState == PST_DIVE);
+
   if (SBS.bStrafe && pen->m_fTargetDist < (bwWeapon.bw_fMinDistance + fStrafe)
    && (pen->m_penFollow == NULL || pen->m_penFollow == pen->m_penTarget || sbl.Following())) {
     // run around the enemy
@@ -402,25 +404,31 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
       FLOAT3D vHor = HorizontalDiff(plDelta.pl_PositionVector, pen->en_vGravityDir);
       FLOAT3D vVer = VerticalDiff(plDelta.pl_PositionVector, pen->en_vGravityDir);
 
-      // stop moving if it's too high up
-      if (vHor.Length() < 1.0f && vVer.Length() > 4.0f) {
-        vBotMovement = FLOAT3D(0.0f, 0.0f, 0.0f);
+      // move towards the point if in liquid
+      if (bInLiquid) {
+        vBotMovement = plDelta.pl_PositionVector.Normalize();
 
       } else {
-        FLOAT3D vRunDir;
-        AnglesToDirectionVector(ANGLE3D(aDeltaHeading, 0.0f, 0.0f), vRunDir);
-        vBotMovement = vRunDir;
-
-        // crouch if needed instead of jumping
-        if (bShouldCrouch) {
-          fVerticalMove = -1.0f;
-
-        // jump if allowed
-        } else if (bShouldJump && SBS.bJump) {
-          fVerticalMove = 1.0f;
+        // stop moving if it's too high up
+        if (vHor.Length() < 1.0f && vVer.Length() > 4.0f) {
+          vBotMovement = FLOAT3D(0.0f, 0.0f, 0.0f);
 
         } else {
-          fVerticalMove = 0.0f;
+          FLOAT3D vRunDir;
+          AnglesToDirectionVector(ANGLE3D(aDeltaHeading, 0.0f, 0.0f), vRunDir);
+          vBotMovement = vRunDir;
+
+          // crouch if needed instead of jumping
+          if (bShouldCrouch) {
+            fVerticalMove = -1.0f;
+
+          // jump if allowed
+          } else if (bShouldJump && SBS.bJump) {
+            fVerticalMove = 1.0f;
+
+          } else {
+            fVerticalMove = 0.0f;
+          }
         }
       }
     }
@@ -440,11 +448,14 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
     }
   }
 
-  // vertical movement (holding crouch or spamming jump)
-  if (fVerticalMove < -0.1f || (fVerticalMove > 0.1f && pen->ButtonAction())) {
-    vBotMovement(2) = fVerticalMove;
-  } else {
-    vBotMovement(2) = 0.0f;
+  // apply vertical movement if not in liquid
+  if (!bInLiquid) {
+    // vertical movement (holding crouch or spamming jump)
+    if (fVerticalMove < -0.1f || (fVerticalMove > 0.1f && pen->ButtonAction())) {
+      vBotMovement(2) = fVerticalMove;
+    } else {
+      vBotMovement(2) = 0.0f;
+    }
   }
 
   // move around
