@@ -102,6 +102,8 @@ CBotPathPoint::CBotPathPoint(void) {
   bpp_ulFlags = 0;
   bpp_penImportant = NULL;
   bpp_pbppNext = NULL;
+  bpp_penLock = NULL;
+  bpp_vLockOrigin = FLOAT3D(0.0f, 0.0f, 0.0f);
 
   bpp_bppoPolygon = NULL;
 };
@@ -119,13 +121,14 @@ CBotPathPoint::~CBotPathPoint(void) {
 
 // Writing & Reading
 void CBotPathPoint::Write(CTStream *strm) {
-  strm->WriteID_t("NMP4"); // NavMesh Point v4
+  strm->WriteID_t(CChunkID("BPPH")); // Bot Path Point Header
 
   *strm << bpp_iIndex;
   *strm << bpp_vPos;
   *strm << bpp_fRange;
   *strm << bpp_ulFlags;
 
+  // write important entity
   if (bpp_penImportant != NULL) {
     *strm << INDEX(bpp_penImportant->en_ulID);
   } else {
@@ -135,6 +138,14 @@ void CBotPathPoint::Write(CTStream *strm) {
   // write next important point
   if (bpp_pbppNext != NULL) {
     *strm << _pNavmesh->bnm_cbppPoints.Index(bpp_pbppNext);
+  } else {
+    *strm << INDEX(-1);
+  }
+
+  // write lock entity
+  if (bpp_penLock != NULL) {
+    *strm << INDEX(bpp_penLock->en_ulID);
+    strm->Write_t(&bpp_vLockOrigin, sizeof(FLOAT3D));
   } else {
     *strm << INDEX(-1);
   }
@@ -156,43 +167,38 @@ void CBotPathPoint::Write(CTStream *strm) {
   }
 };
 
-void CBotPathPoint::Read(CTStream *strm) {
+void CBotPathPoint::Read(CTStream *strm, INDEX iVersion) {
   INDEX iImportantEntity = -1;
   INDEX iNext = -1;
+  INDEX iLockEntity = -1;
 
-  if (strm->PeekID_t() == CChunkID("NMP1")) {
-    strm->ExpectID_t("NMP1"); // NavMesh Point v1
-
-    *strm >> bpp_iIndex;
-    *strm >> bpp_vPos;
-    *strm >> bpp_ulFlags;
-
-  } else if (strm->PeekID_t() == CChunkID("NMP2")) {
-    strm->ExpectID_t("NMP2"); // NavMesh Point v2
-
-    *strm >> bpp_iIndex;
-    *strm >> bpp_vPos;
-    *strm >> bpp_ulFlags;
-    *strm >> iImportantEntity;
-
-  } else if (strm->PeekID_t() == CChunkID("NMP3")) {
-    strm->ExpectID_t("NMP3"); // NavMesh Point v3
-
-    *strm >> bpp_iIndex;
-    *strm >> bpp_vPos;
-    *strm >> bpp_fRange;
-    *strm >> bpp_ulFlags;
-    *strm >> iImportantEntity;
+  // legacy version support
+  if (strnicmp(strm->PeekID_t(), "NMP", 3) == 0) {
+    // read version 4
+    strm->ExpectID_t(CChunkID("NMP4"));
+    iVersion = LEGACY_PATHPOINT_VERSION;
 
   } else {
-    strm->ExpectID_t("NMP4"); // NavMesh Point v4
+    strm->ExpectID_t(CChunkID("BPPH")); // Bot Path Point Header
+  }
 
-    *strm >> bpp_iIndex;
-    *strm >> bpp_vPos;
-    *strm >> bpp_fRange;
-    *strm >> bpp_ulFlags;
-    *strm >> iImportantEntity;
-    *strm >> iNext;
+  // main properties (version 4)
+  *strm >> bpp_iIndex;
+  *strm >> bpp_vPos;
+  *strm >> bpp_fRange;
+  *strm >> bpp_ulFlags;
+  *strm >> iImportantEntity;
+  *strm >> iNext;
+
+  // new versions
+  switch (iVersion) {
+    case 5:
+      *strm >> iLockEntity;
+
+      if (iLockEntity != -1) {
+        strm->Read_t(&bpp_vLockOrigin, sizeof(FLOAT3D));
+      }
+      break;
   }
 
   // set important entity
@@ -204,6 +210,9 @@ void CBotPathPoint::Read(CTStream *strm) {
   } else {
     bpp_pbppNext = NULL;
   }
+
+  // set lock entity
+  bpp_penLock = FindEntityByID(&_pNetwork->ga_World, iLockEntity);
 
   // read possible connections
   INDEX ctConnections;
@@ -230,12 +239,19 @@ void CBotPathPoint::Read(CTStream *strm) {
 };
 
 // Path points comparison
-inline BOOL CBotPathPoint::operator==(const CBotPathPoint &bppOther) {
+BOOL CBotPathPoint::operator==(const CBotPathPoint &bppOther) const {
   return (this->bpp_iIndex == bppOther.bpp_iIndex);
 };
 
-inline BOOL CBotPathPoint::operator==(const CBotPathPoint &bppOther) const {
-  return (this->bpp_iIndex == bppOther.bpp_iIndex);
+// Check if the point is locked (cannot be passed through)
+BOOL CBotPathPoint::IsLocked(void) {
+  // no lock entity
+  if (bpp_penLock == NULL) {
+    return FALSE;
+  }
+
+  // lock entity is away from its origin
+  return (bpp_penLock->GetPlacement().pl_PositionVector - bpp_vLockOrigin).Length() > 1.0f;
 };
 
 // Make a connection with a specific point
@@ -273,7 +289,8 @@ CBotNavmesh::~CBotNavmesh(void) {
 
 // Writing & Reading
 void CBotNavmesh::Write(CTStream *strm) {
-  strm->WriteID_t("BNM1"); // Bot NavMesh v1
+  strm->WriteID_t("BNMV"); // Bot NavMesh Version
+  *strm << INDEX(5); // latest NavMesh version
 
   INDEX ctPoints = bnm_cbppPoints.Count();
 
@@ -289,26 +306,34 @@ void CBotNavmesh::Write(CTStream *strm) {
 };
 
 void CBotNavmesh::Read(CTStream *strm) {
+  INDEX iVersion;
   INDEX ctPoints;
 
-  // Bot NavMesh v1
   if (strm->PeekID_t() == CChunkID("BNM1")) {
-    strm->ExpectID_t("BNM1");
-    *strm >> bnm_bGenerated; // read if generated or not
-    *strm >> bnm_iNextPointID; // next point ID
-    *strm >> ctPoints; // amount of points
+    strm->ExpectID_t("BNM1"); // Bot NavMesh v1
+    iVersion = LEGACY_PATHPOINT_VERSION; // last legacy path point version
+
+  } else {
+    strm->ExpectID_t("BNMV"); // Bot NavMesh Version
+    *strm >> iVersion;
   }
 
+  *strm >> bnm_bGenerated; // read if generated or not
+  *strm >> bnm_iNextPointID; // next point ID
+  *strm >> ctPoints; // amount of points
+
   // create points
-  for (INDEX iNewPoint = 0; iNewPoint < ctPoints; iNewPoint++) {
+  INDEX iPoint;
+
+  for (iPoint = 0; iPoint < ctPoints; iPoint++) {
     CBotPathPoint *bppNew = new CBotPathPoint();
     bnm_cbppPoints.Add(bppNew);
   }
 
   // read points
-  for (INDEX iPoint = 0; iPoint < ctPoints; iPoint++) {
+  for (iPoint = 0; iPoint < ctPoints; iPoint++) {
     CBotPathPoint *pbpp = &bnm_cbppPoints[iPoint];
-    pbpp->Read(strm);
+    pbpp->Read(strm, iVersion);
   }
 };
 

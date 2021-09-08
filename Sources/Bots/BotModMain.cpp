@@ -76,7 +76,7 @@ void CECIL_BotGameStart(CSessionProperties &sp) {
     _pNavmesh->Load(wo);
 
   } catch (char *strError) {
-    (void)strError;
+    CPrintF("Cannot load NavMesh for the map: %s\n", strError);
   }
 
   // [Cecil] 2021-08-28: Set current bot names and skins

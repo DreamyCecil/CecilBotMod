@@ -52,6 +52,9 @@ class DECL_DLL CBotPathPolygon {
     FLOAT3D Center(void);
 };
 
+// [Cecil] 2021-09-09: Legacy path point version
+#define LEGACY_PATHPOINT_VERSION 4
+
 // [Cecil] 2018-10-22: Bot Path Points
 class DECL_DLL CBotPathPoint {
   public:
@@ -63,6 +66,9 @@ class DECL_DLL CBotPathPoint {
     CBotPathPoint *bpp_pbppNext; // next important point
     // [Cecil] TODO: Add defending time which would force bots to stay on important points for some time
     //FLOAT bpp_fDefendTime;
+
+    CEntity *bpp_penLock; // entity that locks the point if it's not on the origin position
+    FLOAT3D bpp_vLockOrigin; // origin position of the locking entity
 
     // Polygon of this point
     CBotPathPolygon *bpp_bppoPolygon;
@@ -76,11 +82,13 @@ class DECL_DLL CBotPathPoint {
 
     // Writing & Reading
     void Write(CTStream *strm);
-    void Read(CTStream *strm);
+    void Read(CTStream *strm, INDEX iVersion);
 
     // Path points comparison
-    inline BOOL operator==(const CBotPathPoint &bppOther);
-    inline BOOL operator==(const CBotPathPoint &bppOther) const;
+    BOOL operator==(const CBotPathPoint &bppOther) const;
+
+    // Check if the point is locked (cannot be passed through)
+    BOOL IsLocked(void);
 
     // Make a connection with a specific point
     void Connect(CBotPathPoint *pbppPoint, INDEX iType);
