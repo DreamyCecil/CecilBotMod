@@ -905,6 +905,11 @@ CBotPathPoint *CBotNavmesh::FindNextPoint(CBotPathPoint *pbppSrc, CBotPathPoint 
         continue;
       }
 
+      // skip locked points
+      if (pbpp->IsLocked()) {
+        continue;
+      }
+
       // distance to current target point (none)
       FLOAT fToTarget = 0.0f;
 
