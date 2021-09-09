@@ -1104,7 +1104,8 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
           CPrintF("Changed point's entity to %d\n", iEntityID);
 
         } else {
-          CPrintF("Important entity under ID %d doesn't exist!\n", iEntityID);
+          pbpp->bpp_penImportant = NULL;
+          CPrintF("Reset point's entity (entity under ID %d doesn't exist)\n", iEntityID);
         }
       }
     } break;
@@ -1165,7 +1166,8 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
           CPrintF("Changed point's lock entity to %d\n", iEntityID);
 
         } else {
-          CPrintF("Lock entity under ID %d doesn't exist!\n", iEntityID);
+          pbpp->bpp_penLock = NULL;
+          CPrintF("Reset point's lock entity (entity under ID %d doesn't exist)\n", iEntityID);
         }
       }
     } break;
