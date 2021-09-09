@@ -198,14 +198,32 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
           // connect with important entity
           if (pbpp->bpp_penImportant != NULL) {
             CEntity *penImportant = pbpp->bpp_penImportant;
-            FLOAT3D vEntity = penImportant->GetPlacement().pl_PositionVector;
+            FLOAT3D vEntity = penImportant->GetLerpedPlacement().pl_PositionVector;
 
-            if (penImportant != NULL) {
-              FLOAT3D vOnScreen1, vEntityOnScreen;
+            FLOAT3D vOnScreen1, vEntityOnScreen;
 
-              if (ProjectLine(&prProjection, vPoint1, vEntity, vOnScreen1, vEntityOnScreen)) {
-                pdp->DrawLine(vOnScreen1(1), vOnScreen1(2), vEntityOnScreen(1), vEntityOnScreen(2), 0x00FF0000 | ubPointAlpha);
-              }
+            // from point to entity
+            if (ProjectLine(&prProjection, vPoint1, vEntity, vOnScreen1, vEntityOnScreen)) {
+              pdp->DrawLine(vOnScreen1(1), vOnScreen1(2), vEntityOnScreen(1), vEntityOnScreen(2), 0x00FF0000 | ubPointAlpha);
+            }
+          }
+
+          // connect with lock entity
+          if (pbpp->bpp_penLock != NULL) {
+            CEntity *penLock = pbpp->bpp_penLock;
+            FLOAT3D vEntity = penLock->GetLerpedPlacement().pl_PositionVector;
+            FLOAT3D vOrigin = pbpp->bpp_vLockOrigin;
+
+            FLOAT3D vOnScreen1, vEntityOnScreen, vOriginOnScreen;
+            
+            // from point to entity
+            if (ProjectLine(&prProjection, vPoint1, vEntity, vOnScreen1, vEntityOnScreen)) {
+              pdp->DrawLine(vOnScreen1(1), vOnScreen1(2), vEntityOnScreen(1), vEntityOnScreen(2), 0xFFFF7F00 | UBYTE(ubPointAlpha * 0.5f));
+            }
+            
+            // from entity to origin
+            if ((vEntity - vOrigin).Length() > 0.01f && ProjectLine(&prProjection, vEntity, vOrigin, vEntityOnScreen, vOriginOnScreen)) {
+              pdp->DrawLine(vEntityOnScreen(1), vEntityOnScreen(2), vOriginOnScreen(1), vOriginOnScreen(2), 0x7FFF7F00 | UBYTE(ubPointAlpha * 0.5f));
             }
           }
 

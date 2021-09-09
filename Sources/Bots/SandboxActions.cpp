@@ -518,6 +518,20 @@ static void CECIL_NavMeshPointNext(INDEX iNextPoint) {
   _pNetwork->SendToServerReliable(nmNavmesh);
 };
 
+// [Cecil] 2021-09-09: Change NavMesh point lock entity
+static void CECIL_NavMeshPointLock(INDEX iEntityID) {
+  // editing is disabled
+  if (MOD_iRenderNavMesh <= 0) {
+    return;
+  }
+
+  CNetworkMessage nmNavmesh = CECIL_NavMeshClientPacket(ESA_NAVMESH_LOCK);
+  nmNavmesh << MOD_iNavMeshPoint;
+  nmNavmesh << iEntityID;
+
+  _pNetwork->SendToServerReliable(nmNavmesh);
+};
+
 // [Cecil] 2021-06-23: Add NavMesh point range
 static void CECIL_AddNavMeshPointRange(FLOAT fRange) {
   // editing is disabled
@@ -663,6 +677,7 @@ extern void CECIL_InitSandboxActions(void) {
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshPointEntity(INDEX);"), &CECIL_NavMeshPointEntity);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshPointRange(FLOAT);"), &CECIL_NavMeshPointRange);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshPointNext(INDEX);"), &CECIL_NavMeshPointNext);
+  _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshPointLock(INDEX);"), &CECIL_NavMeshPointLock);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("AddNavMeshPointRange(FLOAT);"), &CECIL_AddNavMeshPointRange);
 
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshSelectPoint(void);"), &CECIL_NavMeshSelectPoint);
@@ -1082,9 +1097,15 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
         CPrintF("NavMesh point doesn't exist!\n");
 
       } else {
-        pbpp->bpp_penImportant = FindEntityByID(&wo, iEntityID);
+        CEntity *penImportant = FindEntityByID(&wo, iEntityID);
 
-        CPrintF("Changed point's entity to %d\n", iEntityID);
+        if (penImportant != NULL) {
+          pbpp->bpp_penImportant = penImportant;
+          CPrintF("Changed point's entity to %d\n", iEntityID);
+
+        } else {
+          CPrintF("Important entity under ID %d doesn't exist!\n", iEntityID);
+        }
       }
     } break;
 
@@ -1122,6 +1143,30 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
 
         INDEX iNewNext = (pbpp->bpp_pbppNext == NULL) ? -1 : pbpp->bpp_pbppNext->bpp_iIndex;
         CPrintF("Point's next important point: %d -> %d\n", iLastNext, iNewNext);
+      }
+    } break;
+
+    case ESA_NAVMESH_LOCK: {
+      INDEX iCurrentPoint, iEntityID;
+      nmMessage >> iCurrentPoint >> iEntityID;
+
+      CBotPathPoint *pbpp = _pNavmesh->FindPointByID(iCurrentPoint);
+
+      if (pbpp == NULL) {
+        CPrintF("NavMesh point doesn't exist!\n");
+
+      } else {
+        CEntity *penLock = FindEntityByID(&wo, iEntityID);
+
+        if (penLock != NULL) {
+          pbpp->bpp_penLock = penLock;
+          pbpp->bpp_vLockOrigin = penLock->GetPlacement().pl_PositionVector;
+
+          CPrintF("Changed point's lock entity to %d\n", iEntityID);
+
+        } else {
+          CPrintF("Lock entity under ID %d doesn't exist!\n", iEntityID);
+        }
       }
     } break;
 

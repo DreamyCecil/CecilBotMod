@@ -62,12 +62,12 @@ class DECL_DLL CBotPathPoint {
     FLOAT3D bpp_vPos;  // position of this point
     FLOAT bpp_fRange;  // walking radius of a point
     ULONG bpp_ulFlags; // special point flags
-    CEntity *bpp_penImportant; // important entity
+    CEntityPointer bpp_penImportant; // important entity
     CBotPathPoint *bpp_pbppNext; // next important point
     // [Cecil] TODO: Add defending time which would force bots to stay on important points for some time
     //FLOAT bpp_fDefendTime;
 
-    CEntity *bpp_penLock; // entity that locks the point if it's not on the origin position
+    CEntityPointer bpp_penLock; // entity that locks the point if it's not on the origin position
     FLOAT3D bpp_vLockOrigin; // origin position of the locking entity
 
     // Polygon of this point
