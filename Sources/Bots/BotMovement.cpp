@@ -158,7 +158,7 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
       pen->m_pbppTarget = NearestNavMeshPointPos(penMovableTarget, penTarget->GetPlacement().pl_PositionVector);
     }
 
-    CTString strThought; // [Cecil] TEMP
+    CTString strThought;
 
     // [Cecil] 2021-06-21: Just go to the first point if haven't reached it yet
     if (pbppReached != pbppClosest) {
@@ -176,15 +176,26 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
 
       // remember the point if found
       if (pbppNext != NULL) {
+        // [Cecil] 2021-09-09: Point is locked
+        BOOL bStay = pbppNext->IsLocked();
+
+        // stay on point if it's locked
+        if (bStay) {
+          sbl.ulFlags |= BLF_STAYONPOINT;
+        }
+
         // [Cecil] 2021-06-16: Target point is unreachable, stay where you are
-        pen->m_pbppCurrent = (pbppNext->bpp_ulFlags & PPF_UNREACHABLE) ? pbppClosest : pbppNext;
+        bStay |= (pbppNext->bpp_ulFlags & PPF_UNREACHABLE);
+
+        // select new path point
+        pen->m_pbppCurrent = (bStay ? pbppClosest : pbppNext);
 
         // get flags of the closest point or override them
         pen->m_ulPointFlags = (pbppNext->bpp_ulFlags & PPF_OVERRIDE) ? pbppNext->bpp_ulFlags : pbppClosest->bpp_ulFlags;
 
         FLOAT3D vToPoint = (pbppNext->bpp_vPos - vBotPos).SafeNormalize();
         ANGLE3D aToPoint; DirectionVectorToAngles(vToPoint, aToPoint);
-        strThought.PrintF("Next point ^c00ff00%d ^c00af00[%.1f, %.1f]",
+        strThought.PrintF("%s ^c00ff00%d ^c00af00[%.1f, %.1f]", (bStay ? "Staying at" : "Next point"),
                           pbppNext->bpp_iIndex, aToPoint(1), aToPoint(2));
 
       // no next point
@@ -315,7 +326,7 @@ void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
     BOOL bTargetingEnemy = WEAPON->m_penRayHit == pen->m_penTarget;
 
     if (sbl.SeeEnemy() || bTargetingEnemy) {
-      sbl.ubFlags |= BLF_CANSHOOT;
+      sbl.ulFlags |= BLF_CANSHOOT;
     }
   }
 };
@@ -404,13 +415,18 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
       FLOAT3D vHor = HorizontalDiff(plDelta.pl_PositionVector, pen->en_vGravityDir);
       FLOAT3D vVer = VerticalDiff(plDelta.pl_PositionVector, pen->en_vGravityDir);
 
+      // stay in place if it's too high up
+      if (vHor.Length() < 1.0f && vVer.Length() > 4.0f) {
+        sbl.ulFlags |= BLF_STAYONPOINT;
+      }
+
       // move towards the point if in liquid
       if (bInLiquid) {
         vBotMovement = plDelta.pl_PositionVector.Normalize();
 
       } else {
-        // stop moving if it's too high up
-        if (vHor.Length() < 1.0f && vVer.Length() > 4.0f) {
+        // stop moving if needed
+        if (sbl.StayOnPoint()) {
           vBotMovement = FLOAT3D(0.0f, 0.0f, 0.0f);
 
         } else {

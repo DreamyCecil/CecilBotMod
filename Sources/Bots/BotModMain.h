@@ -15,7 +15,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
-// [Cecil] TEMP 2021-06-20: Bot thoughts
+// [Cecil] 2021-06-20: Bot thoughts
 struct SBotThoughts {
   CTString strThoughts[16]; // thoughts
 

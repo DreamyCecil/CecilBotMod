@@ -277,7 +277,7 @@ void BotItemSearch(CPlayerBot *pen, SBotLogic &sbl) {
   if (pen->m_penLastItem != NULL) {
     // item is pickable
     if (IsItemPickable(pen, (CItem *)&*pen->m_penLastItem, TRUE)) {
-      sbl.ubFlags |= BLF_ITEMEXISTS;
+      sbl.ulFlags |= BLF_ITEMEXISTS;
       pen->m_penFollow = pen->m_penLastItem;
 
     // not pickable anymore

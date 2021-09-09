@@ -44,10 +44,11 @@ void UseImportantEntity(CPlayer *penBot, CEntity *penEntity);
 #define BLF_FOLLOWING    (1 << 5)
 #define BLF_SEEPLAYER    (1 << 6)
 #define BLF_BACKOFF      (1 << 7)
+#define BLF_STAYONPOINT  (1 << 8)
 
 // [Cecil] 2021-06-14: Bot logic settings
 struct SBotLogic {
-  UBYTE ubFlags; // things bot is thinking about
+  ULONG ulFlags; // things bot is thinking about
   EntityInfo *peiTarget; // entity info of the looking target
   SBotWeaponConfig *aWeapons; // selected weapon config
 
@@ -55,7 +56,7 @@ struct SBotLogic {
   ANGLE3D aAim;  // in which direction bot needs to aim
 
   // Constructor
-  SBotLogic(void) : ubFlags(0), peiTarget(NULL),  aAim(0.0f, 0.0f, 0.0f),
+  SBotLogic(void) : ulFlags(0), peiTarget(NULL),  aAim(0.0f, 0.0f, 0.0f),
     plBotView(FLOAT3D(0.0f, 0.0f, 0.0f), ANGLE3D(0.0f, 0.0f, 0.0f))
   {
     aWeapons = PickWeaponConfig();
@@ -66,14 +67,15 @@ struct SBotLogic {
   inline ANGLE3D &ViewAng(void) { return plBotView.pl_OrientationAngle; };
 
   // Check flags
-  inline BOOL EnemyExists(void)  { return ubFlags & BLF_ENEMYEXISTS; };
-  inline BOOL SeeEnemy(void)     { return ubFlags & BLF_SEEENEMY; };
-  inline BOOL CanShoot(void)     { return ubFlags & BLF_CANSHOOT; };
-  inline BOOL ItemExists(void)   { return ubFlags & BLF_ITEMEXISTS; };
-  inline BOOL FollowPlayer(void) { return ubFlags & BLF_FOLLOWPLAYER; };
-  inline BOOL Following(void)    { return ubFlags & BLF_FOLLOWING; };
-  inline BOOL SeePlayer(void)    { return ubFlags & BLF_SEEPLAYER; };
-  inline BOOL BackOff(void)      { return ubFlags & BLF_BACKOFF; };
+  inline BOOL EnemyExists(void)  { return ulFlags & BLF_ENEMYEXISTS; };
+  inline BOOL SeeEnemy(void)     { return ulFlags & BLF_SEEENEMY; };
+  inline BOOL CanShoot(void)     { return ulFlags & BLF_CANSHOOT; };
+  inline BOOL ItemExists(void)   { return ulFlags & BLF_ITEMEXISTS; };
+  inline BOOL FollowPlayer(void) { return ulFlags & BLF_FOLLOWPLAYER; };
+  inline BOOL Following(void)    { return ulFlags & BLF_FOLLOWING; };
+  inline BOOL SeePlayer(void)    { return ulFlags & BLF_SEEPLAYER; };
+  inline BOOL BackOff(void)      { return ulFlags & BLF_BACKOFF; };
+  inline BOOL StayOnPoint(void)  { return ulFlags & BLF_STAYONPOINT; };
 };
 
 // [Cecil] Cast bot view ray

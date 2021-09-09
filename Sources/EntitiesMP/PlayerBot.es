@@ -72,7 +72,7 @@ properties:
 
   SBotSettings m_sbsBot; // bot settings
 
-  SBotThoughts m_btThoughts; // [Cecil] TEMP 2021-06-20: Bot thoughts
+  SBotThoughts m_btThoughts; // [Cecil] 2021-06-20: Bot thoughts
 }
 
 components:
@@ -343,17 +343,17 @@ functions:
 
     // [Cecil] 2019-05-28: Follow players in cooperative
     if (GetSP()->sp_bCooperative || GetSP()->sp_bSinglePlayer) {
-      sbl.ubFlags |= BLF_FOLLOWPLAYER;
+      sbl.ulFlags |= BLF_FOLLOWPLAYER;
     }
 
     // enemy exists
     if (m_penTarget != NULL) {
-      sbl.ubFlags |= BLF_ENEMYEXISTS;
+      sbl.ulFlags |= BLF_ENEMYEXISTS;
       sbl.peiTarget = (EntityInfo *)m_penTarget->GetEntityInfo();
 
       // can see the enemy
       if (CastBotRay(this, m_penTarget, sbl, TRUE)) {
-        sbl.ubFlags |= BLF_SEEENEMY;
+        sbl.ulFlags |= BLF_SEEENEMY;
         m_tmLastSawTarget = _pTimer->CurrentTick();
       }
       
@@ -417,21 +417,21 @@ functions:
         // don't follow anything else
         m_penFollow = NULL;
 
-        sbl.ubFlags |= BLF_SEEPLAYER;
+        sbl.ulFlags |= BLF_SEEPLAYER;
 
         // follow the player
         if (fDistToPlayer > 5.0f) {
           m_penFollow = penPlayer;
-          sbl.ubFlags |= BLF_FOLLOWING;
+          sbl.ulFlags |= BLF_FOLLOWING;
 
           // player is too far
           if (fDistToPlayer > 100.0f || !CastBotRay(this, penPlayer, sbl, TRUE)) {
-            sbl.ubFlags &= ~BLF_SEEPLAYER;
+            sbl.ulFlags &= ~BLF_SEEPLAYER;
           }
 
         } else if (fDistToPlayer < 2.0f) {
           m_penFollow = penPlayer;
-          sbl.ubFlags |= BLF_BACKOFF;
+          sbl.ulFlags |= BLF_BACKOFF;
         }
 
         // look at the player

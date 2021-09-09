@@ -251,7 +251,7 @@ BOOL CBotPathPoint::IsLocked(void) {
   }
 
   // lock entity is away from its origin
-  return (bpp_penLock->GetPlacement().pl_PositionVector - bpp_vLockOrigin).Length() > 1.0f;
+  return (bpp_penLock->GetPlacement().pl_PositionVector - bpp_vLockOrigin).Length() > 0.1f;
 };
 
 // Make a connection with a specific point

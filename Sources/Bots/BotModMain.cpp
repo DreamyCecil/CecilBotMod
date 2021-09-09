@@ -344,7 +344,7 @@ void CECIL_HUDOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjectio
     return;
   }
 
-  // [Cecil] TEMP 2021-06-20: Bot thoughts
+  // [Cecil] 2021-06-20: Bot thoughts
   if (MOD_bBotThoughts && penOwner->IsBot()) {
     pdp->SetFont(_pfdDisplayFont);
     pdp->SetTextScaling(fScaling);
