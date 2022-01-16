@@ -586,13 +586,13 @@
     <ClCompile Include="..\Bots\Patcher\patcher.cpp">
       <Filter>Source Files\Patcher</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerBot.cpp">
+    <ClCompile Include="..\Bots\Classes\PlayerBot.cpp">
       <Filter>Source Files\Bot Mod Entity sources</Filter>
     </ClCompile>
-    <ClCompile Include="NavMeshGenerator.cpp">
+    <ClCompile Include="..\Bots\Classes\NavMeshGenerator.cpp">
       <Filter>Source Files\Bot Mod Entity sources</Filter>
     </ClCompile>
-    <ClCompile Include="BotModGlobal.cpp">
+    <ClCompile Include="..\Bots\Classes\BotModGlobal.cpp">
       <Filter>Source Files\Bot Mod Entity sources</Filter>
     </ClCompile>
     <ClCompile Include="..\Bots\BotModMain.cpp">
@@ -1569,22 +1569,22 @@
     <ClInclude Include="..\Bots\Patcher\patcher_defines.h">
       <Filter>Header Files\Patcher headers</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerBot.h">
+    <ClInclude Include="..\Bots\Classes\PlayerBot.h">
       <Filter>Header Files\Bot Mod Entity headers</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerBot_tables.h">
+    <ClInclude Include="..\Bots\Classes\PlayerBot_tables.h">
       <Filter>Header Files\Bot Mod Entity headers</Filter>
     </ClInclude>
-    <ClInclude Include="NavMeshGenerator.h">
+    <ClInclude Include="..\Bots\Classes\NavMeshGenerator.h">
       <Filter>Header Files\Bot Mod Entity headers</Filter>
     </ClInclude>
-    <ClInclude Include="NavMeshGenerator_tables.h">
+    <ClInclude Include="..\Bots\Classes\NavMeshGenerator_tables.h">
       <Filter>Header Files\Bot Mod Entity headers</Filter>
     </ClInclude>
-    <ClInclude Include="BotModGlobal.h">
+    <ClInclude Include="..\Bots\Classes\BotModGlobal.h">
       <Filter>Header Files\Bot Mod Entity headers</Filter>
     </ClInclude>
-    <ClInclude Include="BotModGlobal_tables.h">
+    <ClInclude Include="..\Bots\Classes\BotModGlobal_tables.h">
       <Filter>Header Files\Bot Mod Entity headers</Filter>
     </ClInclude>
     <ClInclude Include="..\Bots\BotModMain.h">
@@ -2471,13 +2471,13 @@
     <CustomBuild Include="..\..\Flesh\Data\Messages\Enemies\Woman.txt">
       <Filter>Messages</Filter>
     </CustomBuild>
-    <CustomBuild Include="PlayerBot.es">
+    <CustomBuild Include="..\Bots\Classes\PlayerBot.es">
       <Filter>Class Files\BotMod</Filter>
     </CustomBuild>
-    <CustomBuild Include="NavMeshGenerator.es">
+    <CustomBuild Include="..\Bots\Classes\NavMeshGenerator.es">
       <Filter>Class Files\BotMod</Filter>
     </CustomBuild>
-    <CustomBuild Include="BotModGlobal.es">
+    <CustomBuild Include="..\Bots\Classes\BotModGlobal.es">
       <Filter>Class Files\BotMod</Filter>
     </CustomBuild>
   </ItemGroup>
