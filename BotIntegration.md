@@ -2,10 +2,10 @@
 
 This document should walk you through simple steps that will help you integrate bots into your own mod.
 
-Keep in mind that if your mod has many drastic changes to gameplay mechanics, don't be afraid of rewriting bot code to your liking.
+Keep in mind that if your mod has many drastic changes to gameplay mechanics, don't be afraid of rewriting the bot code to your liking.
 
 Simple guide to developer comments:
-- `[Cecil] <date>` - indicates specifically when a certain feature has been introduced.
+- `[Cecil] <date>` - indicates specifically when a certain feature has been implemented.
 - `[Cecil] TEMP` - temporary feature that can be applied permanently or removed at a later time.
 - `[Cecil] TODO` - notes to self about features that need to be implemented.
 - `[Cecil] NOTE` - important note about a certain feature. Advised to search for them for extra help with integration.
@@ -17,10 +17,12 @@ Simple guide to developer comments:
 
 ## EntitiesMP
 
-- Copy `BotModGlobal.es`, `NavMeshGenerator.es` and `PlayerBot.es` entities to your project.
+- Include `BotModGlobal.es`, `NavMeshGenerator.es` and `PlayerBot.es` entities in your project and copy the custom build step.
 - All instances of `GetMaxPlayers()` and `GetPlayerEntity()` are replaced with `CECIL_GetMaxPlayers()` and `CECIL_GetPlayerEntity()` respectively (except for three places where it's noted not to do so in `Player.es`).
 - All instances of `IsOfClass(<ptr>, "Player")` and `IsDerivedFromClass(<ptr>, "Player")` are replaced with `IS_PLAYER(<ptr>)`. Can be achieved automatically by replacing `, "Player")` with `)` and then fixing errors where they appear.
 - All instances of `GetMyPlayerIndex()` are replaced with `CECIL_PlayerIndex(<ptr>)`.
+  - If it's just `GetMyPlayerIndex()`, it's replaced with `CECIL_PlayerIndex(this)`.
+  - If it's `ptr->GetMyPlayerIndex()`, it's replaced with `CECIL_PlayerIndex(ptr)`.
 - All `Player.es` additions that are on top of the vanilla `Player.es` (commented with `// [Cecil]`).
 
 ## GameMP
