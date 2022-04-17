@@ -91,3 +91,14 @@ Change current player weapons and "Give Weapons" property of all CPlayerMarkers:
 - `MOD_NavMeshPointFlags(mask)` - set NavMesh point flags as a base 10 bit mask (e.g. 21 = 16 + 4 + 1)
 - `MOD_NavMeshPointEntity(entity ID)` - set NavMesh point entity by its ID (-1 for none)
 - `MOD_NavMeshPointRange(range)` - change NavMesh point range
+- `MOD_NavMeshPointNext(point ID)` - next important point to go to after this one
+
+---
+- `MOD_NavMeshPointLock(entity ID)` - set some entity as the point's "lock" (meaning that this point will only be accessible when the set entity is at the exact same place as it was when it's been set)
+```
+If you see a [pale yellow] line going to a NavMesh point, it means that it's connected to this "lock entity"
+If you see any of these lines connected to the set "lock" entity, it means that the NavMesh point is currently inaccessible:
+  [Pale green] line indicates the difference between the origin position and the current position of the "lock" entity
+  [Pale blue] line indicates origin angle of the "lock" entity
+  [Pale red] line indicates the current angle of the "lock" entity
+```
