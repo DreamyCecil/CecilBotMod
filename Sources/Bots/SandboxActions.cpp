@@ -303,7 +303,7 @@ static void CECIL_NavMeshSave(void) {
   
   // save NavMesh locally
   try {
-    _pNavmesh->Save(wo);
+    _pNavmesh->SaveNavmesh(wo);
 
   } catch (char *strError) {
     CPrintF("%s\n", strError);
@@ -890,7 +890,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
     case ESA_NAVMESH_LOAD: {
       // load the NavMesh
       try {
-        _pNavmesh->Load(wo);
+        _pNavmesh->LoadNavmesh(wo);
 
       } catch (char *strError) {
         CPrintF("%s\n", strError);
@@ -1161,7 +1161,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin,
 
         if (penLock != NULL) {
           pbpp->bpp_penLock = penLock;
-          pbpp->bpp_vLockOrigin = penLock->GetPlacement().pl_PositionVector;
+          pbpp->bpp_plLockOrigin = penLock->GetPlacement();
 
           CPrintF("Changed point's lock entity to %d\n", iEntityID);
 

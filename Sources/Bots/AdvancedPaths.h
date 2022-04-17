@@ -45,12 +45,15 @@ class DECL_DLL CBotPathPolygon {
     ~CBotPathPolygon(void);
 
     // Writing & Reading
-    void Write(CTStream *strm);
-    void Read(CTStream *strm);
+    void WritePolygon(CTStream *strm);
+    void ReadPolygon(CTStream *strm);
 
     // Absolute center position of this polygon
     FLOAT3D Center(void);
 };
+
+// [Cecil] 2022-04-17: Current NavMesh version
+#define CURRENT_NAVMESH_VERSION 6
 
 // [Cecil] 2021-09-09: Legacy path point version
 #define LEGACY_PATHPOINT_VERSION 4
@@ -68,7 +71,7 @@ class DECL_DLL CBotPathPoint {
     //FLOAT bpp_fDefendTime;
 
     CEntityPointer bpp_penLock; // entity that locks the point if it's not on the origin position
-    FLOAT3D bpp_vLockOrigin; // origin position of the locking entity
+    CPlacement3D bpp_plLockOrigin; // origin placement of the locking entity
 
     // Polygon of this point
     CBotPathPolygon *bpp_bppoPolygon;
@@ -81,8 +84,8 @@ class DECL_DLL CBotPathPoint {
     ~CBotPathPoint(void);
 
     // Writing & Reading
-    void Write(CTStream *strm);
-    void Read(CTStream *strm, INDEX iVersion);
+    void WritePoint(CTStream *strm);
+    void ReadPoint(CTStream *strm, INDEX iVersion);
 
     // Path points comparison
     BOOL operator==(const CBotPathPoint &bppOther) const;
@@ -133,12 +136,12 @@ class DECL_DLL CBotNavmesh {
     ~CBotNavmesh(void);
 
     // Writing & Reading
-    void Write(CTStream *strm);
-    void Read(CTStream *strm);
+    void WriteNavmesh(CTStream *strm);
+    void ReadNavmesh(CTStream *strm);
 
     // Saving & Loading for a specific world
-    void Save(CWorld &wo);
-    void Load(CWorld &wo);
+    void SaveNavmesh(CWorld &wo);
+    void LoadNavmesh(CWorld &wo);
 
     // Clear the NavMesh
     void ClearNavMesh(void);

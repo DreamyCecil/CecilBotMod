@@ -58,7 +58,7 @@ CBotPathPolygon::~CBotPathPolygon(void) {
 };
 
 // Writing & Reading
-void CBotPathPolygon::Write(CTStream *strm) {
+void CBotPathPolygon::WritePolygon(CTStream *strm) {
   strm->WriteID_t("PPO2"); // Path POlygon v2
 
   // write vertex count
@@ -70,7 +70,7 @@ void CBotPathPolygon::Write(CTStream *strm) {
   }
 };
 
-void CBotPathPolygon::Read(CTStream *strm) {
+void CBotPathPolygon::ReadPolygon(CTStream *strm) {
   if (strm->PeekID_t() == CChunkID("PPO1")) {
     strm->ExpectID_t("PPO1"); // Path POlygon v1
     
@@ -103,7 +103,7 @@ CBotPathPoint::CBotPathPoint(void) {
   bpp_penImportant = NULL;
   bpp_pbppNext = NULL;
   bpp_penLock = NULL;
-  bpp_vLockOrigin = FLOAT3D(0.0f, 0.0f, 0.0f);
+  bpp_plLockOrigin = CPlacement3D(FLOAT3D(0.0f, 0.0f, 0.0f), ANGLE3D(0.0f, 0.0f, 0.0f));
 
   bpp_bppoPolygon = NULL;
 };
@@ -120,7 +120,7 @@ CBotPathPoint::~CBotPathPoint(void) {
 };
 
 // Writing & Reading
-void CBotPathPoint::Write(CTStream *strm) {
+void CBotPathPoint::WritePoint(CTStream *strm) {
   strm->WriteID_t(CChunkID("BPPH")); // Bot Path Point Header
 
   *strm << bpp_iIndex;
@@ -145,7 +145,7 @@ void CBotPathPoint::Write(CTStream *strm) {
   // write lock entity
   if (bpp_penLock != NULL) {
     *strm << INDEX(bpp_penLock->en_ulID);
-    strm->Write_t(&bpp_vLockOrigin, sizeof(FLOAT3D));
+    *strm << bpp_plLockOrigin;
   } else {
     *strm << INDEX(-1);
   }
@@ -163,11 +163,11 @@ void CBotPathPoint::Write(CTStream *strm) {
   *strm << UBYTE(bpp_bppoPolygon != NULL);
 
   if (bpp_bppoPolygon != NULL) {
-    bpp_bppoPolygon->Write(strm);
+    bpp_bppoPolygon->WritePolygon(strm);
   }
 };
 
-void CBotPathPoint::Read(CTStream *strm, INDEX iVersion) {
+void CBotPathPoint::ReadPoint(CTStream *strm, INDEX iVersion) {
   INDEX iImportantEntity = -1;
   INDEX iNext = -1;
   INDEX iLockEntity = -1;
@@ -196,7 +196,15 @@ void CBotPathPoint::Read(CTStream *strm, INDEX iVersion) {
       *strm >> iLockEntity;
 
       if (iLockEntity != -1) {
-        strm->Read_t(&bpp_vLockOrigin, sizeof(FLOAT3D));
+        strm->Read_t(&bpp_plLockOrigin.pl_PositionVector, sizeof(FLOAT3D));
+      }
+      break;
+
+    case 6:
+      *strm >> iLockEntity;
+
+      if (iLockEntity != -1) {
+        *strm >> bpp_plLockOrigin;
       }
       break;
   }
@@ -234,7 +242,7 @@ void CBotPathPoint::Read(CTStream *strm, INDEX iVersion) {
 
   if (bPolygon) {
     bpp_bppoPolygon = new CBotPathPolygon;
-    bpp_bppoPolygon->Read(strm);
+    bpp_bppoPolygon->ReadPolygon(strm);
   }
 };
 
@@ -251,7 +259,8 @@ BOOL CBotPathPoint::IsLocked(void) {
   }
 
   // lock entity is away from its origin
-  return (bpp_penLock->GetPlacement().pl_PositionVector - bpp_vLockOrigin).Length() > 0.1f;
+  return (bpp_penLock->GetPlacement().pl_PositionVector - bpp_plLockOrigin.pl_PositionVector).Length() > 0.1f
+      || (bpp_penLock->GetPlacement().pl_OrientationAngle - bpp_plLockOrigin.pl_OrientationAngle).Length() > 0.1f;
 };
 
 // Make a connection with a specific point
@@ -288,9 +297,9 @@ CBotNavmesh::~CBotNavmesh(void) {
 };
 
 // Writing & Reading
-void CBotNavmesh::Write(CTStream *strm) {
+void CBotNavmesh::WriteNavmesh(CTStream *strm) {
   strm->WriteID_t("BNMV"); // Bot NavMesh Version
-  *strm << INDEX(5); // latest NavMesh version
+  *strm << INDEX(CURRENT_NAVMESH_VERSION); // latest NavMesh version
 
   INDEX ctPoints = bnm_cbppPoints.Count();
 
@@ -301,11 +310,11 @@ void CBotNavmesh::Write(CTStream *strm) {
   // write points
   for (INDEX iPoint = 0; iPoint < ctPoints; iPoint++) {
     CBotPathPoint *pbpp = bnm_cbppPoints.Pointer(iPoint);
-    pbpp->Write(strm);
+    pbpp->WritePoint(strm);
   }
 };
 
-void CBotNavmesh::Read(CTStream *strm) {
+void CBotNavmesh::ReadNavmesh(CTStream *strm) {
   INDEX iVersion;
   INDEX ctPoints;
 
@@ -333,36 +342,36 @@ void CBotNavmesh::Read(CTStream *strm) {
   // read points
   for (iPoint = 0; iPoint < ctPoints; iPoint++) {
     CBotPathPoint *pbpp = &bnm_cbppPoints[iPoint];
-    pbpp->Read(strm, iVersion);
+    pbpp->ReadPoint(strm, iVersion);
   }
 };
 
 // Saving & Loading
-void CBotNavmesh::Save(CWorld &wo) {
+void CBotNavmesh::SaveNavmesh(CWorld &wo) {
   CTFileName fnFile;
   fnFile.PrintF("Cecil\\Navmeshes\\%s.nav", wo.wo_fnmFileName.FileName().str_String);
   
   CTFileStream strm;
   strm.Create_t(fnFile);
             
-  _pNavmesh->bnm_pwoWorld = &wo;
-  _pNavmesh->Write(&strm);
+  bnm_pwoWorld = &wo;
+  WriteNavmesh(&strm);
 
   CPrintF("Saved NavMesh for the current map into '%s'\n", fnFile.str_String);
   strm.Close();
 };
 
-void CBotNavmesh::Load(CWorld &wo) {
+void CBotNavmesh::LoadNavmesh(CWorld &wo) {
   CTFileName fnFile;
   fnFile.PrintF("Cecil\\Navmeshes\\%s.nav", wo.wo_fnmFileName.FileName().str_String);
   
   CTFileStream strm;
   strm.Open_t(fnFile);
 
-  _pNavmesh->ClearNavMesh();
+  ClearNavMesh();
 
-  _pNavmesh->bnm_pwoWorld = &wo;
-  _pNavmesh->Read(&strm);
+  bnm_pwoWorld = &wo;
+  ReadNavmesh(&strm);
 
   CPrintF("Loaded NavMesh for the current map from '%s'\n", fnFile.str_String);
   strm.Close();

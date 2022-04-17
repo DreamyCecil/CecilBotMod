@@ -73,7 +73,7 @@ void CECIL_BotGameStart(CSessionProperties &sp) {
 
   // [Cecil] 2021-06-13: Load NavMesh for a map
   try {
-    _pNavmesh->Load(wo);
+    _pNavmesh->LoadNavmesh(wo);
 
   } catch (char *strError) {
     CPrintF("Cannot load NavMesh for the map: %s\n", strError);
@@ -212,7 +212,10 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
           if (pbpp->bpp_penLock != NULL) {
             CEntity *penLock = pbpp->bpp_penLock;
             FLOAT3D vEntity = penLock->GetLerpedPlacement().pl_PositionVector;
-            FLOAT3D vOrigin = pbpp->bpp_vLockOrigin;
+            ANGLE3D aEntity = penLock->GetLerpedPlacement().pl_OrientationAngle;
+
+            FLOAT3D vOrigin = pbpp->bpp_plLockOrigin.pl_PositionVector;
+            ANGLE3D aOrigin = pbpp->bpp_plLockOrigin.pl_OrientationAngle;
 
             FLOAT3D vOnScreen1, vEntityOnScreen, vOriginOnScreen;
             
@@ -221,9 +224,29 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
               pdp->DrawLine(vOnScreen1(1), vOnScreen1(2), vEntityOnScreen(1), vEntityOnScreen(2), 0xFFFF7F00 | UBYTE(ubPointAlpha * 0.5f));
             }
             
-            // from entity to origin
+            // from entity to origin position
             if ((vEntity - vOrigin).Length() > 0.01f && ProjectLine(&prProjection, vEntity, vOrigin, vEntityOnScreen, vOriginOnScreen)) {
-              pdp->DrawLine(vEntityOnScreen(1), vEntityOnScreen(2), vOriginOnScreen(1), vOriginOnScreen(2), 0x7FFF7F00 | UBYTE(ubPointAlpha * 0.5f));
+              pdp->DrawLine(vEntityOnScreen(1), vEntityOnScreen(2), vOriginOnScreen(1), vOriginOnScreen(2), 0x7FFF7F00 | ubPointAlpha);
+            }
+            
+            // different origin angle
+            if ((aEntity - aOrigin).Length() > 0.1f) {
+              FLOATmatrix3D mOrigin;
+              MakeRotationMatrixFast(mOrigin, aOrigin);
+              
+              // origin angle
+              FLOAT3D vAngle = FLOAT3D(0.0f, 0.0f, -2.0f) * mOrigin;
+
+              if (ProjectLine(&prProjection, vOrigin, vOrigin + vAngle, vEntityOnScreen, vOriginOnScreen)) {
+                pdp->DrawLine(vEntityOnScreen(1), vEntityOnScreen(2), vOriginOnScreen(1), vOriginOnScreen(2), 0x7F7FFF00 | ubPointAlpha);
+              }
+              
+              // derived angle
+              vAngle = FLOAT3D(0.0f, 0.0f, -2.0f) * penLock->GetRotationMatrix();
+
+              if (ProjectLine(&prProjection, vEntity, vEntity + vAngle, vEntityOnScreen, vOriginOnScreen)) {
+                pdp->DrawLine(vEntityOnScreen(1), vEntityOnScreen(2), vOriginOnScreen(1), vOriginOnScreen(2), 0xFF7F7F00 | ubPointAlpha);
+              }
             }
           }
 

@@ -40,7 +40,7 @@ functions:
     CEntity::Write_t(ostr);
 
     // write navmesh
-    _pNavmesh->Write(ostr);
+    _pNavmesh->WriteNavmesh(ostr);
     *ostr << _iLastPoint; // [Cecil] TEMP
 
     // write bots in order
@@ -56,7 +56,7 @@ functions:
     CEntity::Read_t(istr);
 
     // read navmesh
-    _pNavmesh->Read(istr);
+    _pNavmesh->ReadNavmesh(istr);
     _pNavmesh->bnm_pwoWorld = GetWorld();
 
     *istr >> _iLastPoint; // [Cecil] TEMP
