@@ -35,6 +35,9 @@ country roads
 ^a80^cffffff[^caaaaff^affnotBOTZ^a80^cffffff]^r ^cffffaa^iyUdoDIS
 ^a80^cffffff[^caaffff^affnotBOTZ^a80^cffffff]^r ^cffffaa^iZub-Sero
 ^a80^cffffff[^cffaaaa^affnotBOTZ^a80^cffffff]^r ^cffffaa^iRAGE
+^a80^cffffff[^cffaaff^affnotBOTZ^a80^cffffff]^r ^cffffaa^iMighty-Skeletor
+^a80^cffffff[^cffaaff^affnotBOTZ^a80^cffffff]^r ^cffffaa^ibasillisk
+^a80^cffffff[^cffaaff^affnotBOTZ^a80^cffffff]^r ^cffffaa^iEvanLegion
 ^b"^B\_(``/)_/^b"
 Player 69
 ^cffffff^a30Kappa
@@ -42,3 +45,15 @@ Player 69
 ^i^caa50aaThe power of 2
 G'not a gnelf
 ^b^caa9922xD
+Revolver Ocelot
+^cff0000R^cff7f00A^cffff00I^c00ff00N^c00ffffB^c0000ffO^c7f00ffW
+^cff0000^i^f5YABBA DABBA DOO
+^caaccff^bE^a9f-^affL^a9f-^affO^a9f-^affH^a9f-^affI^a9f-^affM
+BOT Ulysses
+^c5f5f5fB^cfff000A^c5f5f5fTM^cfff000A^c5f5f5fN
+Sussus Amogus
+^cffff00^i~('_')~
+^caa0000AAAAAAAAAA
+^cc8a2c8Lilac Dragon
+^isand undertable
+Hotdog
