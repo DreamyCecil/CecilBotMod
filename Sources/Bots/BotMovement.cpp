@@ -20,10 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "BotMovement.h"
 
 // Shortcuts
-#define SBS    (pen->m_sbsBot)
 #define WEAPON (pen->GetPlayerWeapons())
 #define WORLD  (_pNetwork->ga_World)
-#define THOUGHT(_String) (pen->m_btThoughts.Push(_String))
 
 // [Cecil] 2021-06-25: Too long since the last position change
 BOOL NoPosChange(CPlayerBot *pen) {
@@ -74,7 +72,7 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
         if (pbppImportant != NULL) {
           pen->m_pbppTarget = pbppImportant;
           pen->m_bImportantPoint = TRUE;
-          THOUGHT(CTString(0, "New important point: ^caf3f3f%d", pbppImportant->bpp_iIndex));
+          THOUGHT(pen, CTString(0, "New important point: ^caf3f3f%d", pbppImportant->bpp_iIndex));
         }
       }
 
@@ -112,12 +110,12 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
       // reset important point
       if (pen->m_pbppTarget->bpp_pbppNext == NULL) {
         pen->m_bImportantPoint = FALSE;
-        THOUGHT("^caf3f3fReached important point");
+        THOUGHT(pen, "^caf3f3fReached important point");
 
       // proceed to the next important point
       } else {
         pen->m_pbppTarget = pen->m_pbppTarget->bpp_pbppNext;
-        THOUGHT("^c3f3fafNext important point");
+        THOUGHT(pen, "^c3f3fafNext important point");
       }
     }
   }
@@ -206,7 +204,7 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
     }
 
     if (pen->m_pbppCurrent != NULL) {
-      THOUGHT(strThought);
+      THOUGHT(pen, strThought);
     }
 
     pen->m_tmChangePath = _pTimer->CurrentTick() + 5.0f;

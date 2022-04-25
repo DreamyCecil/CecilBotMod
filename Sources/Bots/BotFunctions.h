@@ -20,14 +20,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "BotWeapons.h"
 
+// Shortcuts
+#define SBS (pen->m_sbsBot)
+#define THOUGHT(_Bot, _String) (_Bot->m_btThoughts.Push(_String))
+
 // [Cecil] 2019-05-28: Find nearest NavMesh point to some position
 CBotPathPoint *NearestNavMeshPointPos(CMovableEntity *pen, const FLOAT3D &vCheck);
 // [Cecil] 2021-06-21: Find nearest NavMesh point to the bot
 CBotPathPoint *NearestNavMeshPointBot(CPlayerBot *pen, BOOL bSkipCurrent);
-
-// Write and read bot properties
-void BotWrite(CPlayerBot *pen, CTStream *strm);
-void BotRead(CPlayerBot *pen, CTStream *strm);
 
 // [Cecil] 2019-06-05: Check if this entity is important for a path point
 BOOL ImportantForNavMesh(CPlayer *penBot, CEntity *penEntity);
@@ -48,12 +48,14 @@ void UseImportantEntity(CPlayer *penBot, CEntity *penEntity);
 
 // [Cecil] 2021-06-14: Bot logic settings
 struct SBotLogic {
-  ULONG ulFlags; // things bot is thinking about
-  EntityInfo *peiTarget; // entity info of the looking target
-  SBotWeaponConfig *aWeapons; // selected weapon config
+  ULONG ulFlags; // Things bot is thinking about
+  EntityInfo *peiTarget; // Entity info of the looking target
+  SBotWeaponConfig *aWeapons; // Selected weapon config
 
-  CPlacement3D plBotView; // bot's viewpoint
-  ANGLE3D aAim;  // in which direction bot needs to aim
+  CPlacement3D plBotView; // Bot's viewpoint
+  ANGLE3D aAim; // In which direction bot needs to aim
+
+  WeaponType wtDesired; // Weapon type for the bot to select
 
   // Constructor
   SBotLogic(void) : ulFlags(0), peiTarget(NULL),  aAim(0.0f, 0.0f, 0.0f),
@@ -67,15 +69,15 @@ struct SBotLogic {
   inline ANGLE3D &ViewAng(void) { return plBotView.pl_OrientationAngle; };
 
   // Check flags
-  inline BOOL EnemyExists(void)  { return ulFlags & BLF_ENEMYEXISTS; };
-  inline BOOL SeeEnemy(void)     { return ulFlags & BLF_SEEENEMY; };
-  inline BOOL CanShoot(void)     { return ulFlags & BLF_CANSHOOT; };
-  inline BOOL ItemExists(void)   { return ulFlags & BLF_ITEMEXISTS; };
-  inline BOOL FollowPlayer(void) { return ulFlags & BLF_FOLLOWPLAYER; };
-  inline BOOL Following(void)    { return ulFlags & BLF_FOLLOWING; };
-  inline BOOL SeePlayer(void)    { return ulFlags & BLF_SEEPLAYER; };
-  inline BOOL BackOff(void)      { return ulFlags & BLF_BACKOFF; };
-  inline BOOL StayOnPoint(void)  { return ulFlags & BLF_STAYONPOINT; };
+  inline BOOL EnemyExists(void)  const { return ulFlags & BLF_ENEMYEXISTS; };
+  inline BOOL SeeEnemy(void)     const { return ulFlags & BLF_SEEENEMY; };
+  inline BOOL CanShoot(void)     const { return ulFlags & BLF_CANSHOOT; };
+  inline BOOL ItemExists(void)   const { return ulFlags & BLF_ITEMEXISTS; };
+  inline BOOL FollowPlayer(void) const { return ulFlags & BLF_FOLLOWPLAYER; };
+  inline BOOL Following(void)    const { return ulFlags & BLF_FOLLOWING; };
+  inline BOOL SeePlayer(void)    const { return ulFlags & BLF_SEEPLAYER; };
+  inline BOOL BackOff(void)      const { return ulFlags & BLF_BACKOFF; };
+  inline BOOL StayOnPoint(void)  const { return ulFlags & BLF_STAYONPOINT; };
 };
 
 // [Cecil] Cast bot view ray

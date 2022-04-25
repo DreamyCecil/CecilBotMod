@@ -20,9 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "EntitiesMP/Switch.h"
 
 // Shortcuts
-#define SBS   (pen->m_sbsBot)
 #define WORLD (_pNetwork->ga_World)
-#define THOUGHT(_String) (pen->m_btThoughts.Push(_String))
 
 // [Cecil] 2019-05-28: Find nearest NavMesh point to some position
 CBotPathPoint *NearestNavMeshPointPos(CMovableEntity *pen, const FLOAT3D &vCheck) {
@@ -97,53 +95,6 @@ CBotPathPoint *NearestNavMeshPointBot(CPlayerBot *pen, BOOL bSkipCurrent) {
   }
 
   return pbppNearest;
-};
-
-// Write bot properties
-void BotWrite(CPlayerBot *pen, CTStream *strm) {
-  // write current point
-  if (pen->m_pbppCurrent == NULL || !_pNavmesh->bnm_cbppPoints.IsMember(pen->m_pbppCurrent)) {
-    *strm << (INDEX)-1;
-  } else {
-    *strm << pen->m_pbppCurrent->bpp_iIndex;
-  }
-
-  // write target point
-  if (pen->m_pbppTarget == NULL || !_pNavmesh->bnm_cbppPoints.IsMember(pen->m_pbppTarget)) {
-    *strm << (INDEX)-1;
-  } else {
-    *strm << pen->m_pbppTarget->bpp_iIndex;
-  }
-
-  // write point flags
-  *strm << pen->m_ulPointFlags;
-
-  // write settings
-  *strm << SBS;
-};
-
-// Read bot properties
-void BotRead(CPlayerBot *pen, CTStream *strm) {
-  // read current point
-  INDEX iPoint;
-  *strm >> iPoint;
-
-  if (iPoint != -1) {
-    pen->m_pbppCurrent = _pNavmesh->FindPointByID(iPoint);
-  }
-  
-  // read target point
-  *strm >> iPoint;
-
-  if (iPoint != -1) {
-    pen->m_pbppTarget = _pNavmesh->FindPointByID(iPoint);
-  }
-
-  // read point flags
-  *strm >> pen->m_ulPointFlags;
-
-  // read settings
-  *strm >> SBS;
 };
 
 // [Cecil] 2019-06-05: Check if this entity is important for a path point
@@ -268,7 +219,7 @@ void BotItemSearch(CPlayerBot *pen, SBotLogic &sbl) {
         pen->m_penLastItem = penItem;
         pen->m_tmLastItemSearch = _pTimer->CurrentTick() + SBS.fItemSearchCD;
 
-        THOUGHT(CTString(0, "Going for ^c7f7fff%s", penItem->en_pecClass->ec_pdecDLLClass->dec_strName));
+        THOUGHT(pen, CTString(0, "Going for ^c7f7fff%s", penItem->en_pecClass->ec_pdecDLLClass->dec_strName));
       }
     }
   }
@@ -285,7 +236,7 @@ void BotItemSearch(CPlayerBot *pen, SBotLogic &sbl) {
       pen->m_penLastItem = NULL;
       pen->m_tmLastItemSearch = 0.0f;
 
-      THOUGHT("^c7f7fffItem is no longer pickable");
+      THOUGHT(pen, "^c7f7fffItem is no longer pickable");
     }
   }
 };

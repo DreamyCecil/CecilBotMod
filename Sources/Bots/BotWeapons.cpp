@@ -72,13 +72,11 @@ BOOL CanUseScope(CPlayerBot *pen) {
 };
 
 // Use weapon scope for a bot
-void UseWeaponScope(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
+void UseWeaponScope(CPlayerBot *pen, CPlayerAction &pa, const SBotLogic &sbl) {
   // unable to press the button this tick
   if (!pen->ButtonAction()) {
     return;
   }
-
-  CPlayerWeapons *penWeapons = pen->GetPlayerWeapons();
 
   // zoom in if enemy is visible
   if (!UsingScope(pen) && sbl.SeeEnemy()) {
@@ -91,11 +89,11 @@ void UseWeaponScope(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
 };
 
 // Fire the weapon now
-void FireWeapon(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
-  SBotWeaponConfig &bwWeapon = sbl.aWeapons[pen->m_iBotWeapon];
+void FireWeapon(CPlayerBot *pen, CPlayerAction &pa, const SBotLogic &sbl) {
+  const SBotWeaponConfig &bwWeapon = sbl.aWeapons[pen->m_iBotWeapon];
 
   BOOL bUseSpecial = FALSE;
-  FLOAT &fSpecial = bwWeapon.bw_fSpecialRange;
+  FLOAT fSpecial = bwWeapon.bw_fSpecialRange;
 
   // can use special at some range
   if (fSpecial != 0.0f) {

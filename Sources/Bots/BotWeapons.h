@@ -49,7 +49,8 @@ inline SBotWeaponConfig *PickWeaponConfig(void) {
 // --- Customizable helper functions
 
 // Default weapons
-#define WPN_DEFAULT_1 WEAPON_KNIFE // increases running speed in deathmatch
+#define WPN_NOTHING WEAPON_NONE // No weapon
+#define WPN_DEFAULT_1 WEAPON_KNIFE // Increases running speed in deathmatch
 #define WPN_DEFAULT_2 WEAPON_COLT
 
 // Weapon flag from the weapon index
@@ -71,7 +72,7 @@ BOOL UsingScope(CPlayerBot *pen);
 BOOL CanUseScope(CPlayerBot *pen);
 
 // Use weapon scope for a bot now
-void UseWeaponScope(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl);
+void UseWeaponScope(CPlayerBot *pen, CPlayerAction &pa, const SBotLogic &sbl);
 
 // Fire the weapon now
-void FireWeapon(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl);
+void FireWeapon(CPlayerBot *pen, CPlayerAction &pa, const SBotLogic &sbl);
