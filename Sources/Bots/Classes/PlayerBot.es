@@ -141,10 +141,41 @@ functions:
     return TRUE;
   };
 
+  // [Cecil] 2022-04-25: Write bot settings
+  void Write_t(CTStream *ostr) {
+    CPlayer::Write_t(ostr);
+    *ostr << m_sbsBot;
+  };
+  
+  // [Cecil] 2022-04-25: Read bot settings
+  void Read_t(CTStream *istr) {
+    CPlayer::Read_t(istr);
+    *istr >> m_sbsBot;
+  };
+
   // [Cecil] 2021-06-12: Apply fake actions
   void PostMoving(void) {
     CPlayer::PostMoving();
-    CPlayer::ApplyAction(CPlayerAction(), 0.0f);
+
+    // [Cecil] 2022-04-25: Only server should make bots think
+    if (_pNetwork->IsServer()) {
+      // [Cecil] TEMP: Apply fake actions for bots
+      CPlayerAction paAction;
+      BotApplyAction(paAction);
+
+      // Rotation per tick
+      paAction.pa_aRotation *= _pTimer->TickQuantum;
+      paAction.pa_aViewRotation *= _pTimer->TickQuantum;
+
+      // Add local rotation
+      m_aLocalRotation += paAction.pa_aRotation;
+      m_aLocalViewRotation += paAction.pa_aViewRotation;
+
+      paAction.pa_aRotation = m_aLocalRotation;
+      paAction.pa_aViewRotation = m_aLocalViewRotation;
+
+      CPlayer::ApplyAction(paAction, 0.0f);
+    }
   };
 
   // Check if selected point is a current one

@@ -3604,9 +3604,6 @@ functions:
       CheckGameEnd();
     }
 
-    // [Cecil] 2021-06-11: Apply action for bots
-    BotApplyAction(paAction);
-
     // limit speeds against abusing
     paAction.pa_vTranslation(1) = Clamp( paAction.pa_vTranslation(1), -plr_fSpeedSide,    plr_fSpeedSide);
     paAction.pa_vTranslation(2) = Clamp( paAction.pa_vTranslation(2), -plr_fSpeedUp,      plr_fSpeedUp);
