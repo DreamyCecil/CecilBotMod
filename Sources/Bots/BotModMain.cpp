@@ -397,3 +397,36 @@ void CECIL_HUDOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjectio
     pdp->PutText(strTime, pixX, pixY + pixThought*19, 0xCCCCCCFF);
   }
 };
+
+// [Cecil] 2022-04-25: Process bot on the server and serialize its actions
+void CECIL_ProcessServerBot(CPlayerBot *pen, CNetworkMessage &nmBotActions) {
+  // Not yet initialized
+  if (!(pen->m_ulFlags & PLF_INITIALIZED)) {
+    nmBotActions << (INDEX)-1;
+    nmBotActions << CPlayerAction();
+    nmBotActions << (INDEX)WPN_NOTHING;
+    return;
+  }
+
+  // Bot's brain
+  SBotLogic sbl;
+  CPlayerAction paAction;
+
+  // Make bot think
+  pen->BotApplyAction(paAction, sbl);
+
+  // Rotation per tick
+  paAction.pa_aRotation *= _pTimer->TickQuantum;
+  paAction.pa_aViewRotation *= _pTimer->TickQuantum;
+
+  // Add local rotation
+  pen->m_aLocalRotation += paAction.pa_aRotation;
+  pen->m_aLocalViewRotation += paAction.pa_aViewRotation;
+
+  paAction.pa_aRotation = pen->m_aLocalRotation;
+  paAction.pa_aViewRotation = pen->m_aLocalViewRotation;
+
+  nmBotActions << (INDEX)pen->en_ulID; // Bot entity
+  nmBotActions << paAction;            // Bot actions
+  nmBotActions << sbl.iDesiredWeapon;  // Bot weapon
+};

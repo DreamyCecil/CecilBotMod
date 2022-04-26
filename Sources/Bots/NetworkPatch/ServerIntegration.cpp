@@ -142,7 +142,7 @@ void CCecilSessionState::P_ProcessGameStreamBlock(CNetworkMessage &nmMessage) {
   _pTimer->SetCurrentTick(ses_tmLastProcessedTick);
 
   // If cannot handle the custom packet
-  if (HandleCustomPacket(nmMessage)) {
+  if (HandleCustomPacket(this, nmMessage)) {
     // Call the original function for standard packets
     (this->*pProcGameStreamBlock)(nmMessage);
   }

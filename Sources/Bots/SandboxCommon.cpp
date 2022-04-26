@@ -321,7 +321,7 @@ INDEX CECIL_PlayerIndex(CPlayer *pen) {
 // --- Packet handling
 
 // [Cecil] 2022-04-26: Handle custom packets coming from the server
-BOOL HandleCustomPacket(CNetworkMessage &nmMessage) {
+BOOL HandleCustomPacket(CSessionState *pses, CNetworkMessage &nmMessage) {
   switch (nmMessage.GetType())
   {
     // [Cecil] Sandbox actions
@@ -338,6 +338,41 @@ BOOL HandleCustomPacket(CNetworkMessage &nmMessage) {
       // Perform sandbox action
       CECIL_SandboxAction(pen, iAction, iAdmin, nmMessage);
 
+    } return FALSE;
+
+    // [Cecil] Bot actions
+    case MSG_CECIL_BOTACTION: {
+      INDEX ctBots;
+      nmMessage >> ctBots;
+
+      while (--ctBots >= 0) {
+        INDEX iBotID;
+        nmMessage >> iBotID;
+
+        CPlayerAction paAction;
+        nmMessage >> paAction;
+
+        INDEX iWeapon;
+        nmMessage >> iWeapon;
+
+        // Invalid bot
+        if (iBotID == -1) {
+          break;
+        }
+
+        CPlayerBot *pen = (CPlayerBot *)FindEntityByID(&_pNetwork->ga_World, iBotID);
+
+        // Invalid entity
+        if (!ASSERT_ENTITY(pen)) {
+          break;
+        }
+        
+        // Apply actions to the bot
+        pen->ApplyAction(paAction, 0.0f);
+
+        // Select new weapon
+        pen->BotSelectNewWeapon(iWeapon);
+      }
     } return FALSE;
   }
 

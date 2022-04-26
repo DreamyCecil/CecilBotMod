@@ -56,7 +56,7 @@ CNetworkMessage &operator<<(CNetworkMessage &nm, const CPlayerAction &pa) {
   ULONG ulFlags = pa.pa_ulButtons;
 
   if (ulFlags == 0) {
-    UBYTE ub=1;
+    UBYTE ub = 1;
     nm.WriteBits(&ub, 1);
 
   } else if (ulFlags == 1) {

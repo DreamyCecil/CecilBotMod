@@ -65,3 +65,6 @@ DECL_DLL void CECIL_BotGameCleanup(void);
 void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjection3D &apr, CDrawPort *pdp);
 // [Cecil] Render extras on top of the HUD
 void CECIL_HUDOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjection3D &apr, CDrawPort *pdp);
+
+// [Cecil] 2022-04-25: Process bot on the server and serialize its actions
+DECL_DLL void CECIL_ProcessServerBot(CPlayerBot *pen, CNetworkMessage &nmBotActions);
