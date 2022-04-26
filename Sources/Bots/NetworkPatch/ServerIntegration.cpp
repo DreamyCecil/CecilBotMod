@@ -35,24 +35,6 @@ class CCecilSessionState : public CSessionState {
     void P_ProcessGameStreamBlock(CNetworkMessage &nmMessage);
 };
 
-// Player character serialization into network packets
-CNetworkMessage &operator>>(CNetworkMessage &nm, CPlayerCharacter &pc) {
-  nm >> pc.pc_strName >> pc.pc_strTeam;
-  nm.Read(pc.pc_aubGUID, PLAYERGUIDSIZE);
-  nm.Read(pc.pc_aubAppearance, MAX_PLAYERAPPEARANCE);
-
-  return nm;
-};
-
-CNetworkMessage &operator<<(CNetworkMessage &nm, CPlayerCharacter &pc) {
-  nm << pc.pc_strName;
-  nm << pc.pc_strTeam;
-  nm.Write(pc.pc_aubGUID, PLAYERGUIDSIZE);
-  nm.Write(pc.pc_aubAppearance, MAX_PLAYERAPPEARANCE);
-
-  return nm;
-};
-
 // Add a block to streams for all sessions
 void CECIL_AddBlockToAllSessions(CCecilStreamBlock &nsb) {
   CServer &srv = _pNetwork->ga_srvServer;

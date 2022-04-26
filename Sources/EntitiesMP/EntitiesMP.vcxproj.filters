@@ -600,6 +600,9 @@
     <ClCompile Include="..\Bots\SandboxActions.cpp">
       <Filter>Source Files\Bots sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\Bots\NetworkPatch\Serialization.cpp">
+      <Filter>Source Files\Bots sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\Common.h">
