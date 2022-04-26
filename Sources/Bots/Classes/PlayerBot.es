@@ -158,10 +158,13 @@ functions:
     CPlayer::PostMoving();
 
     // [Cecil] 2022-04-25: Only server should make bots think
-    if (_pNetwork->IsServer()) {
-      // [Cecil] TEMP: Apply fake actions for bots
+    if (_pNetwork->IsServer() && !IsPredictor()) {
+      // Bot's brain
+      SBotLogic sbl;
       CPlayerAction paAction;
-      BotApplyAction(paAction);
+
+      // Make bot think
+      BotApplyAction(paAction, sbl);
 
       // Rotation per tick
       paAction.pa_aRotation *= _pTimer->TickQuantum;
@@ -175,6 +178,7 @@ functions:
       paAction.pa_aViewRotation = m_aLocalViewRotation;
 
       CPlayer::ApplyAction(paAction, 0.0f);
+      BotSelectNewWeapon(sbl.iDesiredWeapon);
     }
   };
 
@@ -184,13 +188,10 @@ functions:
   };
 
   // Apply action for bots
-  virtual void BotApplyAction(CPlayerAction &paAction) {
+  virtual void BotApplyAction(CPlayerAction &paAction, SBotLogic &sbl) {
     // While alive
     if (GetFlags() & ENF_ALIVE) {
       if (m_penCamera == NULL && m_penActionMarker == NULL) {
-        // Bot's brain
-        SBotLogic sbl;
-
         // Main bot logic
         BotThinking(paAction, sbl);
 
@@ -254,21 +255,21 @@ functions:
   }
 
   // [Cecil] 2021-06-16: Select new weapon
-  void BotSelectNewWeapon(const WeaponType &wtSelect) {
+  void BotSelectNewWeapon(const INDEX &iSelect) {
     // nothing to select or on a cooldown
-    if (wtSelect == WPN_NOTHING || m_tmLastBotWeapon > _pTimer->CurrentTick()) {
+    if (iSelect == WPN_NOTHING || m_tmLastBotWeapon > _pTimer->CurrentTick()) {
       return;
     }
 
     CPlayerWeapons *penWeapons = GetPlayerWeapons();
 
     // already selected
-    if (penWeapons->m_iCurrentWeapon == wtSelect) {
+    if (penWeapons->m_iCurrentWeapon == iSelect) {
       return;
     }
 
     // select it
-    if (penWeapons->WeaponSelectOk(wtSelect)) {
+    if (penWeapons->WeaponSelectOk((WeaponType)iSelect)) {
       penWeapons->SendEvent(EBegin());
       m_tmLastBotWeapon = _pTimer->CurrentTick() + m_sbsBot.fWeaponCD;
     }
@@ -295,8 +296,7 @@ functions:
 
         if (wtType == WPN_DEFAULT_1) {
           m_iBotWeapon = iWeapon;
-          sbl.wtDesired = WPN_DEFAULT_1;
-          BotSelectNewWeapon(sbl.wtDesired); // [Cecil] TEMP
+          sbl.iDesiredWeapon = WPN_DEFAULT_1;
           break;
         }
       }
@@ -350,8 +350,7 @@ functions:
     }
 
     // Select new weapon
-    sbl.wtDesired = wtSelect;
-    BotSelectNewWeapon(sbl.wtDesired); // [Cecil] TEMP
+    sbl.iDesiredWeapon = wtSelect;
   };
 
   // [Cecil] Main bot logic

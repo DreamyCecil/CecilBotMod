@@ -1250,13 +1250,11 @@ components:
 
 functions:
   // [Cecil] 2021-06-11 ~ 2021-06-12
-  
+
   // Check if selected point is a current one
   virtual BOOL CurrentPoint(CBotPathPoint *pbppExclude) { return FALSE; };
   // Identify as a bot
   virtual BOOL IsBot(void) { return FALSE; };
-  // Apply action for bots
-  virtual void BotApplyAction(CPlayerAction &paAction) {};
   // Change bot's speed
   virtual void BotSpeed(FLOAT3D &vTranslation) {};
   // Initialize the bot

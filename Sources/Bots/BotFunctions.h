@@ -55,7 +55,7 @@ struct SBotLogic {
   CPlacement3D plBotView; // Bot's viewpoint
   ANGLE3D aAim; // In which direction bot needs to aim
 
-  WeaponType wtDesired; // Weapon type for the bot to select
+  INDEX iDesiredWeapon; // Weapon type for the bot to select
 
   // Constructor
   SBotLogic(void) : ulFlags(0), peiTarget(NULL),  aAim(0.0f, 0.0f, 0.0f),
