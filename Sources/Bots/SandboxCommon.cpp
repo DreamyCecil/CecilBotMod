@@ -317,3 +317,30 @@ INDEX CECIL_PlayerIndex(CPlayer *pen) {
 
   return pen->GetMyPlayerIndex();
 };
+
+// --- Packet handling
+
+// [Cecil] 2022-04-26: Handle custom packets coming from the server
+BOOL HandleCustomPacket(CNetworkMessage &nmMessage) {
+  switch (nmMessage.GetType())
+  {
+    // [Cecil] Sandbox actions
+    case MSG_CECIL_SANDBOX: {
+      INDEX iPlayer, iAdmin, iAction;
+      nmMessage >> iPlayer >> iAdmin >> iAction;
+
+      CPlayer *pen = NULL;
+      
+      if (iPlayer != -1) {
+        pen = (CPlayer *)CEntity::GetPlayerEntity(iPlayer);
+      }
+
+      // Perform sandbox action
+      CECIL_SandboxAction(pen, iAction, iAdmin, nmMessage);
+
+    } return FALSE;
+  }
+
+  // Let default methods handle packets
+  return TRUE;
+};

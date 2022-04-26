@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Start with 49 to continue the NetworkMessageType list
 enum ECecilPackets {
-  MSG_CECIL_SANDBOX = 49, // sandbox action
+  MSG_CECIL_SANDBOX = 49, // Sandbox action
 };
 
 // [Cecil] 2019-05-28: Sandbox Action Types
@@ -249,3 +249,8 @@ DECL_DLL INDEX CECIL_PlayerIndex(CPlayer *pen);
 
 // [Cecil] Check player and bot entities
 #define IS_PLAYER(_Entity) IsDerivedFromDllClass(_Entity, CPlayer_DLLClass)
+
+// --- Packet handling
+
+// [Cecil] 2022-04-26: Handle custom packets coming from the server
+BOOL HandleCustomPacket(CNetworkMessage &nmMessage);

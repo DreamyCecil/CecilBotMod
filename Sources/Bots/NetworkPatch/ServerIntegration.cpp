@@ -143,14 +143,14 @@ BOOL CCecilMessageDispatcher::ServerHandle(INDEX iClient, CNetworkMessage &nmRec
 	switch (nmReceived.nm_mtType) {
     // [Cecil] Sandbox actions
 		case MSG_CECIL_SANDBOX: {
-      // forward the packet to all clients
+      // Forward the packet to all clients
       CCecilStreamBlock nsb(nmReceived, ++srv.srv_iLastProcessedSequence);
       
       CECIL_AddBlockToAllSessions(nsb);
     } return FALSE;
 	}
 
-  // let original CServer::Handle process other packets
+  // Let original CServer::Handle process other packets
 	return TRUE;
 };
 
@@ -159,23 +159,9 @@ void CCecilSessionState::P_ProcessGameStreamBlock(CNetworkMessage &nmMessage) {
   // copy the tick to process into tick used for all tasks
   _pTimer->SetCurrentTick(ses_tmLastProcessedTick);
 
-  switch (nmMessage.GetType()) {
-    // [Cecil] Sandbox actions
-    case MSG_CECIL_SANDBOX: {
-      INDEX iPlayer, iAdmin, iAction;
-      nmMessage >> iPlayer >> iAdmin >> iAction;
-
-      CPlayer *pen = NULL;
-      
-      if (iPlayer != -1) {
-        pen = (CPlayer *)CEntity::GetPlayerEntity(iPlayer);
-      }
-
-      // perform sandbox action
-      CECIL_SandboxAction(pen, iAction, iAdmin, nmMessage);
-    } break;
-
-    // call the original function for standard packets
-    default: (this->*pProcGameStreamBlock)(nmMessage);
+  // If cannot handle the custom packet
+  if (HandleCustomPacket(nmMessage)) {
+    // Call the original function for standard packets
+    (this->*pProcGameStreamBlock)(nmMessage);
   }
 };
