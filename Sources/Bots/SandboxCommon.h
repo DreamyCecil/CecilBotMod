@@ -25,6 +25,7 @@ enum ECecilPackets {
 
 // [Cecil] 2019-05-28: Sandbox Action Types
 enum ESandboxAction {
+  // Admin actions
   ESA_ADDBOT, // Add a new bot
   ESA_REMBOT, // Remove a bot
   ESA_UPDATEBOT, // Update bot settings
@@ -34,6 +35,8 @@ enum ESandboxAction {
   ESA_NAVMESH_GEN,   // Generate Navigation Mesh
   ESA_NAVMESH_LOAD,  // Load the NavMesh
   ESA_NAVMESH_CLEAR, // Clear the NavMesh
+
+  ESA_LAST_ADMIN = ESA_NAVMESH_CLEAR, // Last admin action
   
   // [Cecil] 2019-11-07: NavMesh Editing Actions
   ESA_NAVMESH_CREATE,   // Add a new path point

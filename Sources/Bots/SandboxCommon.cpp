@@ -332,9 +332,11 @@ BOOL ServerHandlePacket(CMessageDispatcher &md, INDEX iClient, CNetworkMessage &
     case MSG_CECIL_SANDBOX: {
       INDEX iAction;
       nmReceived >> iAction;
+      
+      extern INDEX MOD_bClientSandbox;
 
-      // If not an admin
-      if (!_cmiComm.Server_IsClientLocal(iClient)) {
+      // If not an admin or no permissions
+      if (!_cmiComm.Server_IsClientLocal(iClient) && (iAction <= ESA_LAST_ADMIN || !MOD_bClientSandbox)) {
         nmReceived.IgnoreContents();
 
         // Reply to the client

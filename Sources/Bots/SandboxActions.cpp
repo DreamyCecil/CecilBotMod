@@ -23,6 +23,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // [Cecil] 2021-06-19: Render entity IDs
 extern INDEX MOD_bEntityIDs = FALSE;
+
+// [Cecil] 2022-04-27: Let clients send sandbox actions
+extern INDEX MOD_bClientSandbox = FALSE;
+
 // [Cecil] 2021-06-21: Display bot thoughts
 extern INDEX MOD_bBotThoughts = FALSE;
 
@@ -609,6 +613,7 @@ extern void CECIL_InitSandboxActions(void) {
 
   // [Cecil] Misc
   _pShell->DeclareSymbol("user INDEX " MODCOM_NAME("bEntityIDs;"), &MOD_bEntityIDs);
+  _pShell->DeclareSymbol("user INDEX " MODCOM_NAME("bClientSandbox;"), &MOD_bClientSandbox);
   _pShell->DeclareSymbol("persistent user INDEX " MODCOM_NAME("bBotThoughts;"), &MOD_bBotThoughts);
 
   _pShell->DeclareSymbol("user void " MODCOM_NAME("SetWeapons(INDEX, INDEX);"), &CECIL_SetWeapons);
