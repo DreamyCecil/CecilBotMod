@@ -227,7 +227,7 @@ void CastRayFlags(CCastRay &cr, CWorld *pwoWorld, ULONG ulPass) {
     cr.TestWholeWorld(pwoWorld);
   }
 
-	// calculate the hit point from the hit distance
+  // calculate the hit point from the hit distance
   cr.cr_vHit = cr.cr_vOrigin + (cr.cr_vTarget - cr.cr_vOrigin).Normalize() * cr.cr_fHitDistance;
 };
 
