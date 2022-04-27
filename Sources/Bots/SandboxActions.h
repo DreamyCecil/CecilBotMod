@@ -26,4 +26,4 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define BOTCOM_NAME(_Command) BOTCOM_PREFIX _Command
 
 // Receive and perform a sandbox action
-void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin, CNetworkMessage &nmMessage);
+void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nmMessage);

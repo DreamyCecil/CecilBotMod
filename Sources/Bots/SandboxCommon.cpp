@@ -330,6 +330,25 @@ BOOL ServerHandlePacket(CMessageDispatcher &md, INDEX iClient, CNetworkMessage &
   {
     // [Cecil] Sandbox actions
     case MSG_CECIL_SANDBOX: {
+      INDEX iAction;
+      nmReceived >> iAction;
+
+      // If not an admin
+      if (!_cmiComm.Server_IsClientLocal(iClient)) {
+        nmReceived.IgnoreContents();
+
+        // Reply to the client
+        CNetworkMessage nmReply(MSG_CHAT_OUT);
+        nmReply << (ULONG)0; // From
+        nmReply << CTString("Server"); // Sender
+        nmReply << CTString("You don't have permission to use this command!");
+
+        _pNetwork->SendToClient(iClient, nmReply);
+        return FALSE;
+      }
+
+      nmReceived.Rewind();
+
       // Forward the packet to all clients
       CCecilStreamBlock nsb(nmReceived, ++srv.srv_iLastProcessedSequence);
       
@@ -348,8 +367,8 @@ BOOL HandleCustomPacket(CSessionState *pses, CNetworkMessage &nmMessage) {
   {
     // [Cecil] Sandbox actions
     case MSG_CECIL_SANDBOX: {
-      INDEX iPlayer, iAdmin, iAction;
-      nmMessage >> iPlayer >> iAdmin >> iAction;
+      INDEX iAction, iPlayer;
+      nmMessage >> iAction >> iPlayer;
 
       CPlayer *pen = NULL;
 
@@ -358,7 +377,7 @@ BOOL HandleCustomPacket(CSessionState *pses, CNetworkMessage &nmMessage) {
       }
 
       // Perform sandbox action
-      CECIL_SandboxAction(pen, iAction, iAdmin, nmMessage);
+      CECIL_SandboxAction(pen, iAction, nmMessage);
 
     } return FALSE;
   }

@@ -45,9 +45,8 @@ static SBotSettings _sbsBotSettings;
 // [Cecil] 2019-11-07: Special client packet for NavMesh editing
 static CNetworkMessage CECIL_NavMeshClientPacket(const INDEX &iAction) {
   NEW_PACKET(nmNavmesh, MSG_CECIL_SANDBOX);
-  nmNavmesh << LOCAL_PLAYER_INDEX; // local player
-  nmNavmesh << (INDEX)_pNetwork->IsServer(); // it's a server
-  nmNavmesh << iAction; // specific NavMesh action
+  nmNavmesh << iAction; // Specific NavMesh action
+  nmNavmesh << LOCAL_PLAYER_INDEX; // Local player
 
   return nmNavmesh;
 };
@@ -57,9 +56,8 @@ static CCecilStreamBlock CECIL_BotServerPacket(const INDEX &iAction) {
   CServer &srvServer = _pNetwork->ga_srvServer;
 
   CCecilStreamBlock nsbBot(MSG_CECIL_SANDBOX, ++srvServer.srv_iLastProcessedSequence);
-  nsbBot << LOCAL_PLAYER_INDEX; // local player
-  nsbBot << (INDEX)TRUE; // it's a server
-  nsbBot << iAction; // specific NavMesh action
+  nsbBot << iAction; // Specific NavMesh action
+  nsbBot << LOCAL_PLAYER_INDEX; // Local player
 
   return nsbBot;
 };
@@ -731,7 +729,7 @@ extern void CECIL_InitSandboxActions(void) {
 };
 
 // Receive and perform a sandbox action
-void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, const BOOL &bAdmin, CNetworkMessage &nmMessage) {
+void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nmMessage) {
   BOOL bLocal = _pNetwork->IsPlayerLocal(pen);
   CWorld &wo = _pNetwork->ga_World;
 
