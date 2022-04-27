@@ -319,6 +319,7 @@ copy Debug\$(TargetName).lib $(SolutionDir)..\Bin\Debug\ &gt;nul</Command>
     <ClCompile Include="..\Bots\AdvancedPaths.cpp" />
     <ClCompile Include="..\Bots\BotMovement.cpp" />
     <ClCompile Include="..\Bots\BotWeapons.cpp" />
+    <ClCompile Include="..\Bots\NetworkPatch\Serialization.cpp" />
     <ClCompile Include="..\Bots\Patcher\patcher.cpp" />
     <ClCompile Include="..\Bots\SandboxActions.cpp" />
     <ClCompile Include="..\Bots\SandboxCommon.cpp" />
