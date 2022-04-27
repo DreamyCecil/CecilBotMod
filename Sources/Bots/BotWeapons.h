@@ -20,14 +20,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // [Cecil] 2018-10-12: Bot's weapon configuration
 struct SBotWeaponConfig {
-  WeaponType bw_wtType;   // current weapon
-  FLOAT bw_fMinDistance;  // min (closest) distance to use it
-  FLOAT bw_fMaxDistance;  // max (furthest) distance to use it
-  FLOAT bw_fDamage;       // average damage
-  FLOAT bw_fAccuracy;     // how accurate the weapon is
-  FLOAT bw_fStrafe;       // at what percent of min to max distance to start strafing
-  FLOAT bw_fSpecialRange; // at what percentage from max distance to use a special attack (negative for "closer than %", positive for "further than %")
-  FLOAT bw_tmShotFreq;    // how frequently to spam the fire button (-1 or NO_FREQ to hold)
+  INDEX bw_iType;         // Weapon type
+  FLOAT bw_fMinDistance;  // Min (closest) distance to use it
+  FLOAT bw_fMaxDistance;  // Max (furthest) distance to use it
+  FLOAT bw_fDamage;       // Average damage
+  FLOAT bw_fAccuracy;     // How accurate the weapon is
+  FLOAT bw_fStrafe;       // At what percent of min to max distance to start strafing
+  FLOAT bw_fSpecialRange; // At what percentage from max distance to use a special attack (negative for "closer than %", positive for "further than %")
+  FLOAT bw_tmShotFreq;    // How frequently to spam the fire button (-1 or NO_FREQ to hold)
 };
 
 #define CT_BOT_WEAPONS WEAPON_LAST
@@ -49,7 +49,8 @@ inline const SBotWeaponConfig *PickWeaponConfig(void) {
 // --- Customizable helper functions
 
 // Default weapons
-#define WPN_DEFAULT_1 WEAPON_KNIFE // increases running speed in deathmatch
+#define WPN_NOTHING   WEAPON_NONE // No weapon
+#define WPN_DEFAULT_1 WEAPON_KNIFE // Increases running speed in deathmatch
 #define WPN_DEFAULT_2 WEAPON_COLT
 
 // Weapon flag from the weapon index

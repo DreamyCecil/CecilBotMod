@@ -218,21 +218,21 @@ functions:
   }
 
   // [Cecil] 2021-06-16: Select new weapon
-  void BotSelectNewWeapon(const WeaponType &wtSelect) {
-    // nothing to select or on a cooldown
-    if (wtSelect == WEAPON_NONE || m_tmLastBotWeapon > _pTimer->CurrentTick()) {
+  void BotSelectNewWeapon(const INDEX &iSelect) {
+    // Nothing to select or on a cooldown
+    if (iSelect == WPN_NOTHING || m_tmLastBotWeapon > _pTimer->CurrentTick()) {
       return;
     }
 
     CPlayerWeapons *penWeapons = GetPlayerWeapons();
 
-    // already selected
-    if (penWeapons->m_iCurrentWeapon == wtSelect) {
+    // Already selected
+    if (penWeapons->m_iCurrentWeapon == iSelect) {
       return;
     }
 
-    // select it
-    if (penWeapons->WeaponSelectOk(wtSelect)) {
+    // Select it
+    if (penWeapons->WeaponSelectOk((WeaponType)iSelect)) {
       penWeapons->SendEvent(EBegin());
       m_tmLastBotWeapon = _pTimer->CurrentTick() + m_sbsBot.fWeaponCD;
     }
@@ -255,9 +255,9 @@ functions:
     if (!GetSP()->sp_bCooperative && _pTimer->CurrentTick() - m_tmLastSawTarget > 2.0f)
     {
       for (INDEX iWeapon = 0; iWeapon < CT_BOT_WEAPONS; iWeapon++) {
-        WeaponType wtType = aWeapons[iWeapon].bw_wtType;
+        INDEX iType = aWeapons[iWeapon].bw_iType;
 
-        if (wtType == WPN_DEFAULT_1) {
+        if (iType == WPN_DEFAULT_1) {
           m_iBotWeapon = iWeapon;
           BotSelectNewWeapon(WPN_DEFAULT_1);
           break;
@@ -266,54 +266,54 @@ functions:
       return;
     }
 
-    // pick currently suitable weapon
-    WeaponType wtSelect = WEAPON_NONE;
+    // Pick currently suitable weapon
+    INDEX iSelect = WPN_NOTHING;
     FLOAT fLastDamage = 0.0f;
 
-    WeaponType wtType;
+    INDEX iWeaponType;
     FLOAT fMin, fMax, fAccuracy;
 
     for (INDEX iWeapon = 0; iWeapon < CT_BOT_WEAPONS; iWeapon++) {
-      wtType = aWeapons[iWeapon].bw_wtType;
+      iWeaponType = aWeapons[iWeapon].bw_iType;
 
       fMin = aWeapons[iWeapon].bw_fMinDistance;
       fMax = aWeapons[iWeapon].bw_fMaxDistance;
       fAccuracy = aWeapons[iWeapon].bw_fAccuracy;
 
-      // skip unexistent weapons
-      if (!WPN_EXISTS(penWeapons, wtType)) {
+      // Skip unexistent weapons
+      if (!WPN_EXISTS(penWeapons, iWeaponType)) {
         continue;
       }
 
-      // not allowed
-      if (m_sbsBot.iAllowedWeapons != -1 && !(m_sbsBot.iAllowedWeapons & WPN_FLAG(wtType))) {
+      // Not allowed
+      if (m_sbsBot.iAllowedWeapons != -1 && !(m_sbsBot.iAllowedWeapons & WPN_FLAG(iWeaponType))) {
         continue;
       }
 
-      // check if distance is okay
+      // Check if distance is okay
       if (m_fTargetDist > fMax || m_fTargetDist < fMin) {
         continue;
       }
 
-      // no ammo
-      if (!GetSP()->sp_bInfiniteAmmo && !WPN_HAS_AMMO(penWeapons, wtType)) {
+      // No ammo
+      if (!GetSP()->sp_bInfiniteAmmo && !WPN_HAS_AMMO(penWeapons, iWeaponType)) {
         continue;
       }
 
-      FLOAT fDistRatio = (m_fTargetDist - fMin) / (fMax - fMin); // from min to max [0 .. 1]
-      FLOAT fMul = fAccuracy + (1 - fAccuracy) * (1 - fDistRatio); // from min to max [fAccuracy .. 1]
+      FLOAT fDistRatio = (m_fTargetDist - fMin) / (fMax - fMin); // From min to max [0 .. 1]
+      FLOAT fMul = fAccuracy + (1 - fAccuracy) * (1 - fDistRatio); // From min to max [fAccuracy .. 1]
 
-      // check damage
+      // Check damage
       if (fLastDamage < aWeapons[iWeapon].bw_fDamage * fMul) {
-        // select this weapon
-        wtSelect = wtType;
+        // Select this weapon
+        iSelect = iWeaponType;
         fLastDamage = aWeapons[iWeapon].bw_fDamage * fMul;
         m_iBotWeapon = iWeapon;
       }
     }
 
-    // select new weapon
-    BotSelectNewWeapon(wtSelect);
+    // Select new weapon
+    BotSelectNewWeapon(iSelect);
   };
 
   void BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
