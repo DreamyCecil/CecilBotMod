@@ -30,6 +30,8 @@ For specific bot behaviour customization go to `Options -> Advanced options -> B
 ## Miscellaneous
 
 - `MOD_bEntityIDs` - display IDs of all entities nearby (for `MOD_NavMeshPointEntity()`)
+- `MOD_bClientSandbox` - let server clients edit world's NavMesh (only for the server)
+- `MOD_bBotThoughts` - display bot's thoughts on screen for debugging purposes (only for the server)
 
 - `MOD_SetWeapons(weapon type/mask, players)` - change all weapon items or player weapons on the map:
 ```
@@ -89,6 +91,15 @@ Change current player weapons and "Give Weapons" property of all CPlayerMarkers:
 - `MOD_NavMeshPointPos(x, y, z)` - change NavMesh point position
 - `MOD_SnapNavMeshPoint(grid size)` - snap NavMesh point position to a some grid
 - `MOD_NavMeshPointFlags(mask)` - set NavMesh point flags as a base 10 bit mask (e.g. 21 = 16 + 4 + 1)
+```
+  Available flags:
+   1 "walk"        - don't run from this point
+   2 "jump"        - jump from this point
+   4 "crouch"      - crouch while going from this point
+   8 "override"    - apply point's flags before reaching the point (e.g. jump TO this point)
+  16 "unreachable" - cannot be reached directly by foot (only for target points)
+  32 "teleport"    - point is at a teleport and has 0 distance to any target point (for calculating shorter path)
+```
 - `MOD_NavMeshPointEntity(entity ID)` - set NavMesh point entity by its ID (-1 for none)
 - `MOD_NavMeshPointRange(range)` - change NavMesh point range
 - `MOD_NavMeshPointNext(point ID)` - next important point to go to after this one
