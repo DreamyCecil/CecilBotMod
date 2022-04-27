@@ -76,7 +76,7 @@
     <IntDir>Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>$(SolutionDir)Extras;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(SolutionDir);$(SolutionDir)EntitiesMP/StdH;$(SolutionDir)Extras;$(SolutionDir)Engine107;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)StdH;$(SolutionDir);$(SolutionDir)Extras;$(SolutionDir)Engine107;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Engine107;$(LibraryPath)</LibraryPath>
     <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
@@ -85,7 +85,7 @@
     <IntDir>Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>$(SolutionDir)Extras;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(SolutionDir);$(SolutionDir)Extras;$(SolutionDir)Engine110;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)StdH;$(SolutionDir);$(SolutionDir)Extras;$(SolutionDir)Engine110;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Engine110;$(LibraryPath)</LibraryPath>
     <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
@@ -94,7 +94,7 @@
     <IntDir>Debug\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>$(SolutionDir)Extras;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(SolutionDir);$(SolutionDir)Extras;$(SolutionDir)Engine107;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)StdH;$(SolutionDir);$(SolutionDir)Extras;$(SolutionDir)Engine107;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Engine107;$(LibraryPath)</LibraryPath>
     <TargetName>$(ProjectName)D</TargetName>
   </PropertyGroup>
@@ -103,7 +103,7 @@
     <IntDir>Debug\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>$(SolutionDir)Extras;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(SolutionDir);$(SolutionDir)Extras;$(SolutionDir)Engine110;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)StdH;$(SolutionDir);$(SolutionDir)Extras;$(SolutionDir)Engine110;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Engine110;$(LibraryPath)</LibraryPath>
     <TargetName>$(ProjectName)D</TargetName>
   </PropertyGroup>
@@ -3572,6 +3572,18 @@ ecc EntitiesMP/%(Filename).es </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Bots/Classes/%(Filename).es</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">cd $(SolutionDir)
 ecc Bots/Classes/%(Filename).es </Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release_110|Win32'">%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug_110|Win32'">%(Filename).cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Bots/Classes/%(Filename).es</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release_110|Win32'">Bots/Classes/%(Filename).es</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug_110|Win32'">Bots/Classes/%(Filename).es</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">cd $(SolutionDir)
+ecc Bots/Classes/%(Filename).es </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release_110|Win32'">cd $(SolutionDir)
+ecc Bots/Classes/%(Filename).es </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug_110|Win32'">cd $(SolutionDir)
+ecc Bots/Classes/%(Filename).es </Command>
     </CustomBuild>
     <CustomBuild Include="..\Bots\Classes\BotModGlobal.es">
       <FileType>Document</FileType>
@@ -3579,12 +3591,36 @@ ecc Bots/Classes/%(Filename).es </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).cpp;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">cd $(SolutionDir)
 ecc Bots/Classes/%(Filename).es </Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release_110|Win32'">%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug_110|Win32'">%(Filename).cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Bots/Classes/%(Filename).es</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release_110|Win32'">Bots/Classes/%(Filename).es</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug_110|Win32'">Bots/Classes/%(Filename).es</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">cd $(SolutionDir)
+ecc Bots/Classes/%(Filename).es </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release_110|Win32'">cd $(SolutionDir)
+ecc Bots/Classes/%(Filename).es </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug_110|Win32'">cd $(SolutionDir)
+ecc Bots/Classes/%(Filename).es </Command>
     </CustomBuild>
     <CustomBuild Include="..\Bots\Classes\NavMeshGenerator.es">
       <FileType>Document</FileType>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Bots/Classes/%(Filename).es</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).cpp;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">cd $(SolutionDir)
+ecc Bots/Classes/%(Filename).es </Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release_110|Win32'">%(Filename).cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug_110|Win32'">%(Filename).cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Bots/Classes/%(Filename).es</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release_110|Win32'">Bots/Classes/%(Filename).es</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug_110|Win32'">Bots/Classes/%(Filename).es</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">cd $(SolutionDir)
+ecc Bots/Classes/%(Filename).es </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release_110|Win32'">cd $(SolutionDir)
+ecc Bots/Classes/%(Filename).es </Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug_110|Win32'">cd $(SolutionDir)
 ecc Bots/Classes/%(Filename).es </Command>
     </CustomBuild>
   </ItemGroup>
