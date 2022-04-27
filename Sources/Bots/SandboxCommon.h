@@ -20,35 +20,35 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Start with 49 to continue the NetworkMessageType list
 enum ECecilPackets {
-  MSG_CECIL_SANDBOX = 49, // sandbox action
+  MSG_CECIL_SANDBOX = 49, // Sandbox action
 };
 
 // [Cecil] 2019-05-28: Sandbox Action Types
 enum ESandboxAction {
-  ESA_ADDBOT, // add a new bot
-  ESA_REMBOT, // remove a bot
-  ESA_UPDATEBOT, // update bot settings
+  ESA_ADDBOT, // Add a new bot
+  ESA_REMBOT, // Remove a bot
+  ESA_UPDATEBOT, // Update bot settings
 
-  ESA_SETWEAPONS, // change all weapons in the world
+  ESA_SETWEAPONS, // Change all weapons in the world
 
-  ESA_NAVMESH_GEN,   // generate Navigation Mesh
-  ESA_NAVMESH_LOAD,  // load the NavMesh
-  ESA_NAVMESH_CLEAR, // clear the NavMesh
+  ESA_NAVMESH_GEN,   // Generate Navigation Mesh
+  ESA_NAVMESH_LOAD,  // Load the NavMesh
+  ESA_NAVMESH_CLEAR, // Clear the NavMesh
   
   // [Cecil] 2019-11-07: NavMesh Editing Actions
-  ESA_NAVMESH_CREATE,   // add a new path point
-  ESA_NAVMESH_DELETE,   // delete a path point
-  ESA_NAVMESH_CONNECT,  // connect two points
-  ESA_NAVMESH_UNTARGET, // untarget one point from another
-  ESA_NAVMESH_TELEPORT, // move the point to the player
+  ESA_NAVMESH_CREATE,   // Add a new path point
+  ESA_NAVMESH_DELETE,   // Delete a path point
+  ESA_NAVMESH_CONNECT,  // Connect two points
+  ESA_NAVMESH_UNTARGET, // Untarget one point from another
+  ESA_NAVMESH_TELEPORT, // Move the point to the player
 
-  ESA_NAVMESH_POS,    // change point's position
-  ESA_NAVMESH_SNAP,   // snap point's position
-  ESA_NAVMESH_FLAGS,  // change point's flags
-  ESA_NAVMESH_ENTITY, // change point's entity
-  ESA_NAVMESH_RANGE,  // change point's range
-  ESA_NAVMESH_NEXT,   // change point's next important point
-  ESA_NAVMESH_LOCK,   // change point's lock entity
+  ESA_NAVMESH_POS,    // Change point's position
+  ESA_NAVMESH_SNAP,   // Snap point's position
+  ESA_NAVMESH_FLAGS,  // Change point's flags
+  ESA_NAVMESH_ENTITY, // Change point's entity
+  ESA_NAVMESH_RANGE,  // Change point's range
+  ESA_NAVMESH_NEXT,   // Change point's next important point
+  ESA_NAVMESH_LOCK,   // Change point's lock entity
 };
 
 // [Cecil] 2020-07-28: A structure for bot settings
@@ -249,3 +249,11 @@ DECL_DLL INDEX CECIL_PlayerIndex(CPlayer *pen);
 
 // [Cecil] Check player and bot entities
 #define IS_PLAYER(_Entity) IsDerivedFromDllClass(_Entity, CPlayer_DLLClass)
+
+// --- Packet handling
+
+// [Cecil] 2022-04-27: Handle packets coming from a client (CServer::Handle alternative)
+BOOL ServerHandlePacket(CMessageDispatcher &md, INDEX iClient, CNetworkMessage &nmReceived);
+
+// [Cecil] 2022-04-26: Handle custom packets coming from a server
+BOOL HandleCustomPacket(CSessionState *pses, CNetworkMessage &nmMessage);

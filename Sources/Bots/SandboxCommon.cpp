@@ -15,7 +15,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // [Cecil] 2019-06-02: This file is for common elements and functions from the mod
 #include "StdH.h"
+
 #include "Bots/BotFunctions.h"
+#include "Bots/NetworkPatch/ServerIntegration.h"
 
 #include "EntitiesMP/Item.h"
 
@@ -316,4 +318,51 @@ INDEX CECIL_PlayerIndex(CPlayer *pen) {
   }
 
   return pen->GetMyPlayerIndex();
+};
+
+// --- Packet handling
+
+// [Cecil] 2022-04-27: Handle packets coming from a client (CServer::Handle alternative)
+BOOL ServerHandlePacket(CMessageDispatcher &md, INDEX iClient, CNetworkMessage &nmReceived) {
+  CServer &srv = _pNetwork->ga_srvServer;
+
+  switch (nmReceived.GetType())
+  {
+    // [Cecil] Sandbox actions
+    case MSG_CECIL_SANDBOX: {
+      // Forward the packet to all clients
+      CCecilStreamBlock nsb(nmReceived, ++srv.srv_iLastProcessedSequence);
+      
+      CECIL_AddBlockToAllSessions(nsb);
+
+    } return FALSE;
+  }
+
+  // Let CServer::Handle process other packets
+  return TRUE;
+};
+
+// [Cecil] 2022-04-26: Handle custom packets coming from a server
+BOOL HandleCustomPacket(CSessionState *pses, CNetworkMessage &nmMessage) {
+  switch (nmMessage.GetType())
+  {
+    // [Cecil] Sandbox actions
+    case MSG_CECIL_SANDBOX: {
+      INDEX iPlayer, iAdmin, iAction;
+      nmMessage >> iPlayer >> iAdmin >> iAction;
+
+      CPlayer *pen = NULL;
+
+      if (iPlayer != -1) {
+        pen = (CPlayer *)CEntity::GetPlayerEntity(iPlayer);
+      }
+
+      // Perform sandbox action
+      CECIL_SandboxAction(pen, iAction, iAdmin, nmMessage);
+
+    } return FALSE;
+  }
+
+  // Let default methods handle packets
+  return TRUE;
 };
