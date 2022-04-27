@@ -48,12 +48,12 @@ void UseImportantEntity(CPlayer *penBot, CEntity *penEntity);
 
 // [Cecil] 2021-06-14: Bot logic settings
 struct SBotLogic {
-  ULONG ulFlags; // things bot is thinking about
-  EntityInfo *peiTarget; // entity info of the looking target
-  SBotWeaponConfig *aWeapons; // selected weapon config
+  ULONG ulFlags; // Things bot is thinking about
+  EntityInfo *peiTarget; // Info of a target that bot is looking at
+  const SBotWeaponConfig *aWeapons; // Selected weapon config
 
-  CPlacement3D plBotView; // bot's viewpoint
-  ANGLE3D aAim;  // in which direction bot needs to aim
+  CPlacement3D plBotView; // Bot's viewpoint
+  ANGLE3D aAim; // In which direction bot needs to aim
 
   // Constructor
   SBotLogic(void) : ulFlags(0), peiTarget(NULL),  aAim(0.0f, 0.0f, 0.0f),
@@ -65,21 +65,23 @@ struct SBotLogic {
   // Viewpoint functions
   inline FLOAT3D &ViewPos(void) { return plBotView.pl_PositionVector; };
   inline ANGLE3D &ViewAng(void) { return plBotView.pl_OrientationAngle; };
+  inline const FLOAT3D &ViewPos(void) const { return plBotView.pl_PositionVector; };
+  inline const ANGLE3D &ViewAng(void) const { return plBotView.pl_OrientationAngle; };
 
   // Check flags
-  inline BOOL EnemyExists(void)  { return ulFlags & BLF_ENEMYEXISTS; };
-  inline BOOL SeeEnemy(void)     { return ulFlags & BLF_SEEENEMY; };
-  inline BOOL CanShoot(void)     { return ulFlags & BLF_CANSHOOT; };
-  inline BOOL ItemExists(void)   { return ulFlags & BLF_ITEMEXISTS; };
-  inline BOOL FollowPlayer(void) { return ulFlags & BLF_FOLLOWPLAYER; };
-  inline BOOL Following(void)    { return ulFlags & BLF_FOLLOWING; };
-  inline BOOL SeePlayer(void)    { return ulFlags & BLF_SEEPLAYER; };
-  inline BOOL BackOff(void)      { return ulFlags & BLF_BACKOFF; };
-  inline BOOL StayOnPoint(void)  { return ulFlags & BLF_STAYONPOINT; };
+  inline BOOL EnemyExists(void)  const { return ulFlags & BLF_ENEMYEXISTS; };
+  inline BOOL SeeEnemy(void)     const { return ulFlags & BLF_SEEENEMY; };
+  inline BOOL CanShoot(void)     const { return ulFlags & BLF_CANSHOOT; };
+  inline BOOL ItemExists(void)   const { return ulFlags & BLF_ITEMEXISTS; };
+  inline BOOL FollowPlayer(void) const { return ulFlags & BLF_FOLLOWPLAYER; };
+  inline BOOL Following(void)    const { return ulFlags & BLF_FOLLOWING; };
+  inline BOOL SeePlayer(void)    const { return ulFlags & BLF_SEEPLAYER; };
+  inline BOOL BackOff(void)      const { return ulFlags & BLF_BACKOFF; };
+  inline BOOL StayOnPoint(void)  const { return ulFlags & BLF_STAYONPOINT; };
 };
 
 // [Cecil] Cast bot view ray
-BOOL CastBotRay(CPlayerBot *pen, CEntity *penTarget, SBotLogic &sbl, BOOL bPhysical);
+BOOL CastBotRay(CPlayerBot *pen, CEntity *penTarget, const SBotLogic &sbl, BOOL bPhysical);
 
 // [Cecil] Cast path point ray
 BOOL CastPathPointRay(const FLOAT3D &vSource, const FLOAT3D &vPoint, FLOAT &fDist, BOOL bPhysical);
@@ -99,11 +101,11 @@ void BotItemSearch(CPlayerBot *pen, SBotLogic &sbl);
 FLOAT GetItemDist(CPlayerBot *pen, CEntity *penItem);
 
 // [Cecil] 2021-06-14: Determine the closest item
-CEntity *GetClosestItem(CPlayerBot *pen, FLOAT &fItemDist, SBotLogic &sbl);
+CEntity *GetClosestItem(CPlayerBot *pen, FLOAT &fItemDist, const SBotLogic &sbl);
 
 // [Cecil] 2018-10-11: Bot enemy searching
-CEntity *ClosestEnemy(CPlayerBot *pen, FLOAT &fLastDist, SBotLogic &sbl);
+CEntity *ClosestEnemy(CPlayerBot *pen, FLOAT &fLastDist, const SBotLogic &sbl);
 // [Cecil] Closest item entity
-CEntity *ClosestItemType(CPlayerBot *pen, const CDLLEntityClass &decClass, FLOAT &fDist, SBotLogic &sbl);
+CEntity *ClosestItemType(CPlayerBot *pen, const CDLLEntityClass &decClass, FLOAT &fDist, const SBotLogic &sbl);
 // [Cecil] 2019-05-30: Find closest real player
 CEntity *ClosestRealPlayer(CPlayerBot *pen, FLOAT3D vCheckPos, FLOAT &fDist);

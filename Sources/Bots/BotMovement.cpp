@@ -260,7 +260,7 @@ void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
   }
 
   // current weapon
-  SBotWeaponConfig &bw = sbl.aWeapons[pen->m_iBotWeapon];
+  const SBotWeaponConfig &bw = sbl.aWeapons[pen->m_iBotWeapon];
 
   // next position prediction
   vEnemy += ((CMovableEntity*)&*pen->m_penTarget)->en_vCurrentTranslationAbsolute
@@ -350,7 +350,7 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
   FLOAT3D vBotMovement = FLOAT3D(0.0f, 0.0f, 0.0f); // in which direction bot needs to go
   FLOAT fVerticalMove = 0.0f; // jumping or crouching
 
-  SBotWeaponConfig &bwWeapon = sbl.aWeapons[pen->m_iBotWeapon]; // current weapon config
+  const SBotWeaponConfig &bwWeapon = sbl.aWeapons[pen->m_iBotWeapon]; // current weapon config
 
   // strafe further if lower health
   FLOAT fHealthRatio = Clamp(100.0f - pen->GetHealth(), 0.0f, 100.0f) / 100.0f;

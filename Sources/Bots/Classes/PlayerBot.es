@@ -239,7 +239,7 @@ functions:
   };
 
   // [Cecil] 2018-10-10: Bot weapon logic
-  void BotWeapons(CPlayerAction &pa, SBotLogic &sbl) {
+  void BotWeapons(CPlayerAction &pa, const SBotLogic &sbl) {
     CPlayerWeapons *penWeapons = GetPlayerWeapons();
     
     // sniper scope
@@ -248,7 +248,7 @@ functions:
     }
 
     // pick weapon config
-    SBotWeaponConfig *aWeapons = sbl.aWeapons;
+    const SBotWeaponConfig *aWeapons = sbl.aWeapons;
     m_iBotWeapon = CT_BOT_WEAPONS - 1;
 
     // [Cecil] 2021-06-16: Select knife for faster speed if haven't seen the enemy in a while
@@ -367,7 +367,7 @@ functions:
 
     // shoot if possible
     if (m_sbsBot.bShooting) {
-      SBotWeaponConfig &bwWeapon = sbl.aWeapons[m_iBotWeapon];
+      const SBotWeaponConfig &bwWeapon = sbl.aWeapons[m_iBotWeapon];
 
       // allowed to shoot
       BOOL bCanShoot = sbl.CanShoot();

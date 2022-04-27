@@ -173,7 +173,7 @@ void UseImportantEntity(CPlayer *penBot, CEntity *penEntity) {
 };
 
 // [Cecil] Cast bot view ray
-BOOL CastBotRay(CPlayerBot *pen, CEntity *penTarget, SBotLogic &sbl, BOOL bPhysical) {
+BOOL CastBotRay(CPlayerBot *pen, CEntity *penTarget, const SBotLogic &sbl, BOOL bPhysical) {
   // [Cecil] TEMP: Target is too far
   if (DistanceTo(pen, penTarget) > 1000.0f) {
     return FALSE;
@@ -319,7 +319,7 @@ FLOAT GetItemDist(CPlayerBot *pen, CEntity *penItem) {
 };
 
 // [Cecil] 2021-06-14: Determine the closest item
-CEntity *GetClosestItem(CPlayerBot *pen, FLOAT &fItemDist, SBotLogic &sbl) {
+CEntity *GetClosestItem(CPlayerBot *pen, FLOAT &fItemDist, const SBotLogic &sbl) {
   // run towards the weapon
   CEntity *penItem = ClosestItemType(pen, CWeaponItem_DLLClass, fItemDist, sbl);
 
@@ -398,7 +398,7 @@ CEntity *GetClosestItem(CPlayerBot *pen, FLOAT &fItemDist, SBotLogic &sbl) {
 };
 
 // [Cecil] 2018-10-11: Bot enemy searching
-CEntity *ClosestEnemy(CPlayerBot *pen, FLOAT &fLast, SBotLogic &sbl) {
+CEntity *ClosestEnemy(CPlayerBot *pen, FLOAT &fLast, const SBotLogic &sbl) {
   CEntity *penReturn = NULL;
 
   // don't search for enemies
@@ -488,7 +488,7 @@ CEntity *ClosestEnemy(CPlayerBot *pen, FLOAT &fLast, SBotLogic &sbl) {
   return penReturn;
 };
 
-CEntity *ClosestItemType(CPlayerBot *pen, const CDLLEntityClass &decClass, FLOAT &fDist, SBotLogic &sbl) {
+CEntity *ClosestItemType(CPlayerBot *pen, const CDLLEntityClass &decClass, FLOAT &fDist, const SBotLogic &sbl) {
   // can't search for items right now
   if (!SBS.bItemSearch || pen->m_tmLastItemSearch > _pTimer->CurrentTick()) {
     return NULL;

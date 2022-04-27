@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //               it's only for better understanding of the desired priority.
 
 // [Cecil] 2018-10-12: Bot weapon priority (from best to worst)
-extern SBotWeaponConfig _abwDeathmatchWeapons[CT_BOT_WEAPONS] = {
+extern const SBotWeaponConfig _abwDeathmatchWeapons[CT_BOT_WEAPONS] = {
   //    Weapon Type         Min D    Max D     DMG   Accuracy  Strafe  Special  Frequency
   { WEAPON_SNIPER,          32.0f,  300.0f,  150.0f,  1.00f,   0.30f,  NO_SPEC,  NO_FREQ}, // 13
   { WEAPON_DOUBLESHOTGUN,    0.0f,   32.0f,  100.0f,  0.60f,   0.50f,  NO_SPEC,  NO_FREQ}, // 5
@@ -42,7 +42,7 @@ extern SBotWeaponConfig _abwDeathmatchWeapons[CT_BOT_WEAPONS] = {
   { WEAPON_NONE,             0.0f,    0.0f,    0.0f,  0.00f,   0.00f,  NO_SPEC,  NO_FREQ}, // 0
 };
 
-extern SBotWeaponConfig _abwCooperativeWeapons[CT_BOT_WEAPONS] = {
+extern const SBotWeaponConfig _abwCooperativeWeapons[CT_BOT_WEAPONS] = {
   //    Weapon Type         Min D    Max D     DMG   Accuracy  Strafe  Special  Frequency
   { WEAPON_IRONCANNON,      24.0f,  128.0f,  200.0f,  0.40f,   0.20f,  NO_SPEC,  NO_FREQ}, // 14
   { WEAPON_MINIGUN,          0.0f,  500.0f,  200.0f,  0.85f,   0.25f,  NO_SPEC,  NO_FREQ}, // 7
@@ -72,13 +72,11 @@ BOOL CanUseScope(CPlayerBot *pen) {
 };
 
 // Use weapon scope for a bot
-void UseWeaponScope(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
+void UseWeaponScope(CPlayerBot *pen, CPlayerAction &pa, const SBotLogic &sbl) {
   // unable to press the button this tick
   if (!pen->ButtonAction()) {
     return;
   }
-
-  CPlayerWeapons *penWeapons = pen->GetPlayerWeapons();
 
   // zoom in if enemy is visible
   if (!UsingScope(pen) && sbl.SeeEnemy()) {
@@ -91,11 +89,11 @@ void UseWeaponScope(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
 };
 
 // Fire the weapon now
-void FireWeapon(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
-  SBotWeaponConfig &bwWeapon = sbl.aWeapons[pen->m_iBotWeapon];
+void FireWeapon(CPlayerBot *pen, CPlayerAction &pa, const SBotLogic &sbl) {
+  const SBotWeaponConfig &bwWeapon = sbl.aWeapons[pen->m_iBotWeapon];
 
   BOOL bUseSpecial = FALSE;
-  FLOAT &fSpecial = bwWeapon.bw_fSpecialRange;
+  FLOAT fSpecial = bwWeapon.bw_fSpecialRange;
 
   // can use special at some range
   if (fSpecial != 0.0f) {

@@ -35,11 +35,11 @@ struct SBotWeaponConfig {
 #define NO_FREQ (-1.0f)
 
 // [Cecil] 2018-10-12: Bot weapon priority (from best to worst)
-extern SBotWeaponConfig _abwDeathmatchWeapons[CT_BOT_WEAPONS];
-extern SBotWeaponConfig _abwCooperativeWeapons[CT_BOT_WEAPONS];
+extern const SBotWeaponConfig _abwDeathmatchWeapons[CT_BOT_WEAPONS];
+extern const SBotWeaponConfig _abwCooperativeWeapons[CT_BOT_WEAPONS];
 
 // Pick weapon config
-inline SBotWeaponConfig *PickWeaponConfig(void) {
+inline const SBotWeaponConfig *PickWeaponConfig(void) {
   if (GetSP()->sp_bCooperative || GetSP()->sp_bSinglePlayer) {
     return _abwCooperativeWeapons;
   }
@@ -71,7 +71,7 @@ BOOL UsingScope(CPlayerBot *pen);
 BOOL CanUseScope(CPlayerBot *pen);
 
 // Use weapon scope for a bot now
-void UseWeaponScope(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl);
+void UseWeaponScope(CPlayerBot *pen, CPlayerAction &pa, const SBotLogic &sbl);
 
 // Fire the weapon now
-void FireWeapon(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl);
+void FireWeapon(CPlayerBot *pen, CPlayerAction &pa, const SBotLogic &sbl);
