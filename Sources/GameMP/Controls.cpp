@@ -308,13 +308,13 @@ void CControls::Load_t( CTFileName fnFile)
     ADD_BOT_BUTTON(QUICKBOT, KID_EQUALS,      "QuickBot();");
     ADD_BOT_BUTTON(DECRANGE, KID_PAGEDOWN,    "AddNavMeshPointRange(-1.0);");
     ADD_BOT_BUTTON(INCRANGE, KID_PAGEUP,      "AddNavMeshPointRange(1.0);");
-    ADD_BOT_BUTTON(SNAP,     KID_NUMSLASH,    "SnapNavMeshPoint(0.25);");
+    ADD_BOT_BUTTON(SNAP,     KID_NUMSLASH,    "SnapNavMeshPoint(0.5);");
     ADD_BOT_BUTTON(TOPLAYER, KID_NUMMULTIPLY, "TeleportNavMeshPoint(0.5);");
     ADD_BOT_BUTTON(CONNECT,  KID_NUMDECIMAL,  "NavMeshConnectionType();");
     ADD_BOT_BUTTON(SELECT,   KID_NUM1,        "NavMeshSelectPoint();");
     ADD_BOT_BUTTON(INFO,     KID_NUMENTER,    "NavMeshPointInfo();");
     ADD_BOT_BUTTON(DELETE,   KID_NUMMINUS,    "DeleteNavMeshPoint();");
-    ADD_BOT_BUTTON(ADD,      KID_NUMPLUS,     "AddNavMeshPoint(0.5);");
+    ADD_BOT_BUTTON(ADD,      KID_NUMPLUS,     "AddNavMeshPoint(0.5, 0.5);");
   }
 
 /*

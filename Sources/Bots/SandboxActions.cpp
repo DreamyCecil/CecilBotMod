@@ -343,7 +343,7 @@ static void CECIL_NavMeshClear(INDEX iPoints) {
 // --- Navmesh editing
 
 // [Cecil] 2019-05-28: Add new NavMesh point with vertical offset
-static void CECIL_AddNavMeshPoint(FLOAT fOffset) {
+static void CECIL_AddNavMeshPoint(FLOAT fOffset, FLOAT fGridSnap) {
   // editing is disabled
   if (MOD_iRenderNavMesh <= 0) {
     return;
@@ -353,6 +353,7 @@ static void CECIL_AddNavMeshPoint(FLOAT fOffset) {
   nmNavmesh << MOD_iNavMeshPoint;
   nmNavmesh << MOD_iNavMeshConnecting;
   nmNavmesh << fOffset;
+  nmNavmesh << fGridSnap;
 
   _pNetwork->SendToServerReliable(nmNavmesh);
 };
@@ -676,7 +677,7 @@ extern void CECIL_InitSandboxActions(void) {
   _pShell->DeclareSymbol("user INDEX " MODCOM_NAME("iNavMeshPoint;"), &MOD_iNavMeshPoint);
   _pShell->DeclareSymbol("user INDEX " MODCOM_NAME("iNavMeshConnecting;"), &MOD_iNavMeshConnecting);
 
-  _pShell->DeclareSymbol("user void " MODCOM_NAME("AddNavMeshPoint(FLOAT);"), &CECIL_AddNavMeshPoint);
+  _pShell->DeclareSymbol("user void " MODCOM_NAME("AddNavMeshPoint(FLOAT, FLOAT);"), &CECIL_AddNavMeshPoint);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("DeleteNavMeshPoint(void);"), &CECIL_DeleteNavMeshPoint);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshPointInfo(void);"), &CECIL_NavMeshPointInfo);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("ConnectNavMeshPoint(INDEX);"), &CECIL_ConnectNavMeshPoint);
@@ -920,8 +921,8 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
     case ESA_NAVMESH_CREATE: {
       INDEX iTargetPoint, iConnect;
       nmMessage >> iTargetPoint >> iConnect;
-      FLOAT fOffset;
-      nmMessage >> fOffset;
+      FLOAT fOffset, fGridSnap;
+      nmMessage >> fOffset >> fGridSnap;
 
       // no player
       if (pen == NULL) {
@@ -930,9 +931,12 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
 
       FLOAT3D vPoint = pen->GetPlacement().pl_PositionVector + FLOAT3D(0.0f, fOffset, 0.0f) * pen->GetRotationMatrix();
 
-      // snap to a small grid
-      Snap(vPoint(1), 0.25f);
-      Snap(vPoint(3), 0.25f);
+      // snap to some grid
+      if (fGridSnap > 0.0f) {
+        for (INDEX iPos = 1; iPos <= 3; iPos++) {
+          Snap(vPoint(iPos), fGridSnap);
+        }
+      }
 
       CBotPathPoint *pbppNext = _pNavmesh->AddPoint(vPoint, NULL);
 
