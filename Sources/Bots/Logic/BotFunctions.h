@@ -40,8 +40,6 @@ BOOL CastBotRay(CPlayerBot *pen, CEntity *penTarget, const SBotLogic &sbl, BOOL 
 // [Cecil] Cast path point ray
 BOOL CastPathPointRay(const FLOAT3D &vSource, const FLOAT3D &vPoint, FLOAT &fDist, BOOL bPhysical);
 
-#define MAX_ITEM_DIST 256.0f
-
 // [Cecil] 2021-06-13: Check if it's an enemy player
 BOOL IsEnemyPlayer(CPlayerBot *penBot, CEntity *penEnemy);
 

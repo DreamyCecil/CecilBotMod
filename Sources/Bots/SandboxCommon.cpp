@@ -123,19 +123,6 @@ CEntity *FindEntityByID(CWorld *pwo, const INDEX &iEntityID) {
   return NULL;
 };
 
-// [Cecil] 2021-06-14: Check if item is pickable
-BOOL IsItemPickable(class CPlayer *pen, class CItem *penItem, const BOOL &bCheckDist) {
-  // [Cecil] TEMP: Too far
-  if (bCheckDist && DistanceTo(pen, penItem) > GetItemDist((CPlayerBot *)pen, penItem)) {
-    return FALSE;
-  }
-
-  BOOL bPicked = (pen == NULL ? FALSE : (1 << CECIL_PlayerIndex(pen)) & penItem->m_ulPickedMask);
-
-  return !bPicked && (penItem->en_RenderType == CEntity::RT_MODEL
-                   || penItem->en_RenderType == CEntity::RT_SKAMODEL);
-};
-
 // [Cecil] 2021-06-16: Determine vertical position difference
 FLOAT3D VerticalDiff(FLOAT3D vPosDiff, const FLOAT3D &vGravityDir) {
   // vertical difference based on the gravity vector

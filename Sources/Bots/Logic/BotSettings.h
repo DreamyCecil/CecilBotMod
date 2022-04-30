@@ -100,50 +100,27 @@ struct DECL_DLL SBotSettings {
     fAmmoDist = 16.0f;
   };
 
-  #define WRITE_SETTINGS(_Var) \
-    _Var << sbs.b3rdPerson    << sbs.iCrosshair \
-         << sbs.bSniperZoom   << sbs.bShooting     << sbs.fShootAngle     << sbs.fAccuracyAngle \
-         << sbs.fRotSpeedDist << sbs.fRotSpeedMin  << sbs.fRotSpeedMax    << sbs.fRotSpeedLimit \
-         << sbs.fWeaponCD     << sbs.fTargetCD     << sbs.fSpeedMul       << sbs.bStrafe << sbs.bJump \
-         << sbs.fPrediction   << sbs.fPredictRnd   << sbs.iAllowedWeapons << sbs.iTargetType \
-         << sbs.bTargetSearch << sbs.fImportantChance \
-         << sbs.bItemSearch   << sbs.fItemSearchCD << sbs.bItemVisibility << sbs.fHealthSearch \
-         << sbs.fWeaponDist   << sbs.fHealthDist   << sbs.fArmorDist      << sbs.fAmmoDist
-
-  #define READ_SETTINGS(_Var) \
-    _Var >> sbs.b3rdPerson    >> sbs.iCrosshair \
-         >> sbs.bSniperZoom   >> sbs.bShooting     >> sbs.fShootAngle     >> sbs.fAccuracyAngle \
-         >> sbs.fRotSpeedDist >> sbs.fRotSpeedMin  >> sbs.fRotSpeedMax    >> sbs.fRotSpeedLimit \
-         >> sbs.fWeaponCD     >> sbs.fTargetCD     >> sbs.fSpeedMul       >> sbs.bStrafe >> sbs.bJump \
-         >> sbs.fPrediction   >> sbs.fPredictRnd   >> sbs.iAllowedWeapons >> sbs.iTargetType \
-         >> sbs.bTargetSearch >> sbs.fImportantChance \
-         >> sbs.bItemSearch   >> sbs.fItemSearchCD >> sbs.bItemVisibility >> sbs.fHealthSearch \
-         >> sbs.fWeaponDist   >> sbs.fHealthDist   >> sbs.fArmorDist      >> sbs.fAmmoDist
-
   // Stream operations
   friend CTStream &operator<<(CTStream &strm, SBotSettings &sbs) {
-    WRITE_SETTINGS(strm);
+    strm.Write_t(&sbs, sizeof(sbs));
     return strm;
   };
   
   friend CTStream &operator>>(CTStream &strm, SBotSettings &sbs) {
-    READ_SETTINGS(strm);
+    strm.Read_t(&sbs, sizeof(sbs));
     return strm;
   };
   
   // Message operations
   friend CNetworkMessage &operator<<(CNetworkMessage &nm, SBotSettings &sbs) {
-    WRITE_SETTINGS(nm);
+    nm.Write(&sbs, sizeof(sbs));
     return nm;
   };
   
   friend CNetworkMessage &operator>>(CNetworkMessage &nm, SBotSettings &sbs) {
-    READ_SETTINGS(nm);
+    nm.Read(&sbs, sizeof(sbs));
     return nm;
   };
-
-  #undef WRITE_SETTINGS
-  #undef READ_SETTINGS
 };
 
 #endif // _CECILBOTS_BOTSETTINGS_H

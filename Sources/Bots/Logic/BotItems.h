@@ -19,6 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "EntitiesMP/Item.h"
 
+#define MAX_ITEM_DIST 256.0f
+
 // [Cecil] 2021-06-14: Check if item is pickable
 BOOL IsItemPickable(class CPlayer *pen, class CItem *penItem, const BOOL &bCheckDist);
 
