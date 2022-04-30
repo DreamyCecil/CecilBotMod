@@ -1,4 +1,4 @@
-/* Copyright (c) 2018-2021 Dreamy Cecil
+/* Copyright (c) 2018-2022 Dreamy Cecil
 This program is free software; you can redistribute it and/or modify
 it under the terms of version 2 of the GNU General Public License as published by
 the Free Software Foundation
@@ -14,9 +14,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 // [Cecil] 2021-06-20: This file is for functions primarily used by PlayerBot class
-#pragma once
+#ifndef _CECILBOTS_BOTWEAPONS_H
+#define _CECILBOTS_BOTWEAPONS_H
 
 #include "EntitiesMP/PlayerWeapons.h"
+#include "BotLogic.h"
 
 // [Cecil] 2018-10-12: Bot's weapon configuration
 struct SBotWeaponConfig {
@@ -66,13 +68,15 @@ inline const SBotWeaponConfig *PickWeaponConfig(void) {
 #define WPN_HAS_AMMO(_Plw, _Weapon) (_Plw->HasAmmo((WeaponType)_Weapon))
 
 // Currently zooming in with a scope or not
-BOOL UsingScope(CPlayerBot *pen);
+BOOL UsingScope(class CPlayerBot *pen);
 
 // Able to use the scope or not
-BOOL CanUseScope(CPlayerBot *pen);
+BOOL CanUseScope(class CPlayerBot *pen);
 
 // Use weapon scope for a bot now
-void UseWeaponScope(CPlayerBot *pen, CPlayerAction &pa, const SBotLogic &sbl);
+void UseWeaponScope(class CPlayerBot *pen, CPlayerAction &pa, const SBotLogic &sbl);
 
 // Fire the weapon now
-void FireWeapon(CPlayerBot *pen, CPlayerAction &pa, const SBotLogic &sbl);
+void FireWeapon(class CPlayerBot *pen, CPlayerAction &pa, const SBotLogic &sbl);
+
+#endif // _CECILBOTS_BOTWEAPONS_H

@@ -316,17 +316,20 @@ copy Debug\$(TargetName).lib $(SolutionDir)..\Bin\Debug\ &gt;nul</Command>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Bots\AdvancedPaths.cpp" />
-    <ClCompile Include="..\Bots\BotMovement.cpp" />
-    <ClCompile Include="..\Bots\BotWeapons.cpp" />
+    <ClCompile Include="..\Bots\BotModMain.cpp" />
+    <ClCompile Include="..\Bots\CustomPackets.cpp" />
+    <ClCompile Include="..\Bots\Logic\BotFunctions.cpp" />
+    <ClCompile Include="..\Bots\Logic\BotMovement.cpp" />
+    <ClCompile Include="..\Bots\Logic\BotWeapons.cpp" />
     <ClCompile Include="..\Bots\NetworkPatch\Serialization.cpp" />
     <ClCompile Include="..\Bots\Patcher\patcher.cpp" />
+    <ClCompile Include="..\Bots\PathFinding\Navmesh.cpp" />
+    <ClCompile Include="..\Bots\PathFinding\PathPoint.cpp" />
+    <ClCompile Include="..\Bots\PathFinding\PathPolygon.cpp" />
     <ClCompile Include="..\Bots\SandboxActions.cpp" />
     <ClCompile Include="..\Bots\SandboxCommon.cpp" />
-    <ClCompile Include="..\Bots\BotModMain.cpp" />
     <ClCompile Include="..\Bots\NetworkPatch\ServerIntegration.cpp" />
     <ClCompile Include="..\Bots\NetworkPatch\StreamBlock.cpp" />
-    <ClCompile Include="..\Bots\BotFunctions.cpp" />
     <ClCompile Include="Common\Common.cpp" />
     <ClCompile Include="Common\EmanatingParticles.cpp" />
     <ClCompile Include="Common\HUD.cpp" />
@@ -582,18 +585,25 @@ copy Debug\$(TargetName).lib $(SolutionDir)..\Bin\Debug\ &gt;nul</Command>
     <ClCompile Include="WorldSettingsController.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Bots\AdvancedPaths.h" />
-    <ClInclude Include="..\Bots\BotMovement.h" />
-    <ClInclude Include="..\Bots\BotWeapons.h" />
+    <ClInclude Include="..\Bots\CustomPackets.h" />
+    <ClInclude Include="..\Bots\Logic\BotFunctions.h" />
+    <ClInclude Include="..\Bots\Logic\BotItems.h" />
+    <ClInclude Include="..\Bots\Logic\BotLogic.h" />
+    <ClInclude Include="..\Bots\Logic\BotMovement.h" />
+    <ClInclude Include="..\Bots\Logic\BotSettings.h" />
+    <ClInclude Include="..\Bots\Logic\BotThoughts.h" />
+    <ClInclude Include="..\Bots\Logic\BotWeapons.h" />
     <ClInclude Include="..\Bots\Patcher\patcher.h" />
     <ClInclude Include="..\Bots\Patcher\patcher_defines.h" />
+    <ClInclude Include="..\Bots\PathFinding\Navmesh.h" />
+    <ClInclude Include="..\Bots\PathFinding\PathPoint.h" />
+    <ClInclude Include="..\Bots\PathFinding\PathPolygon.h" />
     <ClInclude Include="..\Bots\PlayerCommon.h" />
     <ClInclude Include="..\Bots\SandboxActions.h" />
     <ClInclude Include="..\Bots\SandboxCommon.h" />
     <ClInclude Include="..\Bots\BotModMain.h" />
     <ClInclude Include="..\Bots\NetworkPatch\StreamBlock.h" />
     <ClInclude Include="..\Bots\NetworkPatch\ServerIntegration.h" />
-    <ClInclude Include="..\Bots\BotFunctions.h" />
     <ClInclude Include="..\Bots\_BotMod.h" />
     <ClInclude Include="Common\Common.h" />
     <ClInclude Include="Common\Flags.h" />

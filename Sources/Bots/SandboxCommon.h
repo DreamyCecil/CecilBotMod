@@ -1,4 +1,4 @@
-/* Copyright (c) 2018-2021 Dreamy Cecil
+/* Copyright (c) 2018-2022 Dreamy Cecil
 This program is free software; you can redistribute it and/or modify
 it under the terms of version 2 of the GNU General Public License as published by
 the Free Software Foundation
@@ -14,175 +14,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 // [Cecil] 2019-06-02: This file is for common elements and functions from the mod
-#pragma once
-
-#include "Engine/Network/NetworkMessage.h"
-
-// Start with 49 to continue the NetworkMessageType list
-enum ECecilPackets {
-  MSG_CECIL_SANDBOX = 49, // Sandbox action
-};
-
-// [Cecil] 2019-05-28: Sandbox Action Types
-enum ESandboxAction {
-  // Admin actions
-  ESA_ADDBOT, // Add a new bot
-  ESA_REMBOT, // Remove a bot
-  ESA_UPDATEBOT, // Update bot settings
-
-  ESA_SETWEAPONS, // Change all weapons in the world
-
-  ESA_NAVMESH_GEN,   // Generate Navigation Mesh
-  ESA_NAVMESH_LOAD,  // Load the NavMesh
-  ESA_NAVMESH_CLEAR, // Clear the NavMesh
-
-  ESA_LAST_ADMIN = ESA_NAVMESH_CLEAR, // Last admin action
-  
-  // [Cecil] 2019-11-07: NavMesh Editing Actions
-  ESA_NAVMESH_CREATE,   // Add a new path point
-  ESA_NAVMESH_DELETE,   // Delete a path point
-  ESA_NAVMESH_CONNECT,  // Connect two points
-  ESA_NAVMESH_UNTARGET, // Untarget one point from another
-  ESA_NAVMESH_TELEPORT, // Move the point to the player
-
-  ESA_NAVMESH_POS,    // Change point's position
-  ESA_NAVMESH_SNAP,   // Snap point's position
-  ESA_NAVMESH_FLAGS,  // Change point's flags
-  ESA_NAVMESH_ENTITY, // Change point's entity
-  ESA_NAVMESH_RANGE,  // Change point's range
-  ESA_NAVMESH_NEXT,   // Change point's next important point
-  ESA_NAVMESH_LOCK,   // Change point's lock entity
-};
-
-// [Cecil] 2020-07-28: A structure for bot settings
-struct DECL_DLL SBotSettings {
-  INDEX b3rdPerson; // Set third person view
-  INDEX iCrosshair; // Preferred crosshair (-1 for random)
-
-  INDEX bSniperZoom;    // Use sniper zoom or not
-  INDEX bShooting;      // Attack or not
-  FLOAT fShootAngle;    // Maximum attack angle
-  FLOAT fAccuracyAngle; // Target angle accuracy
-  
-  FLOAT fRotSpeedDist;  // Maximum distance for the difference
-  FLOAT fRotSpeedMin;   // Minimal rotation speed multiplier
-  FLOAT fRotSpeedMax;   // Maximum rotation speed multiplier
-  FLOAT fRotSpeedLimit; // Maximum rotation speed limit
-  
-  FLOAT fWeaponCD; // Weapon selection cooldown
-  FLOAT fTargetCD; // Target selection cooldown
-  
-  FLOAT fSpeedMul; // Speed multiplier
-  INDEX bStrafe;   // Strafe near the target or not
-  INDEX bJump;     // Jump or not
-  
-  FLOAT fPrediction; // Position prediction multiplier
-  FLOAT fPredictRnd; // Prediction randomness
-  
-  INDEX iAllowedWeapons;  // Allowed weapons for the bot (-1 = everything is allowed)
-  INDEX iTargetType;      // Target type (0 - players, 1 - enemies, 2 - both)
-  INDEX bTargetSearch;    // Search for a target or not
-  FLOAT fImportantChance; // How often to pick important points
-  INDEX bItemSearch;      // Search for items or not
-  FLOAT fItemSearchCD;    // Item search cooldown
-  
-  INDEX bItemVisibility; // Check for item's visibility or not
-  FLOAT fWeaponDist;     // Weapon search distance
-  FLOAT fHealthSearch;   // Start health searching below this HP
-  FLOAT fHealthDist;     // Health search distance
-  FLOAT fArmorDist;      // Armor search distance
-  FLOAT fAmmoDist;       // Ammo search distance
-
-  // Constructor
-  SBotSettings(void) {
-    Reset();
-  };
-
-  // Reset settings
-  void Reset(void) {
-    b3rdPerson = TRUE;
-    iCrosshair = -1;
-
-    bSniperZoom = TRUE;
-    bShooting = TRUE;
-    fShootAngle = 15.0f;
-    fAccuracyAngle = 5.0f;
-  
-    fRotSpeedDist = 400.0f;
-    fRotSpeedMin = 0.05f;
-    fRotSpeedMax = 0.2f;
-    fRotSpeedLimit = 30.0f;
-  
-    fWeaponCD = 3.0f;
-    fTargetCD = 1.0f;
-  
-    fSpeedMul = 1.0f;
-    bStrafe = TRUE;
-    bJump = TRUE;
-  
-    fPrediction = 0.1f;
-    fPredictRnd = 0.1f;
-  
-    iAllowedWeapons = -1;
-    iTargetType = -1;
-    bTargetSearch = TRUE;
-    fImportantChance = 0.2f;
-    bItemSearch = TRUE;
-    fItemSearchCD = 5.0f;
-  
-    bItemVisibility = TRUE;
-    fWeaponDist = 16.0f;
-    fHealthSearch = 100.0f;
-    fHealthDist = 32.0f;
-    fArmorDist = 16.0f;
-    fAmmoDist = 16.0f;
-  };
-
-  #define WRITE_SETTINGS(_Var) \
-    _Var << sbs.b3rdPerson    << sbs.iCrosshair \
-         << sbs.bSniperZoom   << sbs.bShooting     << sbs.fShootAngle     << sbs.fAccuracyAngle \
-         << sbs.fRotSpeedDist << sbs.fRotSpeedMin  << sbs.fRotSpeedMax    << sbs.fRotSpeedLimit \
-         << sbs.fWeaponCD     << sbs.fTargetCD     << sbs.fSpeedMul       << sbs.bStrafe << sbs.bJump \
-         << sbs.fPrediction   << sbs.fPredictRnd   << sbs.iAllowedWeapons << sbs.iTargetType \
-         << sbs.bTargetSearch << sbs.fImportantChance \
-         << sbs.bItemSearch   << sbs.fItemSearchCD << sbs.bItemVisibility << sbs.fHealthSearch \
-         << sbs.fWeaponDist   << sbs.fHealthDist   << sbs.fArmorDist      << sbs.fAmmoDist
-
-  #define READ_SETTINGS(_Var) \
-    _Var >> sbs.b3rdPerson    >> sbs.iCrosshair \
-         >> sbs.bSniperZoom   >> sbs.bShooting     >> sbs.fShootAngle     >> sbs.fAccuracyAngle \
-         >> sbs.fRotSpeedDist >> sbs.fRotSpeedMin  >> sbs.fRotSpeedMax    >> sbs.fRotSpeedLimit \
-         >> sbs.fWeaponCD     >> sbs.fTargetCD     >> sbs.fSpeedMul       >> sbs.bStrafe >> sbs.bJump \
-         >> sbs.fPrediction   >> sbs.fPredictRnd   >> sbs.iAllowedWeapons >> sbs.iTargetType \
-         >> sbs.bTargetSearch >> sbs.fImportantChance \
-         >> sbs.bItemSearch   >> sbs.fItemSearchCD >> sbs.bItemVisibility >> sbs.fHealthSearch \
-         >> sbs.fWeaponDist   >> sbs.fHealthDist   >> sbs.fArmorDist      >> sbs.fAmmoDist
-
-  // Stream operations
-  friend CTStream &operator<<(CTStream &strm, SBotSettings &sbs) {
-    WRITE_SETTINGS(strm);
-    return strm;
-  };
-  
-  friend CTStream &operator>>(CTStream &strm, SBotSettings &sbs) {
-    READ_SETTINGS(strm);
-    return strm;
-  };
-  
-  // Message operations
-  friend CNetworkMessage &operator<<(CNetworkMessage &nm, SBotSettings &sbs) {
-    WRITE_SETTINGS(nm);
-    return nm;
-  };
-  
-  friend CNetworkMessage &operator>>(CNetworkMessage &nm, SBotSettings &sbs) {
-    READ_SETTINGS(nm);
-    return nm;
-  };
-
-  #undef WRITE_SETTINGS
-  #undef READ_SETTINGS
-};
+#ifndef _CECILBOTS_SANDBOXCOMMON_H
+#define _CECILBOTS_SANDBOXCOMMON_H
 
 // --- Helper functions
 
@@ -208,9 +41,6 @@ DECL_DLL CEntity *FindEntityByID(CWorld *pwo, const INDEX &iEntityID);
 inline FLOAT DistanceToPos(FLOAT3D vPos1, FLOAT3D vPos2) {
   return (vPos1 - vPos2).Length();
 };
-
-// [Cecil] 2021-06-14: Check if item is pickable
-DECL_DLL BOOL IsItemPickable(class CPlayer *pen, class CItem *penItem, const BOOL &bCheckDist);
 
 // [Cecil] 2021-06-16: Determine vertical position difference
 DECL_DLL FLOAT3D VerticalDiff(FLOAT3D vPosDiff, const FLOAT3D &vGravityDir);
@@ -253,10 +83,4 @@ DECL_DLL INDEX CECIL_PlayerIndex(CPlayer *pen);
 // [Cecil] Check player and bot entities
 #define IS_PLAYER(_Entity) IsDerivedFromDllClass(_Entity, CPlayer_DLLClass)
 
-// --- Packet handling
-
-// [Cecil] 2022-04-27: Handle packets coming from a client (CServer::Handle alternative)
-BOOL ServerHandlePacket(CMessageDispatcher &md, INDEX iClient, CNetworkMessage &nmReceived);
-
-// [Cecil] 2022-04-26: Handle custom packets coming from a server
-BOOL HandleCustomPacket(CSessionState *pses, CNetworkMessage &nmMessage);
+#endif // _CECILBOTS_SANDBOXCOMMON_H

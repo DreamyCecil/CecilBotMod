@@ -16,8 +16,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // [Cecil] 2019-06-04: This file is for functions primarily used by PlayerBot class
 #include "StdH.h"
 #include "BotFunctions.h"
+#include "BotItems.h"
 
 #include "EntitiesMP/Switch.h"
+
+// Constructor
+SBotLogic::SBotLogic(void) : ulFlags(0), peiTarget(NULL),  aAim(0.0f, 0.0f, 0.0f),
+  plBotView(FLOAT3D(0.0f, 0.0f, 0.0f), ANGLE3D(0.0f, 0.0f, 0.0f))
+{
+  aWeapons = PickWeaponConfig();
+};
 
 // Shortcuts
 #define SBS   (pen->m_sbsBot)

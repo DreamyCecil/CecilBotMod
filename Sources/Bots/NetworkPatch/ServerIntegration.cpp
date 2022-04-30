@@ -14,11 +14,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 #include "StdH.h"
-
 #include "ServerIntegration.h"
-#include "EntitiesMP/Player.h"
 
 #include "Bots/Patcher/patcher.h"
+#include "Bots/CustomPackets.h"
 
 // Server patches
 class CCecilMessageDispatcher : public CMessageDispatcher {

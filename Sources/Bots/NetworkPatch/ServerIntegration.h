@@ -13,7 +13,8 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
-#pragma once
+#ifndef _CECILBOTS_SERVERINTEGRATION_H
+#define _CECILBOTS_SERVERINTEGRATION_H
 
 #include <Engine/Network/CommunicationInterface.h>
 #include "StreamBlock.h"
@@ -25,3 +26,5 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define LOCAL_PLAYER_INDEX INDEX((_pNetwork->ga_aplsPlayers[0].pls_Active) ? _pNetwork->ga_aplsPlayers[0].pls_Index : -1)
 
 void CECIL_AddBlockToAllSessions(CCecilStreamBlock &nsb);
+
+#endif // _CECILBOTS_SERVERINTEGRATION_H

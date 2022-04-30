@@ -1,4 +1,4 @@
-/* Copyright (c) 2018-2021 Dreamy Cecil
+/* Copyright (c) 2018-2022 Dreamy Cecil
 This program is free software; you can redistribute it and/or modify
 it under the terms of version 2 of the GNU General Public License as published by
 the Free Software Foundation
@@ -13,10 +13,8 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
-#pragma once
-
-// [Cecil] 2021-06-11: Player bot
-#include "EntitiesMP/Player.h"
+#ifndef _CECILBOTS_SANDBOXACTIONS_H
+#define _CECILBOTS_SANDBOXACTIONS_H
 
 // [Cecil] 2021-06-18: Bot mod command prefixes
 #define MODCOM_PREFIX "MOD_"
@@ -26,4 +24,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define BOTCOM_NAME(_Command) BOTCOM_PREFIX _Command
 
 // Receive and perform a sandbox action
-void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nmMessage);
+void CECIL_SandboxAction(class CPlayer *pen, const INDEX &iAction, CNetworkMessage &nmMessage);
+
+#endif // _CECILBOTS_SANDBOXACTIONS_H

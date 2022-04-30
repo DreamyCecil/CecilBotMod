@@ -18,11 +18,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 %{
 #include "StdH.h"
 
-#include "Bots/BotFunctions.h"
-#include "Bots/BotMovement.h"
+#include "Bots/Logic/BotFunctions.h"
+#include "Bots/Logic/BotMovement.h"
+#include "Bots/Logic/BotItems.h"
 
 #define THOUGHT(_String) (m_btThoughts.Push(_String))
 %}
+
+// [Cecil] 2022-05-01: Includes headers to these in "PlayerBot.h"
+uses "Bots/Logic/BotLogic";
+uses "Bots/Logic/BotSettings";
+uses "Bots/Logic/BotThoughts";
 
 uses "EntitiesMP/Player";
 uses "EntitiesMP/PlayerWeapons";

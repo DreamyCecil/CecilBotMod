@@ -15,11 +15,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // [Cecil] 2019-06-02: This file is for common elements and functions from the mod
 #include "StdH.h"
-
-#include "Bots/BotFunctions.h"
-#include "Bots/NetworkPatch/ServerIntegration.h"
-
-#include "EntitiesMP/Item.h"
+#include "Bots/Logic/BotItems.h"
 
 // --- Helper functions
 
@@ -318,72 +314,4 @@ INDEX CECIL_PlayerIndex(CPlayer *pen) {
   }
 
   return pen->GetMyPlayerIndex();
-};
-
-// --- Packet handling
-
-// [Cecil] 2022-04-27: Handle packets coming from a client (CServer::Handle alternative)
-BOOL ServerHandlePacket(CMessageDispatcher &md, INDEX iClient, CNetworkMessage &nmReceived) {
-  CServer &srv = _pNetwork->ga_srvServer;
-
-  switch (nmReceived.GetType())
-  {
-    // [Cecil] Sandbox actions
-    case MSG_CECIL_SANDBOX: {
-      INDEX iAction;
-      nmReceived >> iAction;
-      
-      extern INDEX MOD_bClientSandbox;
-
-      // If not an admin or no permissions
-      if (!_cmiComm.Server_IsClientLocal(iClient) && (iAction <= ESA_LAST_ADMIN || !MOD_bClientSandbox)) {
-        nmReceived.IgnoreContents();
-
-        // Reply to the client
-        CNetworkMessage nmReply(MSG_CHAT_OUT);
-        nmReply << (ULONG)0; // From
-        nmReply << CTString("Server"); // Sender
-        nmReply << CTString("You don't have permission to use this command!");
-
-        _pNetwork->SendToClient(iClient, nmReply);
-        return FALSE;
-      }
-
-      nmReceived.Rewind();
-
-      // Forward the packet to all clients
-      CCecilStreamBlock nsb(nmReceived, ++srv.srv_iLastProcessedSequence);
-      
-      CECIL_AddBlockToAllSessions(nsb);
-
-    } return FALSE;
-  }
-
-  // Let CServer::Handle process other packets
-  return TRUE;
-};
-
-// [Cecil] 2022-04-26: Handle custom packets coming from a server
-BOOL HandleCustomPacket(CSessionState *pses, CNetworkMessage &nmMessage) {
-  switch (nmMessage.GetType())
-  {
-    // [Cecil] Sandbox actions
-    case MSG_CECIL_SANDBOX: {
-      INDEX iAction, iPlayer;
-      nmMessage >> iAction >> iPlayer;
-
-      CPlayer *pen = NULL;
-
-      if (iPlayer != -1) {
-        pen = (CPlayer *)CEntity::GetPlayerEntity(iPlayer);
-      }
-
-      // Perform sandbox action
-      CECIL_SandboxAction(pen, iAction, nmMessage);
-
-    } return FALSE;
-  }
-
-  // Let default methods handle packets
-  return TRUE;
 };

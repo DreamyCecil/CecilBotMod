@@ -15,7 +15,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "StdH.h"
 #include "BotModMain.h"
-#include "BotFunctions.h"
+#include "Bots/Logic/BotFunctions.h"
 
 // [Cecil] 2019-05-28: NavMesh Commands
 extern INDEX MOD_iRenderNavMesh = 0; // NavMesh render mode (0 - disabled, 1 - points, 2 - connections, 3 - IDs, 4 - flags)

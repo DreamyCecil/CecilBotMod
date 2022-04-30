@@ -15,8 +15,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "StdH.h"
 #include "SandboxActions.h"
-#include "BotFunctions.h"
-#include "NetworkPatch/ServerIntegration.h"
+#include "Bots/Logic/BotFunctions.h"
+
+#include "CustomPackets.h"
+#include "Bots/NetworkPatch/ServerIntegration.h"
 
 // [Cecil] 2021-06-18: For weapon switching
 #include "EntitiesMP/PlayerMarker.h"

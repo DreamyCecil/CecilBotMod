@@ -82,6 +82,24 @@
     <Filter Include="Source Files\Bot Mod Entity sources">
       <UniqueIdentifier>{9fefeff1-f0a2-45f3-a588-bdb29d58ae07}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Bots headers\NetworkPatch">
+      <UniqueIdentifier>{bc5eb744-7808-4548-bb78-ce5a5f70ff00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Bots headers\PathFinding">
+      <UniqueIdentifier>{33ffb460-4d95-46e7-bf35-839fa1c2dd90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Bots sources\PathFinding">
+      <UniqueIdentifier>{7e62c003-f781-45d0-9fd3-0e76322916e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Bots sources\NetworkPatch">
+      <UniqueIdentifier>{bca70512-da57-4483-8c6f-bdafffb919a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Bots headers\Logic">
+      <UniqueIdentifier>{5d655226-a051-492d-b768-b55df7e3eef7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Bots sources\Logic">
+      <UniqueIdentifier>{1f256f9d-0f1c-4c9c-a09e-f4890f8b3365}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common\Common.cpp">
@@ -101,15 +119,6 @@
     </ClCompile>
     <ClCompile Include="StdH\StdH.cpp">
       <Filter>Source Files\Common sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Bots\AdvancedPaths.cpp">
-      <Filter>Source Files\Bots sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Bots\NetworkPatch\ServerIntegration.cpp">
-      <Filter>Source Files\Bots sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Bots\NetworkPatch\StreamBlock.cpp">
-      <Filter>Source Files\Bots sources</Filter>
     </ClCompile>
     <ClCompile Include="AirElemental.cpp">
       <Filter>Source Files\Entity sources</Filter>
@@ -573,9 +582,6 @@
     <ClCompile Include="..\Bots\SandboxCommon.cpp">
       <Filter>Source Files\Bots sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\Bots\BotFunctions.cpp">
-      <Filter>Source Files\Bots sources</Filter>
-    </ClCompile>
     <ClCompile Include="..\Bots\Patcher\patcher.cpp">
       <Filter>Source Files\Patcher</Filter>
     </ClCompile>
@@ -588,19 +594,40 @@
     <ClCompile Include="..\Bots\Classes\BotModGlobal.cpp">
       <Filter>Source Files\Bot Mod Entity sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\Bots\BotModMain.cpp">
-      <Filter>Source Files\Bots sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Bots\BotMovement.cpp">
-      <Filter>Source Files\Bots sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Bots\BotWeapons.cpp">
-      <Filter>Source Files\Bots sources</Filter>
-    </ClCompile>
     <ClCompile Include="..\Bots\SandboxActions.cpp">
       <Filter>Source Files\Bots sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\Bots\CustomPackets.cpp">
+      <Filter>Source Files\Bots sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Bots\NetworkPatch\StreamBlock.cpp">
+      <Filter>Source Files\Bots sources\NetworkPatch</Filter>
+    </ClCompile>
     <ClCompile Include="..\Bots\NetworkPatch\Serialization.cpp">
+      <Filter>Source Files\Bots sources\NetworkPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Bots\NetworkPatch\ServerIntegration.cpp">
+      <Filter>Source Files\Bots sources\NetworkPatch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Bots\PathFinding\PathPoint.cpp">
+      <Filter>Source Files\Bots sources\PathFinding</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Bots\PathFinding\PathPolygon.cpp">
+      <Filter>Source Files\Bots sources\PathFinding</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Bots\PathFinding\Navmesh.cpp">
+      <Filter>Source Files\Bots sources\PathFinding</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Bots\Logic\BotMovement.cpp">
+      <Filter>Source Files\Bots sources\Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Bots\Logic\BotWeapons.cpp">
+      <Filter>Source Files\Bots sources\Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Bots\Logic\BotFunctions.cpp">
+      <Filter>Source Files\Bots sources\Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Bots\BotModMain.cpp">
       <Filter>Source Files\Bots sources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -625,12 +652,6 @@
     </ClInclude>
     <ClInclude Include="Common\WeaponPositions.h">
       <Filter>Header Files\Common headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Bots\AdvancedPaths.h">
-      <Filter>Header Files\Bots headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Bots\NetworkPatch\StreamBlock.h">
-      <Filter>Header Files\Bots headers</Filter>
     </ClInclude>
     <ClInclude Include="AirElemental.h">
       <Filter>Header Files\Entity headers</Filter>
@@ -1550,12 +1571,6 @@
     <ClInclude Include="..\Bots\SandboxCommon.h">
       <Filter>Header Files\Bots headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\Bots\BotFunctions.h">
-      <Filter>Header Files\Bots headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Bots\NetworkPatch\ServerIntegration.h">
-      <Filter>Header Files\Bots headers</Filter>
-    </ClInclude>
     <ClInclude Include="..\Bots\_BotMod.h">
       <Filter>Header Files\Bots headers</Filter>
     </ClInclude>
@@ -1586,17 +1601,50 @@
     <ClInclude Include="..\Bots\BotModMain.h">
       <Filter>Header Files\Bots headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\Bots\BotMovement.h">
-      <Filter>Header Files\Bots headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Bots\BotWeapons.h">
-      <Filter>Header Files\Bots headers</Filter>
-    </ClInclude>
     <ClInclude Include="..\Bots\SandboxActions.h">
       <Filter>Header Files\Bots headers</Filter>
     </ClInclude>
     <ClInclude Include="..\Bots\PlayerCommon.h">
       <Filter>Header Files\Bots headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Bots\CustomPackets.h">
+      <Filter>Header Files\Bots headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Bots\NetworkPatch\StreamBlock.h">
+      <Filter>Header Files\Bots headers\NetworkPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Bots\NetworkPatch\ServerIntegration.h">
+      <Filter>Header Files\Bots headers\NetworkPatch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Bots\PathFinding\Navmesh.h">
+      <Filter>Header Files\Bots headers\PathFinding</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Bots\PathFinding\PathPoint.h">
+      <Filter>Header Files\Bots headers\PathFinding</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Bots\PathFinding\PathPolygon.h">
+      <Filter>Header Files\Bots headers\PathFinding</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Bots\Logic\BotItems.h">
+      <Filter>Header Files\Bots headers\Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Bots\Logic\BotLogic.h">
+      <Filter>Header Files\Bots headers\Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Bots\Logic\BotMovement.h">
+      <Filter>Header Files\Bots headers\Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Bots\Logic\BotSettings.h">
+      <Filter>Header Files\Bots headers\Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Bots\Logic\BotThoughts.h">
+      <Filter>Header Files\Bots headers\Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Bots\Logic\BotWeapons.h">
+      <Filter>Header Files\Bots headers\Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Bots\Logic\BotFunctions.h">
+      <Filter>Header Files\Bots headers\Logic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
