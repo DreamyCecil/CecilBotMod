@@ -287,6 +287,8 @@ void CControls::Load_t( CTFileName fnFile)
     CREATE_BOT_BUTTON(SNAP,     "NavMesh position snapping");
     CREATE_BOT_BUTTON(INCRANGE, "NavMesh increase range");
     CREATE_BOT_BUTTON(DECRANGE, "NavMesh decrease range");
+    CREATE_BOT_BUTTON(BLUEBOT,  "Add bot to blue team");
+    CREATE_BOT_BUTTON(REDBOT,   "Add bot to red team");
     CREATE_BOT_BUTTON(QUICKBOT, "Quick bot add");
 
     // check if any of the buttons exist
@@ -302,10 +304,14 @@ void CControls::Load_t( CTFileName fnFile)
       CHECK_BOT_BUTTON(SNAP);
       CHECK_BOT_BUTTON(INCRANGE);
       CHECK_BOT_BUTTON(DECRANGE);
+      CHECK_BOT_BUTTON(BLUEBOT);
+      CHECK_BOT_BUTTON(REDBOT);
       CHECK_BOT_BUTTON(QUICKBOT);
     }
 
     ADD_BOT_BUTTON(QUICKBOT, KID_EQUALS,      "QuickBot();");
+    ADD_BOT_BUTTON(REDBOT,   KID_O,           "AddBot(\"\", \"RighteousRobert\", \"Red\");");
+    ADD_BOT_BUTTON(BLUEBOT,  KID_P,           "AddBot(\"\", \"BlueBill\", \"Blue\");");
     ADD_BOT_BUTTON(DECRANGE, KID_PAGEDOWN,    "AddNavMeshPointRange(-1.0);");
     ADD_BOT_BUTTON(INCRANGE, KID_PAGEUP,      "AddNavMeshPointRange(1.0);");
     ADD_BOT_BUTTON(SNAP,     KID_NUMSLASH,    "SnapNavMeshPoint(0.5);");
