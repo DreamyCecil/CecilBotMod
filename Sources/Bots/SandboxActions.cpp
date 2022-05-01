@@ -45,7 +45,7 @@ static CTString BOT_strBotEdit = ""; // name of a bot to edit
 static CTString BOT_strSpawnName = ""; // name to spawn with
 static CTString BOT_strSpawnTeam = ""; // team to spawn in
 
-// [Cecil] 2020-07-28: A structure with bot settings
+// [Cecil] 2020-07-28: A structure with current bot settings
 static SBotSettings _sbsBotSettings;
 
 // [Cecil] 2019-11-07: Special client packet for NavMesh editing
@@ -91,11 +91,20 @@ extern void CopyBotSkins(void) {
 };
 
 // [Cecil] 2018-10-15: Config reset
-static void CECIL_ResetBotConfig(void) {
+static void CECIL_ResetBotConfig(INDEX iDifficulty) {
   CPrintF(BOTCOM_NAME("ResetBotConfig:\n"));
 
-  _sbsBotSettings.Reset();
-  CPrintF("  Bot config has been reset!\n");
+  if (iDifficulty < 0 || iDifficulty >= SBotSettings::BDF_LAST) {
+    iDifficulty = SBotSettings::BDF_NORMAL;
+  }
+
+  _sbsBotSettings.Reset((SBotSettings::EDifficulty)iDifficulty);
+
+  static CTString astrNames[SBotSettings::BDF_LAST] = {
+    "Dummy", "Easy", "Normal", "Hard",
+  };
+
+  CPrintF("  Bot config has been reset to \"%s\" preset!\n", astrNames[iDifficulty]);
 };
 
 // [Cecil] 2018-10-09: Bot adding
@@ -635,7 +644,7 @@ extern void CECIL_InitSandboxActions(void) {
   _pShell->DeclareSymbol("persistent user CTString " BOTCOM_NAME("strSpawnName;"), &BOT_strSpawnName);
   _pShell->DeclareSymbol("persistent user CTString " BOTCOM_NAME("strSpawnTeam;"), &BOT_strSpawnTeam);
 
-  _pShell->DeclareSymbol("user void " BOTCOM_NAME("ResetBotConfig(void);"), &CECIL_ResetBotConfig);
+  _pShell->DeclareSymbol("user void " BOTCOM_NAME("ResetBotConfig(INDEX);"), &CECIL_ResetBotConfig);
   _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("b3rdPerson;"      ), &_sbsBotSettings.b3rdPerson);
   _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("iCrosshair;"      ), &_sbsBotSettings.iCrosshair);
 

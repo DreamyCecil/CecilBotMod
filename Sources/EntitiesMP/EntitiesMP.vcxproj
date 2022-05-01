@@ -321,6 +321,7 @@ copy Debug\$(TargetName).lib $(SolutionDir)..\Bin\Debug\ &gt;nul</Command>
     <ClCompile Include="..\Bots\Logic\BotFunctions.cpp" />
     <ClCompile Include="..\Bots\Logic\BotItems.cpp" />
     <ClCompile Include="..\Bots\Logic\BotMovement.cpp" />
+    <ClCompile Include="..\Bots\Logic\BotSettings.cpp" />
     <ClCompile Include="..\Bots\Logic\BotWeapons.cpp" />
     <ClCompile Include="..\Bots\NetworkPatch\Serialization.cpp" />
     <ClCompile Include="..\Bots\Patcher\patcher.cpp" />

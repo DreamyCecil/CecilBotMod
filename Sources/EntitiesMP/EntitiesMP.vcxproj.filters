@@ -633,6 +633,9 @@
     <ClCompile Include="..\Bots\Logic\BotItems.cpp">
       <Filter>Source Files\Bots sources\Logic</Filter>
     </ClCompile>
+    <ClCompile Include="..\Bots\Logic\BotSettings.cpp">
+      <Filter>Source Files\Bots sources\Logic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\Common.h">

@@ -18,6 +18,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // [Cecil] 2020-07-28: A structure for bot settings
 struct DECL_DLL SBotSettings {
+  // Bot difficulty presets
+  enum EDifficulty {
+    BDF_DUMMY = 0,
+    BDF_EASY,
+    BDF_NORMAL, // Default
+    BDF_HARD,
+
+    BDF_LAST,
+  };
+
   INDEX b3rdPerson; // Set third person view
   INDEX iCrosshair; // Preferred crosshair (-1 for random)
 
@@ -57,48 +67,11 @@ struct DECL_DLL SBotSettings {
 
   // Constructor
   SBotSettings(void) {
-    Reset();
+    Reset(BDF_NORMAL);
   };
-
-  // Reset settings
-  void Reset(void) {
-    b3rdPerson = TRUE;
-    iCrosshair = -1;
-
-    bSniperZoom = TRUE;
-    bShooting = TRUE;
-    fShootAngle = 15.0f;
-    fAccuracyAngle = 5.0f;
   
-    fRotSpeedDist = 400.0f;
-    fRotSpeedMin = 0.05f;
-    fRotSpeedMax = 0.2f;
-    fRotSpeedLimit = 30.0f;
-  
-    fWeaponCD = 3.0f;
-    fTargetCD = 1.0f;
-  
-    fSpeedMul = 1.0f;
-    bStrafe = TRUE;
-    bJump = TRUE;
-  
-    fPrediction = 0.1f;
-    fPredictRnd = 0.1f;
-  
-    iAllowedWeapons = -1;
-    iTargetType = -1;
-    bTargetSearch = TRUE;
-    fImportantChance = 0.2f;
-    bItemSearch = TRUE;
-    fItemSearchCD = 5.0f;
-  
-    bItemVisibility = TRUE;
-    fWeaponDist = 16.0f;
-    fHealthSearch = 100.0f;
-    fHealthDist = 32.0f;
-    fArmorDist = 16.0f;
-    fAmmoDist = 16.0f;
-  };
+  // Reset settings to a certain difficulty preset
+  void Reset(const EDifficulty eDiff);
 
   // Stream operations
   friend CTStream &operator<<(CTStream &strm, SBotSettings &sbs) {
