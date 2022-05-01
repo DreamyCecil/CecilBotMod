@@ -436,6 +436,17 @@ functions:
             sbl.ulFlags &= ~BLF_SEEPLAYER;
           }
 
+          // Teleport back to the player
+          if (fDistToPlayer > 200.0f && GetFlags() & ENF_ALIVE) {
+            FLOAT3D vPlayer = penPlayer->GetPlacement().pl_PositionVector;
+            ANGLE3D aPlayer = penPlayer->GetPlacement().pl_OrientationAngle;
+
+            FLOAT3D vDirToBot = HorizontalDiff(GetPlacement().pl_PositionVector - vPlayer, ((CPlayer *)penPlayer)->en_vGravityDir);
+            vDirToBot.Normalize();
+
+            Teleport(CPlacement3D(vPlayer + vDirToBot, aPlayer), FALSE);
+          }
+
         } else if (fDistToPlayer < 2.0f) {
           m_penFollow = penPlayer;
           sbl.ulFlags |= BLF_BACKOFF;
