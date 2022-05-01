@@ -142,7 +142,7 @@ FLOAT3D HorizontalDiff(FLOAT3D vPosDiff, const FLOAT3D &vGravityDir) {
 // [Cecil] 2021-06-28: Get relative angles from the directed placement
 FLOAT GetRelH(const CPlacement3D &pl) {
   FLOATmatrix3D mRot;
-  MakeRotationMatrixFast(mRot, pl.pl_OrientationAngle);
+  MakeRotationMatrix(mRot, pl.pl_OrientationAngle);
   
   FLOAT3D vDir = FLOAT3D(pl.pl_PositionVector).SafeNormalize();
 
@@ -162,7 +162,7 @@ FLOAT GetRelH(const CPlacement3D &pl) {
 
 FLOAT GetRelP(const CPlacement3D &pl) {
   FLOATmatrix3D mRot;
-  MakeRotationMatrixFast(mRot, pl.pl_OrientationAngle);
+  MakeRotationMatrix(mRot, pl.pl_OrientationAngle);
   
   FLOAT3D vDir = FLOAT3D(pl.pl_PositionVector).SafeNormalize();
 
