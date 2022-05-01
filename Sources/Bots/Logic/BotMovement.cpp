@@ -214,8 +214,8 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
 
 // [Cecil] 2021-06-15: Set bot aim
 void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
-  // [Cecil] 2021-06-16: Aim in the walking direction on a path if haven't seen the enemy in a while
-  if (pen->m_pbppCurrent != NULL && _pTimer->CurrentTick() - pen->m_tmLastSawTarget > 2.0f)
+  // [Cecil] 2021-06-16: Aim in the walking direction if haven't seen the enemy in a while
+  if (_pTimer->CurrentTick() - pen->m_tmLastSawTarget > 2.0f)
   {
     // Running speed
     FLOAT3D vRunDir = HorizontalDiff(pen->en_vCurrentTranslationAbsolute, pen->en_vGravityDir);
