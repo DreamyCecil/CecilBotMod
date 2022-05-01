@@ -47,37 +47,37 @@ name      "PlayerBot";
 thumbnail "";
 
 properties:
-  1 CEntityPointer m_penTarget, // shooting target
-  2 CEntityPointer m_penFollow, // following target
-  3 FLOAT m_tmLastBotTarget = 0.0f, // cooldown for target selection
-  4 FLOAT m_tmLastSawTarget = 0.0f, // last time the enemy has been seen
-  5 FLOAT m_tmButtonAction = 0.0f, // cooldown for button actions
-  6 FLOAT m_tmPosChange = 0.0f, // last time bot has significantly moved
-  7 FLOAT3D m_vLastPos = FLOAT3D(0.0f, 0.0f, 0.0f), // last bot position
+  1 CEntityPointer m_penTarget, // Shooting target
+  2 CEntityPointer m_penFollow, // Following target
+  3 FLOAT m_tmLastBotTarget = 0.0f, // Cooldown for target selection
+  4 FLOAT m_tmLastSawTarget = 0.0f, // Last time the enemy has been seen
+  5 FLOAT m_tmButtonAction = 0.0f, // Cooldown for button actions
+  6 FLOAT m_tmPosChange = 0.0f, // Last time bot has significantly moved
+  7 FLOAT3D m_vLastPos = FLOAT3D(0.0f, 0.0f, 0.0f), // Last bot position
  
- 10 FLOAT m_fTargetDist = 1000.0f, // how far is the following target
- 11 FLOAT m_fSideDir = -1.0f,      // prioritize going left or right
- 12 FLOAT m_tmChangeBotDir = 0.0f, // when to randomize the side direction
- 13 FLOAT3D m_vAccuracy = FLOAT3D(0.0f, 0.0f, 0.0f), // accuracy angle (should be preserved between ticks)
- 14 FLOAT m_tmBotAccuracy = 0.0f,  // accuracy update cooldown
+ 10 FLOAT m_fTargetDist = 1000.0f, // How far is the following target
+ 11 FLOAT m_fSideDir = -1.0f,      // Prioritize going left or right
+ 12 FLOAT m_tmChangeBotDir = 0.0f, // When to randomize the side direction
+ 13 FLOAT3D m_vAccuracy = FLOAT3D(0.0f, 0.0f, 0.0f), // Accuracy angle (should be preserved between ticks)
+ 14 FLOAT m_tmBotAccuracy = 0.0f,  // Accuracy update cooldown
  
- 20 FLOAT m_tmChangePath = 0.0f,    // path update cooldown
- 21 FLOAT m_tmPickImportant = 0.0f, // how often to pick important points
- 22 BOOL m_bImportantPoint = FALSE, // focused on the important point or not
+ 20 FLOAT m_tmChangePath = 0.0f,    // Path update cooldown
+ 21 FLOAT m_tmPickImportant = 0.0f, // How often to pick important points
+ 22 BOOL m_bImportantPoint = FALSE, // Focused on the important point or not
  
- 30 INDEX m_iBotWeapon = CT_BOT_WEAPONS, // which weapon is currently prioritized
- 31 FLOAT m_tmLastBotWeapon = 0.0f, // cooldown for weapon selection
- 32 FLOAT m_tmShootTime = -1.0f, // when to shoot the next time
+ 30 INDEX m_iBotWeapon = CT_BOT_WEAPONS, // Which weapon is currently prioritized
+ 31 FLOAT m_tmLastBotWeapon = 0.0f, // Cooldown for weapon selection
+ 32 FLOAT m_tmShootTime = -1.0f, // When to shoot the next time
 
- 40 FLOAT m_tmLastItemSearch = 0.0f, // item search cooldown
- 41 CEntityPointer m_penLastItem,    // last selected item to run towards
+ 40 FLOAT m_tmLastItemSearch = 0.0f, // Item search cooldown
+ 41 CEntityPointer m_penLastItem,    // Last selected item to run towards
 
 {
-  CBotPathPoint *m_pbppCurrent; // current path point
-  CBotPathPoint *m_pbppTarget; // target point
-  ULONG m_ulPointFlags; // last point's flags
+  CBotPathPoint *m_pbppCurrent; // Current path point
+  CBotPathPoint *m_pbppTarget; // Target point
+  ULONG m_ulPointFlags; // Last point's flags
 
-  SBotSettings m_sbsBot; // bot settings
+  SBotSettings m_sbsBot; // Bot settings
 
   SBotThoughts m_btThoughts; // [Cecil] 2021-06-20: Bot thoughts
 }
@@ -111,14 +111,14 @@ functions:
     m_tmLastBotWeapon = 0.0f;
     m_tmShootTime = -1.0f;
 
-    // give some time before picking anything up
+    // Give some time before picking anything up
     m_tmLastItemSearch = _pTimer->CurrentTick() + 1.0f;
     m_penLastItem = NULL;
   };
   
   // Bot destructor
   virtual void EndBot(void) {
-    // remove from the bot list
+    // Remove from the bot list
     if (_cenPlayerBots.IsMember(this)) {
       _cenPlayerBots.Remove(this);
     }
@@ -154,22 +154,22 @@ functions:
 
   // Apply action for bots
   virtual void BotApplyAction(CPlayerAction &paAction) {
-    // while alive
+    // While alive
     if (GetFlags() & ENF_ALIVE) {
       if (m_penCamera == NULL && m_penActionMarker == NULL) {
-        // bot's brain
+        // Bot's brain
         SBotLogic sbl;
 
-        // main bot logic
+        // Main bot logic
         BotThinking(paAction, sbl);
 
-        // weapon functions
+        // Weapon functions
         BotWeapons(paAction, sbl);
       }
 
-    // when dead
+    // When dead
     } else {
-      // try to respawn
+      // Try to respawn
       if (ButtonAction()) {
         paAction.pa_ulButtons |= PLACT_FIRE;
       }
@@ -186,27 +186,27 @@ functions:
   void UpdateBot(const SBotSettings &sbs) {
     m_sbsBot = sbs;
 
-    // adjust target type
+    // Adjust target type
     if (m_sbsBot.iTargetType == -1)
     {
       if (GetSP()->sp_bCooperative || GetSP()->sp_bSinglePlayer) {
-        m_sbsBot.iTargetType = 1; // only enemies
+        m_sbsBot.iTargetType = 1; // Only enemies
       } else {
-        m_sbsBot.iTargetType = 2; // enemies and players
+        m_sbsBot.iTargetType = 2; // Enemies and players
       }
     }
 
-    // various player settings
+    // Various player settings
     CPlayerSettings *pps = (CPlayerSettings *)en_pcCharacter.pc_aubAppearance;
     
-    // third person view
+    // Third person view
     if (m_sbsBot.b3rdPerson) {
       pps->ps_ulFlags |= PSF_PREFER3RDPERSON;
     } else {
       pps->ps_ulFlags &= ~PSF_PREFER3RDPERSON;
     }
 
-    // change crosshair type
+    // Change crosshair type
     if (m_sbsBot.iCrosshair < 0) {
       pps->ps_iCrossHairType = rand() % 7; // randomize
     } else {
@@ -253,7 +253,7 @@ functions:
       UseWeaponScope(this, pa, sbl);
     }
 
-    // pick weapon config
+    // Pick weapon config
     const SBotWeaponConfig *aWeapons = sbl.aWeapons;
     m_iBotWeapon = CT_BOT_WEAPONS - 1;
 
@@ -330,15 +330,15 @@ functions:
       m_vLastPos = vBotPos;
     }
 
-    // set bot's absolute viewpoint
+    // Set bot's absolute viewpoint
     sbl.plBotView = en_plViewpoint;
     sbl.plBotView.RelativeToAbsolute(GetPlacement());
     
     // [Cecil] 2018-10-11 / 2018-10-13: Bot targeting and following
     CEntity *penBotTarget = ClosestEnemy(this, m_fTargetDist, sbl);
 
-    // select new target only if it doesn't exist or after a cooldown
-    if (ASSERT_ENTITY(m_penTarget) || m_tmLastBotTarget <= _pTimer->CurrentTick()) {
+    // Select new target only if it doesn't exist or after a cooldown
+    if (!ASSERT_ENTITY(m_penTarget) || m_tmLastBotTarget <= _pTimer->CurrentTick()) {
       m_penTarget = penBotTarget;
       m_tmLastBotTarget = _pTimer->CurrentTick() + m_sbsBot.fTargetCD;
 
@@ -353,39 +353,39 @@ functions:
       sbl.ulFlags |= BLF_FOLLOWPLAYER;
     }
 
-    // enemy exists
+    // Enemy exists
     if (m_penTarget != NULL) {
       sbl.ulFlags |= BLF_ENEMYEXISTS;
       sbl.peiTarget = (EntityInfo *)m_penTarget->GetEntityInfo();
 
-      // can see the enemy
+      // Can see the enemy
       if (CastBotRay(this, m_penTarget, sbl, TRUE)) {
         sbl.ulFlags |= BLF_SEEENEMY;
         m_tmLastSawTarget = _pTimer->CurrentTick();
       }
       
-      // follow the enemy
+      // Follow the enemy
       m_penFollow = m_penTarget;
     }
 
-    // aim at the target
+    // Aim at the target
     BotAim(this, pa, sbl);
 
-    // shoot if possible
+    // Shoot if possible
     if (m_sbsBot.bShooting) {
       const SBotWeaponConfig &bwWeapon = sbl.aWeapons[m_iBotWeapon];
 
-      // allowed to shoot
+      // Allowed to shoot
       BOOL bCanShoot = sbl.CanShoot();
       
-      // only shoot allowed weapons
+      // Only shoot allowed weapons
       if (m_sbsBot.iAllowedWeapons != -1) {
         bCanShoot = bCanShoot && m_sbsBot.iAllowedWeapons & WPN_FLAG(GetPlayerWeapons()->m_iCurrentWeapon);
       }
 
-      // if allowed to shoot
+      // If allowed to shoot
       if (bCanShoot) {
-        // enough shooting time
+        // Enough shooting time
         if (m_tmShootTime <= 0.0f || m_tmShootTime > _pTimer->CurrentTick()) {
           FireWeapon(this, pa, sbl);
 
@@ -393,17 +393,17 @@ functions:
           THOUGHT("Stop shooting");
         }
 
-        // reset shooting time a few ticks later
+        // Reset shooting time a few ticks later
         if (m_tmShootTime + 0.05f <= _pTimer->CurrentTick()) {
-          // shooting frequency
+          // Shooting frequency
           FLOAT tmShotFreq = bwWeapon.bw_tmShotFreq;
 
-          // this weapon has a certain shooting frequency
+          // This weapon has a certain shooting frequency
           if (tmShotFreq > 0.0f) {
             m_tmShootTime = _pTimer->CurrentTick() + tmShotFreq;
             THOUGHT(CTString(0, "Shoot for %.2fs", tmShotFreq));
 
-          // no frequency
+          // No frequency
           } else {
             m_tmShootTime = -1.0f;
           }
@@ -411,27 +411,27 @@ functions:
       }
     }
     
-    // search for items
+    // Search for items
     BotItemSearch(this, sbl);
 
-    // follow players
+    // Follow players
     if (sbl.FollowPlayer()) {
       FLOAT fDistToPlayer = -1.0f;
       CEntity *penPlayer = ClosestRealPlayer(this, vBotPos, fDistToPlayer);
       
-      // player exists
+      // Player exists
       if (penPlayer != NULL) {
-        // don't follow anything else
+        // Don't follow anything else
         m_penFollow = NULL;
 
         sbl.ulFlags |= BLF_SEEPLAYER;
 
-        // follow the player
+        // Follow the player
         if (fDistToPlayer > 5.0f) {
           m_penFollow = penPlayer;
           sbl.ulFlags |= BLF_FOLLOWING;
 
-          // player is too far
+          // Player is too far
           if (fDistToPlayer > 100.0f || !CastBotRay(this, penPlayer, sbl, TRUE)) {
             sbl.ulFlags &= ~BLF_SEEPLAYER;
           }
@@ -441,29 +441,29 @@ functions:
           sbl.ulFlags |= BLF_BACKOFF;
         }
 
-        // look at the player
+        // Look at the player
         if (!sbl.SeeEnemy() && sbl.SeePlayer()) {
-          // relative position
+          // Relative position
           CPlacement3D plToPlayer(penPlayer->GetPlacement().pl_PositionVector - vBotPos, sbl.ViewAng());
 
-          // angle towards the target
+          // Angle towards the target
           FLOAT2D vToPlayer = FLOAT2D(GetRelH(plToPlayer), GetRelP(plToPlayer));
 
-          // set rotation speed
+          // Set rotation speed
           sbl.aAim(1) = vToPlayer(1) / 0.5f;
           sbl.aAim(2) = vToPlayer(2) / 0.5f;
         }
       }
     }
 
-    // try to find a path to the target
+    // Try to find a path to the target
     BotPathFinding(this, sbl);
 
-    // aim
+    // Aim
     pa.pa_aRotation(1) += sbl.aAim(1);
     pa.pa_aRotation(2) += sbl.aAim(2);
 
-    // set bot movement
+    // Set bot movement
     BotMovement(this, pa, sbl);
   };
 

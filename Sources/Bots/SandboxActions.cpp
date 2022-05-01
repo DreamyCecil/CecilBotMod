@@ -856,7 +856,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
           if (IsDerivedFromDllClass(penFound, CPlayerWeapons_DLLClass)) {
             ((CPlayerWeapons *)penFound)->m_iAvailableWeapons = iSetWeapons;
 
-            for (INDEX iAddAmmo = WEAPON_NONE; iAddAmmo < WEAPON_LAST; iAddAmmo++) {
+            for (INDEX iAddAmmo = 0; iAddAmmo < CT_BOT_WEAPONS; iAddAmmo++) {
               INDEX iAddAmmoFlag = WPN_FLAG(iAddAmmo);
 
               if (iSetWeapons & iAddAmmoFlag) {
