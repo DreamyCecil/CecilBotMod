@@ -42,7 +42,7 @@ extern const SBotWeaponConfig _abwCooperativeWeapons[CT_BOT_WEAPONS];
 
 // Pick weapon config
 inline const SBotWeaponConfig *PickWeaponConfig(void) {
-  if (GetSP()->sp_bCooperative || GetSP()->sp_bSinglePlayer) {
+  if (IsCoopGame()) {
     return _abwCooperativeWeapons;
   }
   return _abwDeathmatchWeapons;

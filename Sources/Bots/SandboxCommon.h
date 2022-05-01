@@ -64,6 +64,11 @@ DECL_DLL BOOL IsOfDllClass(CEntity *pen, const CDLLEntityClass &dec);
 // [Cecil] Check if entity is of given DLL class or derived from it
 DECL_DLL BOOL IsDerivedFromDllClass(CEntity *pen, const CDLLEntityClass &dec);
 
+// [Cecil] 2022-05-01: Check if it's a non-deathmatch game
+inline BOOL IsCoopGame(void) {
+  return GetSP()->sp_bCooperative || GetSP()->sp_bSinglePlayer;
+};
+
 // --- Replacement functions
 
 // [Cecil] 2021-06-17: Check if an entity exists

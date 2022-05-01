@@ -189,7 +189,7 @@ functions:
     // Adjust target type
     if (m_sbsBot.iTargetType == -1)
     {
-      if (GetSP()->sp_bCooperative || GetSP()->sp_bSinglePlayer) {
+      if (IsCoopGame()) {
         m_sbsBot.iTargetType = 1; // Only enemies
       } else {
         m_sbsBot.iTargetType = 2; // Enemies and players
@@ -258,7 +258,7 @@ functions:
     m_iBotWeapon = CT_BOT_WEAPONS - 1;
 
     // [Cecil] 2021-06-16: Select knife for faster speed if haven't seen the enemy in a while
-    if (!GetSP()->sp_bCooperative && _pTimer->CurrentTick() - m_tmLastSawTarget > 2.0f)
+    if (!IsCoopGame() && _pTimer->CurrentTick() - m_tmLastSawTarget > 2.0f)
     {
       for (INDEX iWeapon = 0; iWeapon < CT_BOT_WEAPONS; iWeapon++) {
         INDEX iType = aWeapons[iWeapon].bw_iType;
@@ -349,7 +349,7 @@ functions:
     m_penFollow = NULL;
 
     // [Cecil] 2019-05-28: Follow players in cooperative
-    if (GetSP()->sp_bCooperative || GetSP()->sp_bSinglePlayer) {
+    if (IsCoopGame()) {
       sbl.ulFlags |= BLF_FOLLOWPLAYER;
     }
 
