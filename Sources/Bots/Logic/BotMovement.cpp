@@ -183,8 +183,10 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
           sbl.ulFlags |= BLF_STAYONPOINT;
         }
 
-        // [Cecil] 2021-06-16: Target point is unreachable, stay where you are
-        bStay |= (pbppNext->bpp_ulFlags & PPF_UNREACHABLE);
+        // [Cecil] 2021-06-16: Target point is unreachable, stay on it if it's not important
+        if (!pen->m_bImportantPoint) {
+          bStay |= (pbppNext->bpp_ulFlags & PPF_UNREACHABLE);
+        }
 
         // Select new path point
         pen->m_pbppCurrent = (bStay ? pbppClosest : pbppNext);
