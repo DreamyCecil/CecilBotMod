@@ -4387,8 +4387,14 @@ functions:
     if (m_iMayRespawn==2 && (ulReleasedButtons&PLACT_FIRE) && !IsPredictor()) {
       // if singleplayer
       if( GetSP()->sp_bSinglePlayer) {
-        // load quick savegame
-        _pShell->Execute("gam_bQuickLoad=1;");
+        // [Cecil] Bots shouldn't reload the game
+        if (IsBot()) {
+          SendEvent(EEnd());
+
+        } else {
+          // load quick savegame
+          _pShell->Execute("gam_bQuickLoad=1;");
+        }
       // if deathmatch or similar
       } else if( !GetSP()->sp_bCooperative) {
         // rebirth
