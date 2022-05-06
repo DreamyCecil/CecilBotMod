@@ -86,8 +86,11 @@ void CBotNavmesh::ReadNavmesh(CTStream *strm) {
 
 // Saving & Loading
 void CBotNavmesh::SaveNavmesh(CWorld &wo) {
+  const CTFileName &fnWorld = wo.wo_fnmFileName;
+
+  // Get level path hash and append it to the level filename
   CTFileName fnFile;
-  fnFile.PrintF("Cecil\\Navmeshes\\%s.nav", wo.wo_fnmFileName.FileName().str_String);
+  fnFile.PrintF("Cecil\\Navmeshes\\%s_%08X.nav", fnWorld.FileName().str_String, fnWorld.GetHash());
   
   CTFileStream strm;
   strm.Create_t(fnFile);
@@ -100,8 +103,11 @@ void CBotNavmesh::SaveNavmesh(CWorld &wo) {
 };
 
 void CBotNavmesh::LoadNavmesh(CWorld &wo) {
+  const CTFileName &fnWorld = wo.wo_fnmFileName;
+
+  // Get navmesh file using a level path hash
   CTFileName fnFile;
-  fnFile.PrintF("Cecil\\Navmeshes\\%s.nav", wo.wo_fnmFileName.FileName().str_String);
+  fnFile.PrintF("Cecil\\Navmeshes\\%s_%08X.nav", fnWorld.FileName().str_String, fnWorld.GetHash());
   
   CTFileStream strm;
   strm.Open_t(fnFile);
