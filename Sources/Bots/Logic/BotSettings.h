@@ -44,6 +44,7 @@ struct DECL_DLL SBotSettings {
   FLOAT fWeaponCD; // Weapon selection cooldown
   FLOAT fTargetCD; // Target selection cooldown
   
+  INDEX iFollowPlayers; // Follow players in coop or not (0 - no, 1 - yes, 2 - until there's a visible enemy)
   FLOAT fSpeedMul; // Speed multiplier
   INDEX bStrafe;   // Strafe near the target or not
   INDEX bJump;     // Jump or not

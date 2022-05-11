@@ -33,6 +33,7 @@ static void PresetDummy(SBotSettings &sbs) {
   sbs.fWeaponCD = 3.0f;
   sbs.fTargetCD = 1.0f;
   
+  sbs.iFollowPlayers = 0;
   sbs.fSpeedMul = 1.0f;
   sbs.bStrafe = TRUE;
   sbs.bJump = TRUE;
@@ -72,6 +73,7 @@ static void PresetEasy(SBotSettings &sbs) {
   sbs.fWeaponCD = 5.0f;
   sbs.fTargetCD = 3.0f;
   
+  sbs.iFollowPlayers = 1;
   sbs.fSpeedMul = 1.0f;
   sbs.bStrafe = FALSE;
   sbs.bJump = TRUE;
@@ -111,6 +113,7 @@ static void PresetNormal(SBotSettings &sbs) {
   sbs.fWeaponCD = 3.0f;
   sbs.fTargetCD = 1.0f;
   
+  sbs.iFollowPlayers = 1;
   sbs.fSpeedMul = 1.0f;
   sbs.bStrafe = TRUE;
   sbs.bJump = TRUE;
@@ -150,6 +153,7 @@ static void PresetHard(SBotSettings &sbs) {
   sbs.fWeaponCD = 3.0f;
   sbs.fTargetCD = 1.0f;
   
+  sbs.iFollowPlayers = 2;
   sbs.fSpeedMul = 1.0f;
   sbs.bStrafe = TRUE;
   sbs.bJump = TRUE;

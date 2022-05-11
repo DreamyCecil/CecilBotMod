@@ -660,7 +660,8 @@ extern void CECIL_InitSandboxActions(void) {
 
   _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fWeaponCD;"       ), &_sbsBotSettings.fWeaponCD);
   _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fTargetCD;"       ), &_sbsBotSettings.fTargetCD);
-
+  
+  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("iFollowPlayers;"  ), &_sbsBotSettings.iFollowPlayers);
   _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fSpeedMul;"       ), &_sbsBotSettings.fSpeedMul);
   _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bStrafe;"         ), &_sbsBotSettings.bStrafe);
   _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bJump;"           ), &_sbsBotSettings.bJump);

@@ -349,7 +349,9 @@ functions:
     m_penFollow = NULL;
 
     // [Cecil] 2019-05-28: Follow players in cooperative
-    if (IsCoopGame()) {
+    BOOL bFollowInCoop = (IsCoopGame() && m_sbsBot.iFollowPlayers != 0);
+
+    if (bFollowInCoop) {
       sbl.ulFlags |= BLF_FOLLOWPLAYER;
     }
 
@@ -366,6 +368,13 @@ functions:
       
       // Follow the enemy
       m_penFollow = m_penTarget;
+
+      // Stop following the player if detected an enemy
+      if (m_sbsBot.iFollowPlayers == 2) {
+        if (sbl.SeeEnemy() || m_fTargetDist < 16.0f) {
+          sbl.ulFlags &= ~BLF_FOLLOWPLAYER;
+        }
+      }
     }
 
     // Aim at the target
@@ -410,62 +419,65 @@ functions:
         }
       }
     }
-    
-    // Search for items
-    BotItemSearch(this, sbl);
 
     // Follow players
-    if (sbl.FollowPlayer()) {
+    if (bFollowInCoop) {
       FLOAT fDistToPlayer = -1.0f;
       CEntity *penPlayer = ClosestRealPlayer(this, vBotPos, fDistToPlayer);
       
       // Player exists
       if (penPlayer != NULL) {
-        // Don't follow anything else
-        m_penFollow = NULL;
+        // Currently following players
+        if (sbl.FollowPlayer()) {
+          // Don't follow anything else
+          m_penFollow = NULL;
 
-        sbl.ulFlags |= BLF_SEEPLAYER;
+          sbl.ulFlags |= BLF_SEEPLAYER;
 
-        // Follow the player
-        if (fDistToPlayer > 5.0f) {
-          m_penFollow = penPlayer;
-          sbl.ulFlags |= BLF_FOLLOWING;
+          // Follow the player specifically
+          if (fDistToPlayer > 5.0f) {
+            m_penFollow = penPlayer;
+            sbl.ulFlags |= BLF_FOLLOWING;
 
-          // Player is too far
-          if (fDistToPlayer > 100.0f || !CastBotRay(this, penPlayer, sbl, TRUE)) {
-            sbl.ulFlags &= ~BLF_SEEPLAYER;
+            // Player is too far
+            if (fDistToPlayer > 100.0f || !CastBotRay(this, penPlayer, sbl, TRUE)) {
+              sbl.ulFlags &= ~BLF_SEEPLAYER;
+            }
+
+          } else if (fDistToPlayer < 2.0f) {
+            m_penFollow = penPlayer;
+            sbl.ulFlags |= BLF_BACKOFF;
           }
 
-          // Teleport back to the player
-          if (fDistToPlayer > 200.0f && GetFlags() & ENF_ALIVE) {
-            FLOAT3D vPlayer = penPlayer->GetPlacement().pl_PositionVector;
-            ANGLE3D aPlayer = penPlayer->GetPlacement().pl_OrientationAngle;
+          // Look at the player
+          if (!sbl.SeeEnemy() && sbl.SeePlayer()) {
+            // Relative position
+            CPlacement3D plToPlayer(penPlayer->GetPlacement().pl_PositionVector - vBotPos, sbl.ViewAng());
 
-            FLOAT3D vDirToBot = HorizontalDiff(GetPlacement().pl_PositionVector - vPlayer, ((CPlayer *)penPlayer)->en_vGravityDir);
-            vDirToBot.Normalize();
+            // Angle towards the target
+            FLOAT2D vToPlayer = FLOAT2D(GetRelH(plToPlayer), GetRelP(plToPlayer));
 
-            Teleport(CPlacement3D(vPlayer + vDirToBot, aPlayer), FALSE);
+            // Set rotation speed
+            sbl.aAim(1) = vToPlayer(1) / 0.5f;
+            sbl.aAim(2) = vToPlayer(2) / 0.5f;
           }
-
-        } else if (fDistToPlayer < 2.0f) {
-          m_penFollow = penPlayer;
-          sbl.ulFlags |= BLF_BACKOFF;
         }
 
-        // Look at the player
-        if (!sbl.SeeEnemy() && sbl.SeePlayer()) {
-          // Relative position
-          CPlacement3D plToPlayer(penPlayer->GetPlacement().pl_PositionVector - vBotPos, sbl.ViewAng());
+        // Teleport back to the player
+        if (fDistToPlayer > 200.0f && GetFlags() & ENF_ALIVE) {
+          FLOAT3D vPlayer = penPlayer->GetPlacement().pl_PositionVector;
+          ANGLE3D aPlayer = penPlayer->GetPlacement().pl_OrientationAngle;
 
-          // Angle towards the target
-          FLOAT2D vToPlayer = FLOAT2D(GetRelH(plToPlayer), GetRelP(plToPlayer));
+          FLOAT3D vDirToBot = HorizontalDiff(GetPlacement().pl_PositionVector - vPlayer, ((CPlayer *)penPlayer)->en_vGravityDir);
+          vDirToBot.Normalize();
 
-          // Set rotation speed
-          sbl.aAim(1) = vToPlayer(1) / 0.5f;
-          sbl.aAim(2) = vToPlayer(2) / 0.5f;
+          Teleport(CPlacement3D(vPlayer + vDirToBot, aPlayer), FALSE);
         }
       }
     }
+    
+    // Search for items (more important than players)
+    BotItemSearch(this, sbl);
 
     // Try to find a path to the target
     BotPathFinding(this, sbl);
