@@ -99,8 +99,7 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
 
     // If reached the important point
     if (bReachedImportantPoint) {
-      // Use important entity
-      UseImportantEntity(pen, pen->m_pbppTarget->bpp_penImportant);
+      CEntity *penImportant = pen->m_pbppTarget->bpp_penImportant;
 
       // Reset important point
       if (pen->m_pbppTarget->bpp_pbppNext == NULL) {
@@ -119,6 +118,9 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
         pen->m_pbppTarget = pen->m_pbppTarget->bpp_pbppNext;
         THOUGHT("^c3f3fafNext important point");
       }
+
+      // Use important entity
+      UseImportantEntity(pen, penImportant);
     }
   }
 
@@ -157,8 +159,7 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
 
     // If not following the important point, select new one if possible
     if (penTarget != NULL && !pen->m_bImportantPoint && bSelectTarget) {
-      CMovableEntity *penMovableTarget = (penTarget->GetPhysicsFlags() & EPF_MOVABLE ? (CMovableEntity *)penTarget : NULL);
-      pen->m_pbppTarget = NearestNavMeshPointPos(penMovableTarget, penTarget->GetPlacement().pl_PositionVector);
+      pen->m_pbppTarget = NearestNavMeshPointPos(penTarget, penTarget->GetPlacement().pl_PositionVector);
     }
 
     // [Cecil] 2022-05-11: Construct a path as long as there's a target point

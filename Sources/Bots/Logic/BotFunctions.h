@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "BotWeapons.h"
 
 // [Cecil] 2019-05-28: Find nearest NavMesh point to some position
-CBotPathPoint *NearestNavMeshPointPos(CMovableEntity *pen, const FLOAT3D &vCheck);
+CBotPathPoint *NearestNavMeshPointPos(CEntity *pen, const FLOAT3D &vCheck);
 // [Cecil] 2021-06-21: Find nearest NavMesh point to the bot
 CBotPathPoint *NearestNavMeshPointBot(CPlayerBot *pen, BOOL bSkipCurrent);
 

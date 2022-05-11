@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "BotItems.h"
 
 #include "EntitiesMP/Switch.h"
+#include "EntitiesMP/MovingBrush.h"
 
 // Constructor
 SBotLogic::SBotLogic(void) : ulFlags(0), peiTarget(NULL),  aAim(0.0f, 0.0f, 0.0f),
@@ -28,13 +29,17 @@ SBotLogic::SBotLogic(void) : ulFlags(0), peiTarget(NULL),  aAim(0.0f, 0.0f, 0.0f
 };
 
 // [Cecil] 2019-05-28: Find nearest NavMesh point to some position
-CBotPathPoint *NearestNavMeshPointPos(CMovableEntity *pen, const FLOAT3D &vCheck) {
+CBotPathPoint *NearestNavMeshPointPos(CEntity *pen, const FLOAT3D &vCheck) {
   if (_pNavmesh->bnm_cbppPoints.Count() <= 0) {
     return NULL;
   }
 
   // Gravity direction
-  FLOAT3D vGravityDir = (pen != NULL ? pen->en_vGravityDir : FLOAT3D(0.0f, -1.0f, 0.0f));
+  FLOAT3D vGravityDir(0.0f, -1.0f, 0.0f);
+
+  if (pen != NULL && pen->GetPhysicsFlags() & EPF_MOVABLE) {
+    vGravityDir = ((CMovableEntity *)pen)->en_vGravityDir;
+  }
 
   FLOAT fDist = 1000.0f;
   CBotPathPoint *pbppNearest = NULL;
@@ -158,6 +163,15 @@ BOOL ImportantForNavMesh(CPlayer *penBot, CEntity *penEntity) {
   // Is switch usable
   } else if (IsOfDllClass(penEntity, CSwitch_DLLClass)) {
     return ((CSwitch &)*penEntity).m_bUseable;
+
+  // Is moving brush usable
+  } else if (IsOfDllClass(penEntity, CMovingBrush_DLLClass)) {
+    CEntity *penSwitch = ((CMovingBrush *)penEntity)->m_penSwitch;
+    return ImportantForNavMesh(penBot, penSwitch);
+
+  // Can go to markers
+  } else if (IsOfDllClass(penEntity, CMarker_DLLClass)) {
+    return TRUE;
   }
 
   return FALSE;
@@ -170,8 +184,26 @@ void UseImportantEntity(CPlayer *penBot, CEntity *penEntity) {
   }
 
   // Press the switch
-  if (IsOfDllClass(penEntity, CSwitch_DLLClass) && ((CSwitch &)*penEntity).m_bUseable) {
-    SendToTarget(penEntity, EET_TRIGGER, penBot);
+  if (IsOfDllClass(penEntity, CSwitch_DLLClass)) {
+    if (((CSwitch &)*penEntity).m_bUseable) {
+      SendToTarget(penEntity, EET_TRIGGER, penBot);
+    }
+
+  // Use the moving brush
+  } else if (IsOfDllClass(penEntity, CMovingBrush_DLLClass)) {
+    CEntity *penSwitch = ((CMovingBrush *)penEntity)->m_penSwitch;
+    UseImportantEntity(penBot, penSwitch);
+
+  // Go to the point near the marker target
+  } else if (IsOfDllClass(penEntity, CMarker_DLLClass)) {
+    if (IsDerivedFromDllClass(penBot, CPlayerBot_DLLClass)) {
+      CEntity *penTarget = penEntity->GetTarget();
+
+      if (penTarget != NULL) {
+        ((CPlayerBot *)penBot)->m_pbppTarget = NearestNavMeshPointPos(penTarget, penTarget->GetPlacement().pl_PositionVector);
+        ((CPlayerBot *)penBot)->m_bImportantPoint = TRUE;
+      }
+    }
   }
 };
 
