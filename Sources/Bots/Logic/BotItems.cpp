@@ -53,8 +53,11 @@ void BotItemSearch(CPlayerBot *pen, SBotLogic &sbl) {
     // Check if bot wants an item (if it's not too close)
     BOOL bWantItem = (fItemDist > fCloseItemDist);
 
+    // [Cecil] TEMP 2022-05-11: Go for items in coop anyway
+    BOOL bImportantPoint = (pen->m_bImportantPoint && !IsCoopGame());
+
     // Check if item is really needed (because going for an important point)
-    BOOL bNeedItem = (!pen->m_bImportantPoint || fItemDist < 8.0f);
+    BOOL bNeedItem = (!bImportantPoint || fItemDist < 8.0f);
 
     if (bWantItem && bNeedItem) {
       // Determine the closest item
