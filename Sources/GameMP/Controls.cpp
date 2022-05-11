@@ -259,68 +259,44 @@ void CControls::Load_t( CTFileName fnFile)
 
   // [Cecil] TEMP 2021-06-13: Bot mod buttons
   if (fnFile == CTString("Controls\\System\\Common.ctl")) {
-    // create a button
-    #define CREATE_BOT_BUTTON(_Var, _Name) \
-      CTString strBot##_Var = _Name; \
-      BOOL bBot##_Var = FALSE
+    for (INDEX i = 0; i < _ctKeysInTable; i++) {
+      const SKeyConversion &kc = _akcKeyTable[i];
 
-    // check the button
-    #define CHECK_BOT_BUTTON(_Var) \
-      if (ba.ba_strName == strBot##_Var) bBot##_Var = TRUE
+      // [Cecil] 2022-05-11: Load commands for one hotkey
+      SHotkey hk;
 
-    // add the button
-    #define ADD_BOT_BUTTON(_Var, _Button, _Command) \
-      if (!bBot##_Var) { \
-        CButtonAction &baBot = AddButtonAction(); \
-        baBot.ba_strName = strBot##_Var; baBot.ba_iFirstKey = _Button; \
-        baBot.ba_strCommandLineWhenPressed = MODCOM_NAME(_Command); \
-        baBot.ba_strCommandLineWhenReleased = ""; \
-        baBot.ba_lnNode.Remove(); ctrl_lhButtonActions.AddHead(baBot.ba_lnNode); \
+      if (!LoadCommands(hk, kc)) {
+        continue;
       }
-    
-    CREATE_BOT_BUTTON(ADD,      "Add NavMesh point");
-    CREATE_BOT_BUTTON(DELETE,   "Delete NavMesh point");
-    CREATE_BOT_BUTTON(INFO,     "NavMesh point info");
-    CREATE_BOT_BUTTON(SELECT,   "NavMesh select point");
-    CREATE_BOT_BUTTON(CONNECT,  "NavMesh connection type");
-    CREATE_BOT_BUTTON(TOPLAYER, "NavMesh move to player");
-    CREATE_BOT_BUTTON(SNAP,     "NavMesh position snapping");
-    CREATE_BOT_BUTTON(INCRANGE, "NavMesh increase range");
-    CREATE_BOT_BUTTON(DECRANGE, "NavMesh decrease range");
-    CREATE_BOT_BUTTON(BLUEBOT,  "Add bot to blue team");
-    CREATE_BOT_BUTTON(REDBOT,   "Add bot to red team");
-    CREATE_BOT_BUTTON(QUICKBOT, "Quick bot add");
 
-    // check if any of the buttons exist
-    FOREACHINLIST(CButtonAction, ba_lnNode, ctrl_lhButtonActions, itba) {
-      CButtonAction &ba = *itba;
+      CTString strKeyName(0, "Bot Mod %s Key", kc.kc_strName);
+      BOOL bAlreadyExists = FALSE;
 
-      CHECK_BOT_BUTTON(ADD);
-      CHECK_BOT_BUTTON(DELETE);
-      CHECK_BOT_BUTTON(INFO);
-      CHECK_BOT_BUTTON(SELECT);
-      CHECK_BOT_BUTTON(CONNECT);
-      CHECK_BOT_BUTTON(TOPLAYER);
-      CHECK_BOT_BUTTON(SNAP);
-      CHECK_BOT_BUTTON(INCRANGE);
-      CHECK_BOT_BUTTON(DECRANGE);
-      CHECK_BOT_BUTTON(BLUEBOT);
-      CHECK_BOT_BUTTON(REDBOT);
-      CHECK_BOT_BUTTON(QUICKBOT);
+      // Check if it's been added already
+      FOREACHINLIST(CButtonAction, ba_lnNode, ctrl_lhButtonActions, itba) {
+        CButtonAction &baCheck = *itba;
+
+        if (baCheck.ba_strName == strKeyName) {
+          bAlreadyExists = TRUE;
+          break;
+        }
+      }
+
+      // Already exists
+      if (bAlreadyExists) {
+        continue;
+      }
+
+      CButtonAction &baNew = AddButtonAction();
+      baNew.ba_strName = strKeyName;
+      baNew.ba_iFirstKey = hk.iKey;
+      baNew.ba_strCommandLineWhenPressed = hk.strPressed;
+      baNew.ba_strCommandLineWhenReleased = hk.strReleased;
+
+      // Add key to the top
+      baNew.ba_lnNode.Remove();
+      ctrl_lhButtonActions.AddHead(baNew.ba_lnNode);
     }
-
-    ADD_BOT_BUTTON(QUICKBOT, KID_EQUALS,      "QuickBot();");
-    ADD_BOT_BUTTON(REDBOT,   KID_O,           "AddBot(\"\", \"RighteousRobert\", \"Red\");");
-    ADD_BOT_BUTTON(BLUEBOT,  KID_P,           "AddBot(\"\", \"BlueBill\", \"Blue\");");
-    ADD_BOT_BUTTON(DECRANGE, KID_PAGEDOWN,    "AddNavMeshPointRange(-1.0);");
-    ADD_BOT_BUTTON(INCRANGE, KID_PAGEUP,      "AddNavMeshPointRange(1.0);");
-    ADD_BOT_BUTTON(SNAP,     KID_NUMSLASH,    "SnapNavMeshPoint(0.5);");
-    ADD_BOT_BUTTON(TOPLAYER, KID_NUMMULTIPLY, "TeleportNavMeshPoint(0.5);");
-    ADD_BOT_BUTTON(CONNECT,  KID_NUMDECIMAL,  "NavMeshConnectionType();");
-    ADD_BOT_BUTTON(SELECT,   KID_NUM1,        "NavMeshSelectPoint();");
-    ADD_BOT_BUTTON(INFO,     KID_NUMENTER,    "NavMeshPointInfo();");
-    ADD_BOT_BUTTON(DELETE,   KID_NUMMINUS,    "DeleteNavMeshPoint();");
-    ADD_BOT_BUTTON(ADD,      KID_NUMPLUS,     "AddNavMeshPoint(0.5, 0.5);");
   }
 
 /*

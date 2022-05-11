@@ -318,6 +318,7 @@ copy Debug\$(TargetName).lib $(SolutionDir)..\Bin\Debug\ &gt;nul</Command>
   <ItemGroup>
     <ClCompile Include="..\Bots\BotModMain.cpp" />
     <ClCompile Include="..\Bots\CustomPackets.cpp" />
+    <ClCompile Include="..\Bots\Hotkeys.cpp" />
     <ClCompile Include="..\Bots\Logic\BotFunctions.cpp" />
     <ClCompile Include="..\Bots\Logic\BotItems.cpp" />
     <ClCompile Include="..\Bots\Logic\BotMovement.cpp" />
@@ -588,6 +589,7 @@ copy Debug\$(TargetName).lib $(SolutionDir)..\Bin\Debug\ &gt;nul</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Bots\CustomPackets.h" />
+    <ClInclude Include="..\Bots\Hotkeys.h" />
     <ClInclude Include="..\Bots\Logic\BotFunctions.h" />
     <ClInclude Include="..\Bots\Logic\BotItems.h" />
     <ClInclude Include="..\Bots\Logic\BotLogic.h" />

@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // [Cecil] 2021-06-11: Main headers
 #include "Bots/SandboxCommon.h"
 #include "Bots/SandboxActions.h"
+#include "Bots/Hotkeys.h"
 
 #include "Bots/BotModMain.h"
 #include "Bots/PathFinding/Navmesh.h"

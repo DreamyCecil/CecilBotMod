@@ -636,6 +636,9 @@
     <ClCompile Include="..\Bots\Logic\BotSettings.cpp">
       <Filter>Source Files\Bots sources\Logic</Filter>
     </ClCompile>
+    <ClCompile Include="..\Bots\Hotkeys.cpp">
+      <Filter>Source Files\Bots sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\Common.h">
@@ -1651,6 +1654,9 @@
     </ClInclude>
     <ClInclude Include="..\Bots\Logic\BotFunctions.h">
       <Filter>Header Files\Bots headers\Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Bots\Hotkeys.h">
+      <Filter>Header Files\Bots headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
