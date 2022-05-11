@@ -81,12 +81,6 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
     }
   }
 
-  if (penTarget == NULL) {
-    pen->m_pbppCurrent = NULL;
-    pen->m_ulPointFlags = 0;
-    return;
-  }
-
   BOOL bReachedImportantPoint = FALSE;
 
   // Only change the important point if reached it
@@ -113,6 +107,13 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
         pen->m_bImportantPoint = FALSE;
         THOUGHT("^caf3f3fReached important point");
 
+        // Reset the path if no target
+        if (penTarget == NULL) {
+          pen->m_pbppCurrent = NULL;
+          pen->m_pbppTarget = NULL;
+          pen->m_ulPointFlags = 0;
+        }
+
       // Proceed to the next important point
       } else {
         pen->m_pbppTarget = pen->m_pbppTarget->bpp_pbppNext;
@@ -121,12 +122,15 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
     }
   }
 
+  // Need to find path to the target or the important point
+  BOOL bReasonForNewPoint = pen->m_pbppCurrent == NULL && (penTarget != NULL || pen->m_bImportantPoint);
+
   // Able to select new target point
-  BOOL bChangeTargetPoint = (pen->m_pbppCurrent == NULL || pen->m_tmChangePath <= _pTimer->CurrentTick() || NoPosChange(pen));
+  BOOL bChangeTargetPoint = (bReasonForNewPoint || pen->m_tmChangePath <= _pTimer->CurrentTick() || NoPosChange(pen));
   CBotPathPoint *pbppReached = NULL;
 
   // If timer is up and there's a point
-  if (!bChangeTargetPoint) {
+  if (!bChangeTargetPoint && pen->m_pbppCurrent != NULL) {
     // Position difference
     FLOAT3D vPointDiff = (pen->m_pbppCurrent->bpp_vPos - vBotPos);
 
@@ -152,62 +156,70 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
     BOOL bSelectTarget = (bSeeTarget || pen->m_pbppCurrent == NULL);
 
     // If not following the important point, select new one if possible
-    if (!pen->m_bImportantPoint && bSelectTarget) {
+    if (penTarget != NULL && !pen->m_bImportantPoint && bSelectTarget) {
       CMovableEntity *penMovableTarget = (penTarget->GetPhysicsFlags() & EPF_MOVABLE ? (CMovableEntity *)penTarget : NULL);
       pen->m_pbppTarget = NearestNavMeshPointPos(penMovableTarget, penTarget->GetPlacement().pl_PositionVector);
     }
 
-    CTString strThought;
+    // [Cecil] 2022-05-11: Construct a path as long as there's a target point
+    if (pen->m_pbppTarget != NULL) {
+      CTString strThought;
 
-    // [Cecil] 2021-06-21: Just go to the first point if haven't reached it yet
-    if (pbppReached != pbppClosest) {
-      pen->m_pbppCurrent = pbppClosest;
-      pen->m_ulPointFlags = pbppClosest->bpp_ulFlags;
+      // [Cecil] 2021-06-21: Just go to the first point if haven't reached it yet
+      if (pbppReached != pbppClosest) {
+        pen->m_pbppCurrent = pbppClosest;
+        pen->m_ulPointFlags = pbppClosest->bpp_ulFlags;
       
-      FLOAT3D vToPoint = (pbppClosest->bpp_vPos - vBotPos).SafeNormalize();
-      ANGLE3D aToPoint; DirectionVectorToAngles(vToPoint, aToPoint);
-      strThought.PrintF("Closest point ^c00ff00%d ^c00af00[%.1f, %.1f]",
-                        pbppClosest->bpp_iIndex, aToPoint(1), aToPoint(2));
-
-    // Pick the next point on the path
-    } else {
-      CBotPathPoint *pbppNext = _pNavmesh->FindNextPoint(pbppClosest, pen->m_pbppTarget);
-
-      // Remember the point if found
-      if (pbppNext != NULL) {
-        // [Cecil] 2021-09-09: Point is locked
-        BOOL bStay = pbppNext->IsLocked();
-
-        // Stay on point if it's locked
-        if (bStay) {
-          sbl.ulFlags |= BLF_STAYONPOINT;
-        }
-
-        // [Cecil] 2021-06-16: Target point is unreachable, stay on it if it's not important
-        if (!pen->m_bImportantPoint) {
-          bStay |= (pbppNext->bpp_ulFlags & PPF_UNREACHABLE);
-        }
-
-        // Select new path point
-        pen->m_pbppCurrent = (bStay ? pbppClosest : pbppNext);
-
-        // Get flags of the closest point or override them
-        pen->m_ulPointFlags = (pbppNext->bpp_ulFlags & PPF_OVERRIDE) ? pbppNext->bpp_ulFlags : pbppClosest->bpp_ulFlags;
-
-        FLOAT3D vToPoint = (pbppNext->bpp_vPos - vBotPos).SafeNormalize();
+        FLOAT3D vToPoint = (pbppClosest->bpp_vPos - vBotPos).SafeNormalize();
         ANGLE3D aToPoint; DirectionVectorToAngles(vToPoint, aToPoint);
-        strThought.PrintF("%s ^c00ff00%d ^c00af00[%.1f, %.1f]", (bStay ? "Staying at" : "Next point"),
-                          pbppNext->bpp_iIndex, aToPoint(1), aToPoint(2));
+        strThought.PrintF("Closest point ^c00ff00%d ^c00af00[%.1f, %.1f]",
+                          pbppClosest->bpp_iIndex, aToPoint(1), aToPoint(2));
 
-      // No next point
+      // Pick the next point on the path
       } else {
-        pen->m_pbppCurrent = NULL;
-        pen->m_ulPointFlags = 0;
-      }
-    }
+        CBotPathPoint *pbppNext = _pNavmesh->FindNextPoint(pbppClosest, pen->m_pbppTarget);
 
-    if (pen->m_pbppCurrent != NULL) {
-      THOUGHT(strThought);
+        // Remember the point if found
+        if (pbppNext != NULL) {
+          // [Cecil] 2021-09-09: Point is locked
+          BOOL bStay = pbppNext->IsLocked();
+
+          // Stay on point if it's locked
+          if (bStay) {
+            sbl.ulFlags |= BLF_STAYONPOINT;
+          }
+
+          // [Cecil] 2021-06-16: Target point is unreachable, stay on it if it's not important
+          if (!pen->m_bImportantPoint) {
+            bStay |= (pbppNext->bpp_ulFlags & PPF_UNREACHABLE);
+          }
+
+          // Select new path point
+          pen->m_pbppCurrent = (bStay ? pbppClosest : pbppNext);
+
+          // Get flags of the closest point or override them
+          pen->m_ulPointFlags = (pbppNext->bpp_ulFlags & PPF_OVERRIDE) ? pbppNext->bpp_ulFlags : pbppClosest->bpp_ulFlags;
+
+          FLOAT3D vToPoint = (pbppNext->bpp_vPos - vBotPos).SafeNormalize();
+          ANGLE3D aToPoint; DirectionVectorToAngles(vToPoint, aToPoint);
+          strThought.PrintF("%s ^c00ff00%d ^c00af00[%.1f, %.1f]", (bStay ? "Staying at" : "Next point"),
+                            pbppNext->bpp_iIndex, aToPoint(1), aToPoint(2));
+
+        // No next point
+        } else {
+          pen->m_pbppCurrent = NULL;
+          pen->m_ulPointFlags = 0;
+        }
+      }
+
+      if (pen->m_pbppCurrent != NULL) {
+        THOUGHT(strThought);
+      }
+
+    // No target point
+    } else {
+      pen->m_pbppCurrent = NULL;
+      pen->m_ulPointFlags = 0;
     }
 
     pen->m_tmChangePath = _pTimer->CurrentTick() + 5.0f;

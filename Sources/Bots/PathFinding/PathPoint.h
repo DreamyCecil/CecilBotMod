@@ -33,6 +33,7 @@ class DECL_DLL CBotPathPoint {
     FLOAT3D bpp_vPos;  // position of this point
     FLOAT bpp_fRange;  // walking radius of a point
     ULONG bpp_ulFlags; // special point flags
+    // [Cecil] TODO: Add ability to just mark points as "important" without any entity attached to them
     CEntityPointer bpp_penImportant; // important entity
     CBotPathPoint *bpp_pbppNext; // next important point
     // [Cecil] TODO: Add defending time which would force bots to stay on important points for some time
