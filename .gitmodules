@@ -1,0 +1,4 @@
+[submodule "Sources/Includes"]
+	path = Sources/Includes
+	url = https://github.com/DreamyCecil/SeriousSam_SDK107.git
+	branch = includes
