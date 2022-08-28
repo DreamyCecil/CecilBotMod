@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Constructor
 SBotLogic::SBotLogic(void) : ulFlags(0), peiTarget(NULL),  aAim(0.0f, 0.0f, 0.0f),
-  plBotView(FLOAT3D(0.0f, 0.0f, 0.0f), ANGLE3D(0.0f, 0.0f, 0.0f))
+  plBotView(FLOAT3D(0.0f, 0.0f, 0.0f), ANGLE3D(0.0f, 0.0f, 0.0f)), iDesiredWeapon(WPN_DEFAULT_1)
 {
   aWeapons = PickWeaponConfig();
 };
@@ -157,20 +157,20 @@ void BotRead(CPlayerBot *pen, CTStream *strm) {
 // [Cecil] 2019-06-05: Check if this entity is important for a path point
 BOOL ImportantForNavMesh(CPlayer *penBot, CEntity *penEntity) {
   // Is item pickable
-  if (IsDerivedFromDllClass(penEntity, CItem_DLLClass)) {
+  if (IsDerivedFromClass(penEntity, "Item")) {
     return IsItemPickable(penBot, (CItem *)penEntity, FALSE);
 
   // Is switch usable
-  } else if (IsOfDllClass(penEntity, CSwitch_DLLClass)) {
+  } else if (IsOfClass(penEntity, "Switch")) {
     return ((CSwitch &)*penEntity).m_bUseable;
 
   // Is moving brush usable
-  } else if (IsOfDllClass(penEntity, CMovingBrush_DLLClass)) {
+  } else if (IsOfClass(penEntity, "Moving Brush")) {
     CEntity *penSwitch = ((CMovingBrush *)penEntity)->m_penSwitch;
     return ImportantForNavMesh(penBot, penSwitch);
 
   // Can go to markers
-  } else if (IsOfDllClass(penEntity, CMarker_DLLClass)) {
+  } else if (IsDerivedFromClass(penEntity, "Marker")) {
     return TRUE;
   }
 
@@ -329,7 +329,7 @@ CEntity *ClosestEnemy(CPlayerBot *pen, FLOAT &fLast, const SBotLogic &sbl) {
     if (IsOfDllClass(penCheck, CPlayerBot_DLLClass)) {
       penTargetEnemy = ((CPlayerBot *)penCheck)->m_penTarget;
 
-    } else if (IsDerivedFromDllClass(penCheck, CEnemyBase_DLLClass)) {
+    } else if (IsDerivedFromClass(penCheck, "Enemy Base")) {
       penTargetEnemy = ((CEnemyBase *)penCheck)->m_penEnemy;
     }
 

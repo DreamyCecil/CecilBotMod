@@ -849,7 +849,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
         CEntity *penFound = iten;
 
         if (!bPlayer) {
-          if (!IsDerivedFromDllClass(penFound, CWeaponItem_DLLClass)) {
+          if (!IsDerivedFromClass(penFound, "Weapon Item")) {
             continue;
           }
 

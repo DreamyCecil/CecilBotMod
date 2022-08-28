@@ -165,6 +165,8 @@ functions:
 
         // Weapon functions
         BotWeapons(paAction, sbl);
+
+        BotSelectNewWeapon(sbl.iDesiredWeapon);
       }
 
     // When dead
@@ -245,7 +247,7 @@ functions:
   };
 
   // [Cecil] 2018-10-10: Bot weapon logic
-  void BotWeapons(CPlayerAction &pa, const SBotLogic &sbl) {
+  void BotWeapons(CPlayerAction &pa, SBotLogic &sbl) {
     CPlayerWeapons *penWeapons = GetPlayerWeapons();
     
     // sniper scope
@@ -265,7 +267,7 @@ functions:
 
         if (iType == WPN_DEFAULT_1) {
           m_iBotWeapon = iWeapon;
-          BotSelectNewWeapon(WPN_DEFAULT_1);
+          sbl.iDesiredWeapon = WPN_DEFAULT_1;
           break;
         }
       }
@@ -319,7 +321,7 @@ functions:
     }
 
     // Select new weapon
-    BotSelectNewWeapon(iSelect);
+    sbl.iDesiredWeapon = iSelect;
   };
 
   void BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
