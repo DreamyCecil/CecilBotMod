@@ -119,7 +119,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
       const CBotPathPoint *pbppClosest = NULL;
       
       // bots don't need to select points
-      if (!penOwner->IsBot()) {
+      if (!IsDerivedFromDllClass(penOwner, CPlayerBot_DLLClass)) {
         pbppClosest = NearestNavMeshPointPos(penOwner, penOwner->GetPlayerWeapons()->m_vRayHit);
       }
 
@@ -368,7 +368,7 @@ void CECIL_HUDOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjectio
   }
 
   // [Cecil] 2021-06-20: Bot thoughts
-  if (MOD_bBotThoughts && penOwner->IsBot()) {
+  if (MOD_bBotThoughts && IsDerivedFromDllClass(penOwner, CPlayerBot_DLLClass)) {
     pdp->SetFont(_pfdDisplayFont);
     pdp->SetTextScaling(fScaling);
     pdp->SetTextAspect(1.0f);

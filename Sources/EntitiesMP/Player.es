@@ -1249,20 +1249,8 @@ components:
 
 
 functions:
-  // [Cecil] 2021-06-11 ~ 2021-06-12
-  
-  // Check if selected point is a current one
-  virtual BOOL CurrentPoint(class CBotPathPoint *pbppExclude) { return FALSE; };
-  // Identify as a bot
-  virtual BOOL IsBot(void) { return FALSE; };
-  // Apply action for bots
+  // [Cecil] Apply action for bots
   virtual void BotApplyAction(CPlayerAction &paAction) {};
-  // Change bot's speed
-  virtual void BotSpeed(FLOAT3D &vTranslation) {};
-  // Initialize the bot
-  virtual void InitBot(void) {};
-  // Bot destructor
-  virtual void EndBot(void) {};
 
   INDEX GenderSound(INDEX iSound)
   {
@@ -3604,17 +3592,13 @@ functions:
       CheckGameEnd();
     }
 
-    // [Cecil] 2021-06-11: Apply action for bots
-    BotApplyAction(paAction);
-
     // limit speeds against abusing
     paAction.pa_vTranslation(1) = Clamp( paAction.pa_vTranslation(1), -plr_fSpeedSide,    plr_fSpeedSide);
     paAction.pa_vTranslation(2) = Clamp( paAction.pa_vTranslation(2), -plr_fSpeedUp,      plr_fSpeedUp);
     paAction.pa_vTranslation(3) = Clamp( paAction.pa_vTranslation(3), -plr_fSpeedForward, plr_fSpeedBackward);
 
     // if speeds are like walking
-    if (!IsBot() // [Cecil] Bots get stuck when forced to walk at high places
-     && Abs(paAction.pa_vTranslation(3))< plr_fSpeedForward/1.99f
+    if (Abs(paAction.pa_vTranslation(3))< plr_fSpeedForward/1.99f
      && Abs(paAction.pa_vTranslation(1))< plr_fSpeedSide/1.99f) {
       // don't allow falling
       en_fStepDnHeight = 1.5f;
@@ -3634,6 +3618,9 @@ functions:
       v(1)*=fFactor;
       v(3)*=fFactor;
     }
+
+    // [Cecil] 2021-06-11: Apply action for bots
+    BotApplyAction(paAction);
 
     ulButtonsNow = paAction.pa_ulButtons;
     ulButtonsBefore = m_ulLastButtons;
@@ -3969,9 +3956,6 @@ functions:
       vTranslation(3) *= 1.35f;
     //en_fDeceleration *= 0.8f;
     }
-    
-    // [Cecil] Adjust bot's speed
-    BotSpeed(vTranslation);
 
     CContentType &ctUp = GetWorld()->wo_actContentTypes[en_iUpContent];
     CContentType &ctDn = GetWorld()->wo_actContentTypes[en_iDnContent];
@@ -4387,14 +4371,8 @@ functions:
     if (m_iMayRespawn==2 && (ulReleasedButtons&PLACT_FIRE) && !IsPredictor()) {
       // if singleplayer
       if( GetSP()->sp_bSinglePlayer) {
-        // [Cecil] Bots shouldn't reload the game
-        if (IsBot()) {
-          SendEvent(EEnd());
-
-        } else {
-          // load quick savegame
-          _pShell->Execute("gam_bQuickLoad=1;");
-        }
+        // load quick savegame
+        _pShell->Execute("gam_bQuickLoad=1;");
       // if deathmatch or similar
       } else if( !GetSP()->sp_bCooperative) {
         // rebirth
@@ -4963,7 +4941,8 @@ functions:
  *                  INITIALIZE PLAYER                       *
  ************************************************************/
 
-  void InitializePlayer()
+  // [Cecil] Marked as virtual
+  virtual void InitializePlayer(void)
   {
     // set viewpoint position inside the entity
     en_plViewpoint.pl_OrientationAngle = ANGLE3D(0,0,0);
@@ -4993,8 +4972,6 @@ functions:
     SetPhysicsFlags(EPF_MODEL_WALKING|EPF_HASLUNGS);
     SetCollisionFlags(ECF_MODEL|((ECBI_PLAYER)<<ECB_IS));
     SetFlags(GetFlags()|ENF_ALIVE);
-
-    InitBot(); // [Cecil] Bot Mod
 
     // animation
     StartModelAnim(PLAYER_ANIM_STAND, AOF_LOOPING);
@@ -6736,9 +6713,6 @@ procedures:
 
     // spawn teleport effect
     SpawnTeleport();
-
-    // [Cecil] 2021-06-12: End the bot
-    EndBot();
 
     // cease to exist
     m_penWeapons->Destroy();

@@ -293,7 +293,7 @@ CPlayer *CECIL_GetPlayerEntity(const INDEX &iPlayer) {
 INDEX CECIL_PlayerIndex(CPlayer *pen) {
   INDEX ctPlayers = CEntity::GetMaxPlayers();
 
-  if (pen->IsBot()) {
+  if (IsDerivedFromDllClass(pen, CPlayerBot_DLLClass)) {
     INDEX iBot = _cenPlayerBots.Index((CPlayerBot *)pen);
 
     // occupy the rest of the bits by bots

@@ -55,22 +55,17 @@ components:
 
 functions:
   // Initialize the bot  
-  virtual void InitBot(void) {
+  void InitBot(void) {
     m_props.Reset();
     m_props.ResetLastPos(this);
   };
   
   // Bot destructor
-  virtual void EndBot(void) {
+  void EndBot(void) {
     // Remove from the bot list
     if (_cenPlayerBots.IsMember(this)) {
       _cenPlayerBots.Remove(this);
     }
-  };
-
-  // Identify as a bot
-  virtual BOOL IsBot(void) {
-    return TRUE;
   };
 
   // Write to stream
@@ -92,12 +87,15 @@ functions:
   };
 
   // Check if selected point is a current one
-  virtual BOOL CurrentPoint(CBotPathPoint *pbppExclude) {
+  BOOL CurrentPoint(CBotPathPoint *pbppExclude) {
     return (pbppExclude != NULL && m_props.m_pbppCurrent == pbppExclude);
   };
 
   // Apply action for bots
   virtual void BotApplyAction(CPlayerAction &paAction) {
+    // Allow falling off all the time
+    en_fStepDnHeight = -1;
+
     // While alive
     if (GetFlags() & ENF_ALIVE) {
       if (m_penCamera == NULL && m_penActionMarker == NULL) {
@@ -113,20 +111,28 @@ functions:
         BotSelectNewWeapon(sbl.iDesiredWeapon);
       }
 
-    // When dead
+    // While dead in singleplayer
+    } else if (GetSP()->sp_bSinglePlayer) {
+      // Respawn manually to avoid reloading the game
+      if (m_iMayRespawn == 2) {
+        SendEvent(EEnd());
+      }
+
+    // While dead in any other case
     } else {
       // Try to respawn
       if (ButtonAction()) {
         paAction.pa_ulButtons |= PLACT_FIRE;
       }
     }
-  };
 
-  // Change bot's speed
-  virtual void BotSpeed(FLOAT3D &vTranslation) {
-    vTranslation(1) *= m_props.m_sbsBot.fSpeedMul;
-    vTranslation(3) *= m_props.m_sbsBot.fSpeedMul;
-  }
+    // Adjust bot's speed
+    FLOAT3D &vTranslation = paAction.pa_vTranslation;
+    FLOAT fSpeedMul = m_props.m_sbsBot.fSpeedMul;
+
+    vTranslation(1) *= fSpeedMul;
+    vTranslation(3) *= fSpeedMul;
+  };
 
   // [Cecil] 2018-10-15: Update bot settings
   void UpdateBot(const SBotSettings &sbs) {
@@ -434,6 +440,22 @@ functions:
 
     // Set bot movement
     BotMovement(this, pa, sbl);
+  };
+
+  // Override player initialization
+  virtual void InitializePlayer(void) {
+    CPlayer::InitializePlayer();
+
+    // Initialize the bot
+    InitBot();
+  };
+
+  // Upon class destruction (bot removal)
+  void OnEnd(void) {
+    CPlayer::OnEnd();
+
+    // End the bot
+    EndBot();
   };
 
 procedures:

@@ -1141,7 +1141,7 @@ extern void DrawHUD( const CPlayer *penPlayerCurrent, CDrawPort *pdpCurrent, BOO
       CPlayer *penPlayer = _apenPlayers[i];
       CTString strName = penPlayer->GetPlayerName(); // [Cecil] Made not const
       // [Cecil] Add team tag at the end of the bot name
-      if (penPlayer->IsBot() && penPlayer->en_pcCharacter.GetTeam() != "") {
+      if (IsDerivedFromDllClass(penPlayer, CPlayerBot_DLLClass) && penPlayer->en_pcCharacter.GetTeam() != "") {
         strName.PrintF("%s^r [%s]", strName, penPlayer->en_pcCharacter.GetTeamForPrinting());
       }
       const INDEX iScore  = penPlayer->m_psGameStats.ps_iScore;
