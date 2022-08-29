@@ -588,6 +588,7 @@ copy Debug\$(TargetName).lib $(SolutionDir)..\Bin\Debug\ &gt;nul</Command>
     <ClCompile Include="WorldSettingsController.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Bots\BotStructure.h" />
     <ClInclude Include="..\Bots\CustomPackets.h" />
     <ClInclude Include="..\Bots\Hotkeys.h" />
     <ClInclude Include="..\Bots\Logic\BotFunctions.h" />

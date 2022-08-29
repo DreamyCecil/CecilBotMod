@@ -89,8 +89,8 @@ void UseWeaponScope(CPlayerBot *pen, CPlayerAction &pa, const SBotLogic &sbl) {
 };
 
 // Fire the weapon now
-void FireWeapon(CPlayerBot *pen, CPlayerAction &pa, const SBotLogic &sbl) {
-  const SBotWeaponConfig &bwWeapon = sbl.aWeapons[pen->m_iBotWeapon];
+void FireWeapon(CPlayerBot *penBot, CPlayerAction &pa, const SBotLogic &sbl) {
+  const SBotWeaponConfig &bwWeapon = sbl.aWeapons[penBot->m_props.m_iBotWeapon];
 
   BOOL bUseSpecial = FALSE;
   FLOAT fSpecial = bwWeapon.bw_fSpecialRange;
@@ -99,11 +99,11 @@ void FireWeapon(CPlayerBot *pen, CPlayerAction &pa, const SBotLogic &sbl) {
   if (fSpecial != 0.0f) {
     // if further than the reversed percentage
     if (fSpecial < 0.0f) {
-      bUseSpecial = (pen->m_fTargetDist <= bwWeapon.bw_fMaxDistance * -fSpecial);
+      bUseSpecial = (penBot->m_props.m_fTargetDist <= bwWeapon.bw_fMaxDistance * -fSpecial);
 
     // if closer than the percentage
     } else {
-      bUseSpecial = (pen->m_fTargetDist >= bwWeapon.bw_fMaxDistance * fSpecial);
+      bUseSpecial = (penBot->m_props.m_fTargetDist >= bwWeapon.bw_fMaxDistance * fSpecial);
     }
   }
 

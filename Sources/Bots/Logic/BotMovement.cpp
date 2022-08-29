@@ -20,26 +20,26 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "BotMovement.h"
 
 // Shortcuts
-#define SETTINGS         (pen->m_sbsBot)
-#define WEAPON           (pen->GetPlayerWeapons())
-#define THOUGHT(_String) (pen->m_btThoughts.Push(_String))
+#define SETTINGS         (penBot->m_props.m_sbsBot)
+#define WEAPON           (penBot->GetPlayerWeapons())
+#define THOUGHT(_String) (penBot->m_props.m_btThoughts.Push(_String))
 
 // [Cecil] 2021-06-25: Too long since the last position change
-BOOL NoPosChange(CPlayerBot *pen) {
-  if (_pTimer->CurrentTick() - pen->m_tmPosChange > 1.0f) {
-    pen->m_tmPosChange = _pTimer->CurrentTick();
+BOOL NoPosChange(CPlayerBot *penBot) {
+  if (_pTimer->CurrentTick() - penBot->m_props.m_tmPosChange > 1.0f) {
+    penBot->m_props.m_tmPosChange = _pTimer->CurrentTick();
     return TRUE;
   }
   return FALSE;
 };
 
 // [Cecil] 2021-06-14: Try to find some path
-void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
+void BotPathFinding(CPlayerBot *penBot, SBotLogic &sbl) {
   if (_pNavmesh->bnm_cbppPoints.Count() <= 0) {
     return;
   }
 
-  const FLOAT3D &vBotPos = pen->GetPlacement().pl_PositionVector;
+  const FLOAT3D &vBotPos = penBot->GetPlacement().pl_PositionVector;
 
   CEntity *penTarget = NULL;
   BOOL bSeeTarget = FALSE;
@@ -48,128 +48,128 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
   if (sbl.Following()) {
     // If can't see them
     if (!sbl.SeePlayer()) {
-      penTarget = pen->m_penFollow;
+      penTarget = penBot->m_props.m_penFollow;
       bSeeTarget = TRUE;
     }
 
   // Go to the item
   } else if (sbl.ItemExists()) {
-    penTarget = pen->m_penFollow;
+    penTarget = penBot->m_props.m_penFollow;
     bSeeTarget = TRUE;
 
   // Go to the enemy
   } else {
-    penTarget = pen->m_penTarget;
+    penTarget = penBot->m_props.m_penTarget;
     bSeeTarget = sbl.SeeEnemy();
   }
 
   if (!sbl.Following()) {
     // Select important points sometimes
-    if (!pen->m_bImportantPoint && pen->m_tmPickImportant <= _pTimer->CurrentTick()) {
+    if (!penBot->m_props.m_bImportantPoint && penBot->m_props.m_tmPickImportant <= _pTimer->CurrentTick()) {
       // Compare chance
-      if (SETTINGS.fImportantChance > 0.0f && pen->FRnd() <= SETTINGS.fImportantChance) {
-        CBotPathPoint *pbppImportant = _pNavmesh->FindImportantPoint(pen, -1);
+      if (SETTINGS.fImportantChance > 0.0f && penBot->FRnd() <= SETTINGS.fImportantChance) {
+        CBotPathPoint *pbppImportant = _pNavmesh->FindImportantPoint(penBot, -1);
 
         if (pbppImportant != NULL) {
-          pen->m_pbppTarget = pbppImportant;
-          pen->m_bImportantPoint = TRUE;
+          penBot->m_props.m_pbppTarget = pbppImportant;
+          penBot->m_props.m_bImportantPoint = TRUE;
           THOUGHT(CTString(0, "New important point: ^caf3f3f%d", pbppImportant->bpp_iIndex));
         }
       }
 
-      pen->m_tmPickImportant = _pTimer->CurrentTick() + 5.0f;
+      penBot->m_props.m_tmPickImportant = _pTimer->CurrentTick() + 5.0f;
     }
   }
 
   BOOL bReachedImportantPoint = FALSE;
 
   // Only change the important point if reached it
-  if (pen->m_bImportantPoint) {
-    if (pen->m_pbppTarget != NULL) {
+  if (penBot->m_props.m_bImportantPoint) {
+    if (penBot->m_props.m_pbppTarget != NULL) {
       // Position difference
-      FLOAT3D vPointDiff = (pen->m_pbppTarget->bpp_vPos - vBotPos);
+      FLOAT3D vPointDiff = (penBot->m_props.m_pbppTarget->bpp_vPos - vBotPos);
       
       // Close to the point
-      bReachedImportantPoint = (vPointDiff.Length() < pen->m_pbppTarget->bpp_fRange);
+      bReachedImportantPoint = (vPointDiff.Length() < penBot->m_props.m_pbppTarget->bpp_fRange);
 
     // Lost target point
     } else {
-      pen->m_bImportantPoint = FALSE;
+      penBot->m_props.m_bImportantPoint = FALSE;
     }
 
     // If reached the important point
     if (bReachedImportantPoint) {
-      CEntity *penImportant = pen->m_pbppTarget->bpp_penImportant;
+      CEntity *penImportant = penBot->m_props.m_pbppTarget->bpp_penImportant;
 
       // Reset important point
-      if (pen->m_pbppTarget->bpp_pbppNext == NULL) {
-        pen->m_bImportantPoint = FALSE;
+      if (penBot->m_props.m_pbppTarget->bpp_pbppNext == NULL) {
+        penBot->m_props.m_bImportantPoint = FALSE;
         THOUGHT("^caf3f3fReached important point");
 
         // Reset the path if no target
         if (penTarget == NULL) {
-          pen->m_pbppCurrent = NULL;
-          pen->m_pbppTarget = NULL;
-          pen->m_ulPointFlags = 0;
+          penBot->m_props.m_pbppCurrent = NULL;
+          penBot->m_props.m_pbppTarget = NULL;
+          penBot->m_props.m_ulPointFlags = 0;
         }
 
       // Proceed to the next important point
       } else {
-        pen->m_pbppTarget = pen->m_pbppTarget->bpp_pbppNext;
+        penBot->m_props.m_pbppTarget = penBot->m_props.m_pbppTarget->bpp_pbppNext;
         THOUGHT("^c3f3fafNext important point");
       }
 
       // Use important entity
-      UseImportantEntity(pen, penImportant);
+      UseImportantEntity(penBot, penImportant);
     }
   }
 
   // Need to find path to the target or the important point
-  BOOL bReasonForNewPoint = pen->m_pbppCurrent == NULL && (penTarget != NULL || pen->m_bImportantPoint);
+  BOOL bReasonForNewPoint = penBot->m_props.m_pbppCurrent == NULL && (penTarget != NULL || penBot->m_props.m_bImportantPoint);
 
   // Able to select new target point
-  BOOL bChangeTargetPoint = (bReasonForNewPoint || pen->m_tmChangePath <= _pTimer->CurrentTick() || NoPosChange(pen));
+  BOOL bChangeTargetPoint = (bReasonForNewPoint || penBot->m_props.m_tmChangePath <= _pTimer->CurrentTick() || NoPosChange(penBot));
   CBotPathPoint *pbppReached = NULL;
 
   // If timer is up and there's a point
-  if (!bChangeTargetPoint && pen->m_pbppCurrent != NULL) {
+  if (!bChangeTargetPoint && penBot->m_props.m_pbppCurrent != NULL) {
     // Position difference
-    FLOAT3D vPointDiff = (pen->m_pbppCurrent->bpp_vPos - vBotPos);
+    FLOAT3D vPointDiff = (penBot->m_props.m_pbppCurrent->bpp_vPos - vBotPos);
 
     // Close to the point
-    FLOAT &fRange = pen->m_pbppCurrent->bpp_fRange;
+    FLOAT &fRange = penBot->m_props.m_pbppCurrent->bpp_fRange;
     bChangeTargetPoint = (vPointDiff.Length() < fRange);
 
     // A bit higher up
-    vPointDiff = (pen->m_pbppCurrent->bpp_vPos - vBotPos) - pen->en_vGravityDir * (fRange * 0.5f);
+    vPointDiff = (penBot->m_props.m_pbppCurrent->bpp_vPos - vBotPos) - penBot->en_vGravityDir * (fRange * 0.5f);
     bChangeTargetPoint |= (vPointDiff.Length() < fRange);
 
     // Reached this point
     if (bChangeTargetPoint) {
-      pbppReached = pen->m_pbppCurrent;
+      pbppReached = penBot->m_props.m_pbppCurrent;
     }
   }
 
   if (bChangeTargetPoint) { 
     // Find first point to go to
-    CBotPathPoint *pbppClosest = NearestNavMeshPointBot(pen, FALSE);
+    CBotPathPoint *pbppClosest = NearestNavMeshPointBot(penBot, FALSE);
 
     // Can see the enemy or don't have any point yet
-    BOOL bSelectTarget = (bSeeTarget || pen->m_pbppCurrent == NULL);
+    BOOL bSelectTarget = (bSeeTarget || penBot->m_props.m_pbppCurrent == NULL);
 
     // If not following the important point, select new one if possible
-    if (penTarget != NULL && !pen->m_bImportantPoint && bSelectTarget) {
-      pen->m_pbppTarget = NearestNavMeshPointPos(penTarget, penTarget->GetPlacement().pl_PositionVector);
+    if (penTarget != NULL && !penBot->m_props.m_bImportantPoint && bSelectTarget) {
+      penBot->m_props.m_pbppTarget = NearestNavMeshPointPos(penTarget, penTarget->GetPlacement().pl_PositionVector);
     }
 
     // [Cecil] 2022-05-11: Construct a path as long as there's a target point
-    if (pen->m_pbppTarget != NULL) {
+    if (penBot->m_props.m_pbppTarget != NULL) {
       CTString strThought;
 
       // [Cecil] 2021-06-21: Just go to the first point if haven't reached it yet
       if (pbppReached != pbppClosest) {
-        pen->m_pbppCurrent = pbppClosest;
-        pen->m_ulPointFlags = pbppClosest->bpp_ulFlags;
+        penBot->m_props.m_pbppCurrent = pbppClosest;
+        penBot->m_props.m_ulPointFlags = pbppClosest->bpp_ulFlags;
       
         FLOAT3D vToPoint = (pbppClosest->bpp_vPos - vBotPos).SafeNormalize();
         ANGLE3D aToPoint; DirectionVectorToAngles(vToPoint, aToPoint);
@@ -178,7 +178,7 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
 
       // Pick the next point on the path
       } else {
-        CBotPathPoint *pbppNext = _pNavmesh->FindNextPoint(pbppClosest, pen->m_pbppTarget);
+        CBotPathPoint *pbppNext = _pNavmesh->FindNextPoint(pbppClosest, penBot->m_props.m_pbppTarget);
 
         // Remember the point if found
         if (pbppNext != NULL) {
@@ -191,15 +191,15 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
           }
 
           // [Cecil] 2021-06-16: Target point is unreachable, stay on it if it's not important
-          if (!pen->m_bImportantPoint) {
+          if (!penBot->m_props.m_bImportantPoint) {
             bStay |= (pbppNext->bpp_ulFlags & PPF_UNREACHABLE);
           }
 
           // Select new path point
-          pen->m_pbppCurrent = (bStay ? pbppClosest : pbppNext);
+          penBot->m_props.m_pbppCurrent = (bStay ? pbppClosest : pbppNext);
 
           // Get flags of the closest point or override them
-          pen->m_ulPointFlags = (pbppNext->bpp_ulFlags & PPF_OVERRIDE) ? pbppNext->bpp_ulFlags : pbppClosest->bpp_ulFlags;
+          penBot->m_props.m_ulPointFlags = (pbppNext->bpp_ulFlags & PPF_OVERRIDE) ? pbppNext->bpp_ulFlags : pbppClosest->bpp_ulFlags;
 
           FLOAT3D vToPoint = (pbppNext->bpp_vPos - vBotPos).SafeNormalize();
           ANGLE3D aToPoint; DirectionVectorToAngles(vToPoint, aToPoint);
@@ -208,42 +208,42 @@ void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl) {
 
         // No next point
         } else {
-          pen->m_pbppCurrent = NULL;
-          pen->m_ulPointFlags = 0;
+          penBot->m_props.m_pbppCurrent = NULL;
+          penBot->m_props.m_ulPointFlags = 0;
         }
       }
 
-      if (pen->m_pbppCurrent != NULL) {
+      if (penBot->m_props.m_pbppCurrent != NULL) {
         THOUGHT(strThought);
       }
 
     // No target point
     } else {
-      pen->m_pbppCurrent = NULL;
-      pen->m_ulPointFlags = 0;
+      penBot->m_props.m_pbppCurrent = NULL;
+      penBot->m_props.m_ulPointFlags = 0;
     }
 
-    pen->m_tmChangePath = _pTimer->CurrentTick() + 5.0f;
+    penBot->m_props.m_tmChangePath = _pTimer->CurrentTick() + 5.0f;
   }
 };
 
 // [Cecil] 2021-06-15: Set bot aim
-void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
+void BotAim(CPlayerBot *penBot, CPlayerAction &pa, SBotLogic &sbl) {
   // [Cecil] 2021-06-16: Aim in the walking direction if haven't seen the enemy in a while
-  if (_pTimer->CurrentTick() - pen->m_tmLastSawTarget > 2.0f)
+  if (_pTimer->CurrentTick() - penBot->m_props.m_tmLastSawTarget > 2.0f)
   {
     // Running speed
-    FLOAT3D vRunDir = HorizontalDiff(pen->en_vCurrentTranslationAbsolute, pen->en_vGravityDir);
+    FLOAT3D vRunDir = HorizontalDiff(penBot->en_vCurrentTranslationAbsolute, penBot->en_vGravityDir);
     
     // Relative position
-    CPlacement3D plToDir(pen->en_vCurrentTranslationAbsolute, sbl.ViewAng());
+    CPlacement3D plToDir(penBot->en_vCurrentTranslationAbsolute, sbl.ViewAng());
 
     // Angle towards the target (negate pitch)
     FLOAT2D vToTarget = FLOAT2D(GetRelH(plToDir), -sbl.ViewAng()(2));
     FLOAT fPitch = GetRelP(plToDir);
 
     // Look down after some time
-    if (pen->m_fFallTime > 1.0f && fPitch < 0.0f) {
+    if (penBot->m_fFallTime > 1.0f && fPitch < 0.0f) {
       vToTarget(2) = fPitch;
     }
 
@@ -261,29 +261,29 @@ void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
     return;
   }
 
-  EntityInfo *peiTarget = (EntityInfo *)pen->m_penTarget->GetEntityInfo();
+  EntityInfo *peiTarget = (EntityInfo *)penBot->m_props.m_penTarget->GetEntityInfo();
   FLOAT3D vEnemy;
 
   // Get target center position
   if (peiTarget != NULL) {
-    GetEntityInfoPosition(pen->m_penTarget, peiTarget->vTargetCenter, vEnemy);
+    GetEntityInfoPosition(penBot->m_props.m_penTarget, peiTarget->vTargetCenter, vEnemy);
 
   // Just enemy position if no entity info
   } else {
-    vEnemy = pen->m_penTarget->GetPlacement().pl_PositionVector + FLOAT3D(0.0f, 1.0f, 0.0f) * pen->m_penTarget->GetRotationMatrix();
+    vEnemy = penBot->m_props.m_penTarget->GetPlacement().pl_PositionVector + FLOAT3D(0.0f, 1.0f, 0.0f) * penBot->m_props.m_penTarget->GetRotationMatrix();
   }
 
   // Current weapon
-  const SBotWeaponConfig &bw = sbl.aWeapons[pen->m_iBotWeapon];
+  const SBotWeaponConfig &bw = sbl.aWeapons[penBot->m_props.m_iBotWeapon];
 
   // Next position prediction
-  vEnemy += ((CMovableEntity*)&*pen->m_penTarget)->en_vCurrentTranslationAbsolute
-          * (SETTINGS.fPrediction + pen->FRnd() * SETTINGS.fPredictRnd) // Default: *= 0.2f
+  vEnemy += ((CMovableEntity*)&*penBot->m_props.m_penTarget)->en_vCurrentTranslationAbsolute
+          * (SETTINGS.fPrediction + penBot->FRnd() * SETTINGS.fPredictRnd) // Default: *= 0.2f
           * (1.0f - bw.bw_fAccuracy); // [Cecil] 2021-06-20: Prediction based on accuracy
 
   // Look a bit higher if it's a player
-  if (IS_PLAYER(pen->m_penTarget)) {
-    vEnemy += FLOAT3D(0, 0.25f, 0) * pen->m_penTarget->GetRotationMatrix();
+  if (IS_PLAYER(penBot->m_props.m_penTarget)) {
+    vEnemy += FLOAT3D(0, 0.25f, 0) * penBot->m_props.m_penTarget->GetRotationMatrix();
   }
 
   // Relative position
@@ -298,21 +298,21 @@ void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
     FLOAT tmNow = _pTimer->CurrentTick();
         
     // Randomize every half a second
-    if (pen->m_tmBotAccuracy <= tmNow) {
+    if (penBot->m_props.m_tmBotAccuracy <= tmNow) {
       // More accurate with the sniper
-      FLOAT fAccuracyMul = (UsingScope(pen) ? 0.2f : 1.0f) * SETTINGS.fAccuracyAngle;
+      FLOAT fAccuracyMul = (UsingScope(penBot) ? 0.2f : 1.0f) * SETTINGS.fAccuracyAngle;
 
       // Invisible targets are hard to aim at
-      if (pen->m_penTarget->GetFlags() & ENF_INVISIBLE) {
+      if (penBot->m_props.m_penTarget->GetFlags() & ENF_INVISIBLE) {
         fAccuracyMul *= 3.0f;
       }
 
-      pen->m_vAccuracy = FLOAT3D(pen->FRnd() - 0.5f, pen->FRnd() - 0.5f, 0.0f) * fAccuracyMul;
-      pen->m_tmBotAccuracy = tmNow + 0.5f;
+      penBot->m_props.m_vAccuracy = FLOAT3D(penBot->FRnd() - 0.5f, penBot->FRnd() - 0.5f, 0.0f) * fAccuracyMul;
+      penBot->m_props.m_tmBotAccuracy = tmNow + 0.5f;
     }
 
-    vToTarget(1) += pen->m_vAccuracy(1);
-    vToTarget(2) += pen->m_vAccuracy(2);
+    vToTarget(1) += penBot->m_props.m_vAccuracy(1);
+    vToTarget(2) += penBot->m_props.m_vAccuracy(2);
   }
       
   // Limit to one tick, otherwise aim will go too far and miss
@@ -322,7 +322,7 @@ void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
   const FLOAT fSpeedLimit = SETTINGS.fRotSpeedLimit;                       // 30
 
   // Clamp the speed
-  FLOAT fRotationSpeed = Clamp(pen->m_fTargetDist / fDistRotSpeed, fMinRotSpeed, fMaxRotSpeed);
+  FLOAT fRotationSpeed = Clamp(penBot->m_props.m_fTargetDist / fDistRotSpeed, fMinRotSpeed, fMaxRotSpeed);
 
   // Max speed
   if (fSpeedLimit >= 0.0f) {
@@ -337,7 +337,7 @@ void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
   // Try to shoot
   if (Abs(vToTarget(1)) < SETTINGS.fShootAngle && Abs(vToTarget(2)) < SETTINGS.fShootAngle) {
     // Shoot if the enemy is visible or the crosshair is on them
-    BOOL bTargetingEnemy = WEAPON->m_penRayHit == pen->m_penTarget;
+    BOOL bTargetingEnemy = WEAPON->m_penRayHit == penBot->m_props.m_penTarget;
 
     if (sbl.SeeEnemy() || bTargetingEnemy) {
       sbl.ulFlags |= BLF_CANSHOOT;
@@ -346,57 +346,57 @@ void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
 };
 
 // [Cecil] 2021-06-14: Set bot movement
-void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
+void BotMovement(CPlayerBot *penBot, CPlayerAction &pa, SBotLogic &sbl) {
   // No need to set any moving speed if nowhere to go
   if (!sbl.EnemyExists() && !sbl.ItemExists()
-   && pen->m_penFollow == NULL && pen->m_pbppCurrent == NULL) {
+   && penBot->m_props.m_penFollow == NULL && penBot->m_props.m_pbppCurrent == NULL) {
     return;
   }
 
-  const FLOAT3D &vBotPos = pen->GetPlacement().pl_PositionVector;
+  const FLOAT3D &vBotPos = penBot->GetPlacement().pl_PositionVector;
 
   // Randomize strafe direction every once in a while
-  if (pen->m_tmChangeBotDir <= _pTimer->CurrentTick()) {
-    pen->m_fSideDir = (pen->IRnd() % 2 == 0) ? -1.0f : 1.0f;
-    pen->m_tmChangeBotDir = _pTimer->CurrentTick() + (pen->FRnd() * 2.0f) + 2.0f; // 2 to 4 seconds
+  if (penBot->m_props.m_tmChangeBotDir <= _pTimer->CurrentTick()) {
+    penBot->m_props.m_fSideDir = (penBot->IRnd() % 2 == 0) ? -1.0f : 1.0f;
+    penBot->m_props.m_tmChangeBotDir = _pTimer->CurrentTick() + (penBot->FRnd() * 2.0f) + 2.0f; // 2 to 4 seconds
   }
 
   FLOAT3D vBotMovement = FLOAT3D(0.0f, 0.0f, 0.0f); // In which direction bot needs to go
   FLOAT fVerticalMove = 0.0f; // Jumping or crouching
 
-  const SBotWeaponConfig &bwWeapon = sbl.aWeapons[pen->m_iBotWeapon]; // Current weapon config
+  const SBotWeaponConfig &bwWeapon = sbl.aWeapons[penBot->m_props.m_iBotWeapon]; // Current weapon config
 
   // Strafe further if lower health
-  FLOAT fHealthRatio = Clamp(100.0f - pen->GetHealth(), 0.0f, 100.0f) / 100.0f;
+  FLOAT fHealthRatio = Clamp(100.0f - penBot->GetHealth(), 0.0f, 100.0f) / 100.0f;
   const FLOAT fStrafeRange = (bwWeapon.bw_fMaxDistance - bwWeapon.bw_fMinDistance) * bwWeapon.bw_fStrafe;
 
   // Avoid the target in front of the bot
   FLOAT fStrafe = Clamp(fStrafeRange * fHealthRatio, 3.0f, 16.0f);
 
-  BOOL bInLiquid = (pen->m_pstState == PST_SWIM || pen->m_pstState == PST_DIVE);
+  BOOL bInLiquid = (penBot->m_pstState == PST_SWIM || penBot->m_pstState == PST_DIVE);
 
-  if (SETTINGS.bStrafe && pen->m_fTargetDist < (bwWeapon.bw_fMinDistance + fStrafe)
-   && (pen->m_penFollow == NULL || pen->m_penFollow == pen->m_penTarget || sbl.Following())) {
+  if (SETTINGS.bStrafe && penBot->m_props.m_fTargetDist < (bwWeapon.bw_fMinDistance + fStrafe)
+   && (penBot->m_props.m_penFollow == NULL || penBot->m_props.m_penFollow == penBot->m_props.m_penTarget || sbl.Following())) {
     // Run around the enemy
-    vBotMovement = FLOAT3D(pen->m_fSideDir, 0.0f, 0.0f);
+    vBotMovement = FLOAT3D(penBot->m_props.m_fSideDir, 0.0f, 0.0f);
 
   } else {
-    CPlacement3D plDelta = pen->GetPlacement();
+    CPlacement3D plDelta = penBot->GetPlacement();
     BOOL bShouldFollow = FALSE;
     BOOL bShouldJump = FALSE;
     BOOL bShouldCrouch = FALSE;
     
     // Run towards the following target
-    if (pen->m_penFollow != NULL) {
+    if (penBot->m_props.m_penFollow != NULL) {
       // Back off if needed
       if (sbl.BackOff()) {
-        plDelta.pl_PositionVector = (vBotPos - pen->m_penFollow->GetPlacement().pl_PositionVector);
+        plDelta.pl_PositionVector = (vBotPos - penBot->m_props.m_penFollow->GetPlacement().pl_PositionVector);
       } else {
-        plDelta.pl_PositionVector = (pen->m_penFollow->GetPlacement().pl_PositionVector - vBotPos);
+        plDelta.pl_PositionVector = (penBot->m_props.m_penFollow->GetPlacement().pl_PositionVector - vBotPos);
       }
 
       // Check vertical difference
-      FLOAT3D vVertical = VerticalDiff(plDelta.pl_PositionVector, pen->en_vGravityDir);
+      FLOAT3D vVertical = VerticalDiff(plDelta.pl_PositionVector, penBot->en_vGravityDir);
 
       // Jump if it's higher
       bShouldJump = (vVertical.Length() > 1.0f);
@@ -410,12 +410,12 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
     }
     
     // Run towards the point
-    if (pen->m_pbppCurrent != NULL) {
+    if (penBot->m_props.m_pbppCurrent != NULL) {
       // Ignore the point if there's an item (if it exists and current point is target point)
-      if (!sbl.ItemExists() || pen->m_pbppCurrent != pen->m_pbppTarget) {
-        plDelta.pl_PositionVector = (pen->m_pbppCurrent->bpp_vPos - vBotPos);
-        bShouldJump = pen->m_ulPointFlags & PPF_JUMP;
-        bShouldCrouch = pen->m_ulPointFlags & PPF_CROUCH;
+      if (!sbl.ItemExists() || penBot->m_props.m_pbppCurrent != penBot->m_props.m_pbppTarget) {
+        plDelta.pl_PositionVector = (penBot->m_props.m_pbppCurrent->bpp_vPos - vBotPos);
+        bShouldJump = penBot->m_props.m_ulPointFlags & PPF_JUMP;
+        bShouldCrouch = penBot->m_props.m_ulPointFlags & PPF_CROUCH;
 
         bShouldFollow = TRUE;
       }
@@ -426,8 +426,8 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
       FLOAT aDeltaHeading = GetRelH(plDelta);
 
       // Compare directional difference
-      FLOAT3D vHor = HorizontalDiff(plDelta.pl_PositionVector, pen->en_vGravityDir);
-      FLOAT3D vVer = VerticalDiff(plDelta.pl_PositionVector, pen->en_vGravityDir);
+      FLOAT3D vHor = HorizontalDiff(plDelta.pl_PositionVector, penBot->en_vGravityDir);
+      FLOAT3D vVer = VerticalDiff(plDelta.pl_PositionVector, penBot->en_vGravityDir);
 
       // Stay in place if it's too high up
       if (vHor.Length() < 1.0f && vVer.Length() > 4.0f) {
@@ -465,7 +465,7 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
   }
 
   // Try to avoid obstacles
-  BOOL bNowhereToGo = (pen->m_pbppCurrent == NULL || NoPosChange(pen));
+  BOOL bNowhereToGo = (penBot->m_props.m_pbppCurrent == NULL || NoPosChange(penBot));
 
   if (bNowhereToGo && WEAPON->m_fRayHitDistance < 4.0f
    && !(WEAPON->m_penRayHit->GetPhysicsFlags() & EPF_MOVABLE)) {
@@ -474,14 +474,14 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
       fVerticalMove = 1.0f;
 
     } else {
-      vBotMovement = FLOAT3D(pen->m_fSideDir, 0.0f, 1.0f);
+      vBotMovement = FLOAT3D(penBot->m_props.m_fSideDir, 0.0f, 1.0f);
     }
   }
 
   // Apply vertical movement if not in liquid
   if (!bInLiquid) {
     // Vertical movement (holding crouch or spamming jump)
-    if (fVerticalMove < -0.1f || (fVerticalMove > 0.1f && pen->ButtonAction())) {
+    if (fVerticalMove < -0.1f || (fVerticalMove > 0.1f && penBot->ButtonAction())) {
       vBotMovement(2) = fVerticalMove;
     } else {
       vBotMovement(2) = 0.0f;
@@ -497,7 +497,7 @@ void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl) {
   pa.pa_vTranslation(3) += vBotMovement(3) * vMoveSpeed(3);
 
   // Walk if needed
-  if (pen->m_ulPointFlags & PPF_WALK) {
+  if (penBot->m_props.m_ulPointFlags & PPF_WALK) {
     pa.pa_vTranslation(1) /= 2.0f;
     pa.pa_vTranslation(3) /= 2.0f;
   }

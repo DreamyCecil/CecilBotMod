@@ -126,8 +126,8 @@ void CBotNavmesh::ClearNavMesh(void) {
   for (INDEX iBot = 0; iBot < _cenPlayerBots.Count(); iBot++) {
     CPlayerBot *penBot = _cenPlayerBots.Pointer(iBot);
 
-    penBot->m_pbppCurrent = NULL;
-    penBot->m_pbppTarget = NULL;
+    penBot->m_props.m_pbppCurrent = NULL;
+    penBot->m_props.m_pbppTarget = NULL;
   }
 
   // destroy all path points

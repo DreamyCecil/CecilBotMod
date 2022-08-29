@@ -310,8 +310,8 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
       FLOAT3D vCurPoint = FLOAT3D(0.0f, 0.0f, 0.0f);
 
       // current point
-      if (penBot->m_pbppCurrent != NULL) {
-        vCurPoint = penBot->m_pbppCurrent->bpp_vPos;
+      if (penBot->m_props.m_pbppCurrent != NULL) {
+        vCurPoint = penBot->m_props.m_pbppCurrent->bpp_vPos;
 
         if (ProjectLine(&prProjection, vBot, vCurPoint, vPos1, vPos2)) {
           pdp->DrawLine(vPos1(1), vPos1(2), vPos2(1), vPos2(2), 0xFFFF00FF);
@@ -319,8 +319,8 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
       }
 
       // target point
-      if (penBot->m_pbppTarget != NULL) {
-        vCurPoint = penBot->m_pbppTarget->bpp_vPos;
+      if (penBot->m_props.m_pbppTarget != NULL) {
+        vCurPoint = penBot->m_props.m_pbppTarget->bpp_vPos;
           
         if (ProjectLine(&prProjection, vBot, vCurPoint, vPos1, vPos2)) {
           pdp->DrawLine(vPos1(1), vPos1(2), vPos2(1), vPos2(2), 0xFF0000FF);
@@ -383,17 +383,17 @@ void CECIL_HUDOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjectio
       UBYTE ubAlpha = NormFloatToByte(1.0f - iThought / 50.0f);
       COLOR colText = LerpColor(0xFFFFFF00, 0x7F7F7F00, iThought / 15.0f) | ubAlpha;
 
-      pdp->PutText(penBot->m_btThoughts.strThoughts[iThought], pixX, pixY + iThought*pixThought, colText);
+      pdp->PutText(penBot->m_props.m_btThoughts.strThoughts[iThought], pixX, pixY + iThought*pixThought, colText);
     }
 
     // target point
-    if (penBot->m_pbppCurrent != NULL) {
-      CTString strTarget(0, "Current Point: ^cffff00%d^r\nTarget Point: ^cff0000%d ^caf3f3f%s", penBot->m_pbppCurrent->bpp_iIndex,
-                         penBot->m_pbppTarget->bpp_iIndex, penBot->m_bImportantPoint ? "(Important)" : "");
+    if (penBot->m_props.m_pbppCurrent != NULL) {
+      CTString strTarget(0, "Current Point: ^cffff00%d^r\nTarget Point: ^cff0000%d ^caf3f3f%s", penBot->m_props.m_pbppCurrent->bpp_iIndex,
+                         penBot->m_props.m_pbppTarget->bpp_iIndex, penBot->m_props.m_bImportantPoint ? "(Important)" : "");
       pdp->PutText(strTarget, pixX, pixY + pixThought*17, 0xCCCCCCFF);
     }
 
-    CTString strTime(0, "Cur Time: %.2f\nShooting: %.2f", _pTimer->CurrentTick(), penBot->m_tmShootTime);
+    CTString strTime(0, "Cur Time: %.2f\nShooting: %.2f", _pTimer->CurrentTick(), penBot->m_props.m_tmShootTime);
     pdp->PutText(strTime, pixX, pixY + pixThought*19, 0xCCCCCCFF);
   }
 };

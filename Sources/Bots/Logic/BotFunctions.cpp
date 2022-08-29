@@ -108,57 +108,138 @@ CBotPathPoint *NearestNavMeshPointBot(CPlayerBot *pen, BOOL bSkipCurrent) {
 };
 
 // Write bot properties
-void BotWrite(CPlayerBot *pen, CTStream *strm) {
+void BotWrite(CPlayerBot *penBot, CTStream *strm) {
+  SBotProperties &props = penBot->m_props;
+
+  // Write entity pointers
+  if (props.m_penTarget != NULL) {
+    *strm << (INDEX)props.m_penTarget->en_ulID;
+  } else {
+    *strm << (INDEX)-1;
+  }
+
+  if (props.m_penFollow != NULL) {
+    *strm << (INDEX)props.m_penFollow->en_ulID;
+  } else {
+    *strm << (INDEX)-1;
+  }
+
+  if (props.m_penLastItem != NULL) {
+    *strm << (INDEX)props.m_penLastItem->en_ulID;
+  } else {
+    *strm << (INDEX)-1;
+  }
+
+  // Write fields
+  *strm << props.m_tmLastBotTarget;
+  *strm << props.m_tmLastSawTarget;
+  *strm << props.m_tmButtonAction;
+  *strm << props.m_tmPosChange;
+  *strm << props.m_vLastPos;
+
+  *strm << props.m_fTargetDist;
+  *strm << props.m_fSideDir;
+  *strm << props.m_tmChangeBotDir;
+  *strm << props.m_vAccuracy;
+  *strm << props.m_tmBotAccuracy;
+
+  *strm << props.m_tmChangePath;
+  *strm << props.m_tmPickImportant;
+  *strm << props.m_bImportantPoint;
+
+  *strm << props.m_iBotWeapon;
+  *strm << props.m_tmLastBotWeapon;
+  *strm << props.m_tmShootTime;
+
+  *strm << props.m_tmLastItemSearch;
+
   // Write current point
-  if (pen->m_pbppCurrent == NULL || !_pNavmesh->bnm_cbppPoints.IsMember(pen->m_pbppCurrent)) {
+  if (props.m_pbppCurrent == NULL || !_pNavmesh->bnm_cbppPoints.IsMember(props.m_pbppCurrent)) {
     *strm << (INDEX)-1;
   } else {
-    *strm << pen->m_pbppCurrent->bpp_iIndex;
+    *strm << props.m_pbppCurrent->bpp_iIndex;
   }
 
   // Write target point
-  if (pen->m_pbppTarget == NULL || !_pNavmesh->bnm_cbppPoints.IsMember(pen->m_pbppTarget)) {
+  if (props.m_pbppTarget == NULL || !_pNavmesh->bnm_cbppPoints.IsMember(props.m_pbppTarget)) {
     *strm << (INDEX)-1;
   } else {
-    *strm << pen->m_pbppTarget->bpp_iIndex;
+    *strm << props.m_pbppTarget->bpp_iIndex;
   }
 
   // Write point flags
-  *strm << pen->m_ulPointFlags;
+  *strm << props.m_ulPointFlags;
 
   // Write settings
-  *strm << pen->m_sbsBot;
+  *strm << props.m_sbsBot;
 };
 
 // Read bot properties
-void BotRead(CPlayerBot *pen, CTStream *strm) {
+void BotRead(CPlayerBot *penBot, CTStream *strm) {
+  SBotProperties &props = penBot->m_props;
+
+  // Read entity pointers
+  INDEX iEntity;
+
+  *strm >> iEntity;
+  props.m_penTarget = FindEntityByID(penBot->GetWorld(), iEntity);
+
+  *strm >> iEntity;
+  props.m_penFollow = FindEntityByID(penBot->GetWorld(), iEntity);
+
+  *strm >> iEntity;
+  props.m_penLastItem = FindEntityByID(penBot->GetWorld(), iEntity);
+
+  // Read fields
+  *strm >> props.m_tmLastBotTarget;
+  *strm >> props.m_tmLastSawTarget;
+  *strm >> props.m_tmButtonAction;
+  *strm >> props.m_tmPosChange;
+  *strm >> props.m_vLastPos;
+
+  *strm >> props.m_fTargetDist;
+  *strm >> props.m_fSideDir;
+  *strm >> props.m_tmChangeBotDir;
+  *strm >> props.m_vAccuracy;
+  *strm >> props.m_tmBotAccuracy;
+
+  *strm >> props.m_tmChangePath;
+  *strm >> props.m_tmPickImportant;
+  *strm >> props.m_bImportantPoint;
+
+  *strm >> props.m_iBotWeapon;
+  *strm >> props.m_tmLastBotWeapon;
+  *strm >> props.m_tmShootTime;
+
+  *strm >> props.m_tmLastItemSearch;
+
   // Read current point
   INDEX iPoint;
   *strm >> iPoint;
 
   if (iPoint != -1) {
-    pen->m_pbppCurrent = _pNavmesh->FindPointByID(iPoint);
+    props.m_pbppCurrent = _pNavmesh->FindPointByID(iPoint);
   }
   
   // Read target point
   *strm >> iPoint;
 
   if (iPoint != -1) {
-    pen->m_pbppTarget = _pNavmesh->FindPointByID(iPoint);
+    props.m_pbppTarget = _pNavmesh->FindPointByID(iPoint);
   }
 
   // Read point flags
-  *strm >> pen->m_ulPointFlags;
+  *strm >> props.m_ulPointFlags;
 
   // Read settings
-  *strm >> pen->m_sbsBot;
+  *strm >> props.m_sbsBot;
 };
 
 // [Cecil] 2019-06-05: Check if this entity is important for a path point
-BOOL ImportantForNavMesh(CPlayer *penBot, CEntity *penEntity) {
+BOOL ImportantForNavMesh(CPlayer *pen, CEntity *penEntity) {
   // Is item pickable
   if (IsDerivedFromClass(penEntity, "Item")) {
-    return IsItemPickable(penBot, (CItem *)penEntity, FALSE);
+    return IsItemPickable(pen, (CItem *)penEntity, FALSE);
 
   // Is switch usable
   } else if (IsOfClass(penEntity, "Switch")) {
@@ -167,7 +248,7 @@ BOOL ImportantForNavMesh(CPlayer *penBot, CEntity *penEntity) {
   // Is moving brush usable
   } else if (IsOfClass(penEntity, "Moving Brush")) {
     CEntity *penSwitch = ((CMovingBrush *)penEntity)->m_penSwitch;
-    return ImportantForNavMesh(penBot, penSwitch);
+    return ImportantForNavMesh(pen, penSwitch);
 
   // Can go to markers
   } else if (IsDerivedFromClass(penEntity, "Marker")) {
@@ -178,7 +259,7 @@ BOOL ImportantForNavMesh(CPlayer *penBot, CEntity *penEntity) {
 };
 
 // [Cecil] 2021-06-25: Use important entity
-void UseImportantEntity(CPlayer *penBot, CEntity *penEntity) {
+void UseImportantEntity(CPlayer *pen, CEntity *penEntity) {
   if (!ASSERT_ENTITY(penEntity)) {
     return;
   }
@@ -186,22 +267,23 @@ void UseImportantEntity(CPlayer *penBot, CEntity *penEntity) {
   // Press the switch
   if (IsOfDllClass(penEntity, CSwitch_DLLClass)) {
     if (((CSwitch &)*penEntity).m_bUseable) {
-      SendToTarget(penEntity, EET_TRIGGER, penBot);
+      SendToTarget(penEntity, EET_TRIGGER, pen);
     }
 
   // Use the moving brush
   } else if (IsOfDllClass(penEntity, CMovingBrush_DLLClass)) {
     CEntity *penSwitch = ((CMovingBrush *)penEntity)->m_penSwitch;
-    UseImportantEntity(penBot, penSwitch);
+    UseImportantEntity(pen, penSwitch);
 
   // Go to the point near the marker target
   } else if (IsOfDllClass(penEntity, CMarker_DLLClass)) {
-    if (IsDerivedFromDllClass(penBot, CPlayerBot_DLLClass)) {
+    if (IsDerivedFromDllClass(pen, CPlayerBot_DLLClass)) {
       CEntity *penTarget = penEntity->GetTarget();
 
       if (penTarget != NULL) {
-        ((CPlayerBot *)penBot)->m_pbppTarget = NearestNavMeshPointPos(penTarget, penTarget->GetPlacement().pl_PositionVector);
-        ((CPlayerBot *)penBot)->m_bImportantPoint = TRUE;
+        CPlayerBot *penBot = (CPlayerBot *)pen;
+        penBot->m_props.m_pbppTarget = NearestNavMeshPointPos(penTarget, penTarget->GetPlacement().pl_PositionVector);
+        penBot->m_props.m_bImportantPoint = TRUE;
       }
     }
   }
@@ -273,11 +355,11 @@ BOOL IsEnemyMonster(CPlayerBot *penBot, CEntity *penEnemy) {
 };
 
 // [Cecil] 2018-10-11: Bot enemy searching
-CEntity *ClosestEnemy(CPlayerBot *pen, FLOAT &fLast, const SBotLogic &sbl) {
+CEntity *ClosestEnemy(CPlayerBot *penBot, FLOAT &fLast, const SBotLogic &sbl) {
   CEntity *penReturn = NULL;
 
   // Don't search for enemies
-  if (!pen->m_sbsBot.bTargetSearch) {
+  if (!penBot->m_props.m_sbsBot.bTargetSearch) {
     return NULL;
   }
 
@@ -292,11 +374,11 @@ CEntity *ClosestEnemy(CPlayerBot *pen, FLOAT &fLast, const SBotLogic &sbl) {
   CEntity *penLastTarget = NULL;
 
   // For each entity in the world
-  {FOREACHINDYNAMICCONTAINER(pen->GetWorld()->wo_cenEntities, CEntity, iten) {
+  {FOREACHINDYNAMICCONTAINER(penBot->GetWorld()->wo_cenEntities, CEntity, iten) {
     CEntity *penCheck = iten;
 
     // If enemy (but not cannons - usually hard to reach)
-    if (pen->m_sbsBot.iTargetType >= 1 && IsEnemyMonster(pen, penCheck)) {
+    if (penBot->m_props.m_sbsBot.iTargetType >= 1 && IsEnemyMonster(penBot, penCheck)) {
       // If not alive
       CEnemyBase *penEnemy = (CEnemyBase *)penCheck;
 
@@ -305,11 +387,11 @@ CEntity *ClosestEnemy(CPlayerBot *pen, FLOAT &fLast, const SBotLogic &sbl) {
       }
 
     // If player and it's not a coop or a singleplayer game
-    } else if (pen->m_sbsBot.iTargetType != 1 && IsEnemyPlayer(pen, penCheck)) {
+    } else if (penBot->m_props.m_sbsBot.iTargetType != 1 && IsEnemyPlayer(penBot, penCheck)) {
       // If not alive
       CPlayer *penEnemy = (CPlayer *)penCheck;
 
-      if (penEnemy == pen || !(penEnemy->GetFlags() & ENF_ALIVE) || penEnemy->GetHealth() <= 0.0f) {
+      if (penEnemy == penBot || !(penEnemy->GetFlags() & ENF_ALIVE) || penEnemy->GetHealth() <= 0.0f) {
         continue;
       }
 
@@ -322,12 +404,12 @@ CEntity *ClosestEnemy(CPlayerBot *pen, FLOAT &fLast, const SBotLogic &sbl) {
 
     FLOAT fHealth = ((CMovableEntity *)penCheck)->GetHealth();
     FLOAT fDist = DistanceToPos(sbl.ViewPos(), vEnemy);
-    BOOL bCurrentVisible = CastBotRay(pen, penCheck, sbl, TRUE);
+    BOOL bCurrentVisible = CastBotRay(penBot, penCheck, sbl, TRUE);
     CEntity *penTargetEnemy = NULL;
 
     // Target's target
     if (IsOfDllClass(penCheck, CPlayerBot_DLLClass)) {
-      penTargetEnemy = ((CPlayerBot *)penCheck)->m_penTarget;
+      penTargetEnemy = ((CPlayerBot *)penCheck)->m_props.m_penTarget;
 
     } else if (IsDerivedFromClass(penCheck, "Enemy Base")) {
       penTargetEnemy = ((CEnemyBase *)penCheck)->m_penEnemy;
@@ -337,7 +419,7 @@ CEntity *ClosestEnemy(CPlayerBot *pen, FLOAT &fLast, const SBotLogic &sbl) {
     if (bCurrentVisible)                 iPriority++;
     if (fHealth < fLastHP)               iPriority++;
     if (fDist < fLast || fLast == -1.0f) iPriority++;
-    if (penTargetEnemy == pen)           iPriority++;
+    if (penTargetEnemy == penBot)        iPriority++;
 
     // If more priorities have been fulfilled
     if (iPriority >= iLastPriority) {
