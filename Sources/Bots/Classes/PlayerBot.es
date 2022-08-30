@@ -113,18 +113,28 @@ functions:
         m_pBot->BotSelectNewWeapon(sbl.iDesiredWeapon);
       }
 
-    // While dead in singleplayer
-    } else if (GetSP()->sp_bSinglePlayer) {
-      // Respawn manually to avoid reloading the game
-      if (m_iMayRespawn == 2) {
-        SendEvent(EEnd());
+    // While dead
+    } else {
+      // Remember time of death
+      if (m_iMayRespawn == 0) {
+        GetProps().m_tmDied = _pTimer->CurrentTick();
       }
 
-    // While dead in any other case
-    } else {
-      // Try to respawn
-      if (m_pBot->ButtonAction()) {
-        paAction.pa_ulButtons |= PLACT_FIRE;
+      // If allowed to respawn and delay has ended
+      const FLOAT fRespawn = GetProps().m_sbsBot.fRespawnDelay;
+
+      if (m_iMayRespawn == 2 && fRespawn >= 0.0f
+       && _pTimer->CurrentTick() >= GetProps().m_tmDied + fRespawn)
+      {
+        // In singleplayer
+        if (GetSP()->sp_bSinglePlayer) {
+          // Respawn manually to avoid reloading the game
+          SendEvent(EEnd());
+
+        // Try to respawn
+        } else if (m_pBot->ButtonAction()) {
+          paAction.pa_ulButtons |= PLACT_FIRE;
+        }
       }
     }
 

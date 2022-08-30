@@ -647,6 +647,7 @@ extern void CECIL_InitSandboxActions(void) {
   _pShell->DeclareSymbol("user void " BOTCOM_NAME("ResetBotConfig(INDEX);"), &CECIL_ResetBotConfig);
   _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("b3rdPerson;"      ), &_sbsBotSettings.b3rdPerson);
   _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("iCrosshair;"      ), &_sbsBotSettings.iCrosshair);
+  _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fRespawnDelay;"   ), &_sbsBotSettings.fRespawnDelay);
 
   _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bSniperZoom;"     ), &_sbsBotSettings.bSniperZoom);
   _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bShooting;"       ), &_sbsBotSettings.bShooting);

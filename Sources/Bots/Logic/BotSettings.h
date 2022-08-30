@@ -30,6 +30,7 @@ struct DECL_DLL SBotSettings {
 
   INDEX b3rdPerson; // Set third person view
   INDEX iCrosshair; // Preferred crosshair (-1 for random)
+  FLOAT fRespawnDelay; // How long to wait until respawning
 
   INDEX bSniperZoom;    // Use sniper zoom or not
   INDEX bShooting;      // Attack or not

@@ -32,6 +32,7 @@ struct DECL_DLL SBotProperties {
   FLOAT m_tmButtonAction;  // Cooldown for button actions
   FLOAT m_tmPosChange;     // Last time bot has significantly moved
   FLOAT3D m_vLastPos;      // Last bot position
+  FLOAT m_tmDied;          // Time of death
 
   FLOAT m_fTargetDist;    // How far is the following target
   FLOAT m_fSideDir;       // Prioritize going left or right
@@ -81,6 +82,7 @@ struct DECL_DLL SBotProperties {
     m_tmLastSawTarget = 0.0f;
     m_tmPosChange = _pTimer->CurrentTick();
     m_vLastPos = FLOAT3D(0.0f, 0.0f, 0.0f);
+    m_tmDied = -100.0f;
     
     m_tmChangePath = 0.0f;
     m_tmPickImportant = 0.0f;
@@ -113,6 +115,7 @@ struct DECL_DLL SBotProperties {
     m_tmButtonAction   = props.m_tmButtonAction;
     m_tmPosChange      = props.m_tmPosChange;
     m_vLastPos         = props.m_vLastPos;
+    m_tmDied           = props.m_tmDied;
     m_fTargetDist      = props.m_fTargetDist;
     m_fSideDir         = props.m_fSideDir;
     m_tmChangeBotDir   = props.m_tmChangeBotDir;
