@@ -1,6 +1,6 @@
 # Cecil's Bot Mod
 This is the source code of a mod for classic Serious Sam: The Second Encounter v1.07 that adds customizable bots to multiplayer games (both Cooperative and Deathmatch modes).
-Based on [Serious Sam SDK v1.07 for Visual Studio 2013](https://github.com/DreamyCecil/SeriousSam_SDK107)
+Based on [Serious Engine 1 Mod SDK](https://github.com/DreamyCecil/SE1-ModSDK)
 
 Visit repository's wiki to find information about integration help and available mod console commands:
 - [Bot integration help](https://github.com/DreamyCecil/CecilBotMod/wiki/Bot-integration-help)
@@ -13,7 +13,7 @@ Building
 
 To compile the source code, you'll need to use a compiler from Microsoft Visual C++ 6.0.
 
-Full guide: https://github.com/DreamyCecil/SeriousSam_SDK107#building
+Full guide: https://github.com/DreamyCecil/SE1-ModSDK#building
 
 Running
 -------
