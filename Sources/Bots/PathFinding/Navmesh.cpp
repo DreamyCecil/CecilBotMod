@@ -123,11 +123,11 @@ void CBotNavmesh::LoadNavmesh(CWorld &wo) {
 
 void CBotNavmesh::ClearNavMesh(void) {
   // [Cecil] 2021-06-22: Untarget all bots
-  for (INDEX iBot = 0; iBot < _cenPlayerBots.Count(); iBot++) {
-    CPlayerBot *penBot = _cenPlayerBots.Pointer(iBot);
+  for (INDEX iBot = 0; iBot < _aPlayerBots.Count(); iBot++) {
+    CPlayerBot *penBot = (CPlayerBot *)_aPlayerBots[iBot].pen;
 
-    penBot->m_props.m_pbppCurrent = NULL;
-    penBot->m_props.m_pbppTarget = NULL;
+    penBot->GetProps().m_pbppCurrent = NULL;
+    penBot->GetProps().m_pbppTarget = NULL;
   }
 
   // destroy all path points

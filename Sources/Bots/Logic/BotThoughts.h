@@ -22,6 +22,11 @@ struct SBotThoughts {
 
   // Constructor
   SBotThoughts(void) {
+    Reset();
+  };
+
+  // Reset thoughts
+  void Reset(void) {
     for (INDEX i = 0; i < 16; i++) {
       strThoughts[i] = "";
     }

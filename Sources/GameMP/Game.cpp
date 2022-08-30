@@ -2206,8 +2206,8 @@ void CGame::GameRedrawView( CDrawPort *pdpDrawPort, ULONG ulFlags)
     }}
 
     // [Cecil] Add bots
-    for (INDEX iBot = 0; iBot < _cenPlayerBots.Count(); iBot++) {
-      CPlayerBot *penBot = _cenPlayerBots.Pointer(iBot);
+    for (INDEX iBot = 0; iBot < _aPlayerBots.Count(); iBot++) {
+      CPlayerBot *penBot = (CPlayerBot *)_aPlayerBots[iBot].pen;
       cenPlayerEntities.Add(penBot);
     }
     // [Cecil] Count non-local players

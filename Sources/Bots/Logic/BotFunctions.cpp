@@ -109,7 +109,7 @@ CBotPathPoint *NearestNavMeshPointBot(CPlayerBot *pen, BOOL bSkipCurrent) {
 
 // Write bot properties
 void BotWrite(CPlayerBot *penBot, CTStream *strm) {
-  SBotProperties &props = penBot->m_props;
+  SBotProperties &props = penBot->GetProps();
 
   // Write entity pointers
   if (props.m_penTarget != NULL) {
@@ -176,7 +176,7 @@ void BotWrite(CPlayerBot *penBot, CTStream *strm) {
 
 // Read bot properties
 void BotRead(CPlayerBot *penBot, CTStream *strm) {
-  SBotProperties &props = penBot->m_props;
+  SBotProperties &props = penBot->GetProps();
 
   // Read entity pointers
   INDEX iEntity;
@@ -282,8 +282,8 @@ void UseImportantEntity(CPlayer *pen, CEntity *penEntity) {
 
       if (penTarget != NULL) {
         CPlayerBot *penBot = (CPlayerBot *)pen;
-        penBot->m_props.m_pbppTarget = NearestNavMeshPointPos(penTarget, penTarget->GetPlacement().pl_PositionVector);
-        penBot->m_props.m_bImportantPoint = TRUE;
+        penBot->GetProps().m_pbppTarget = NearestNavMeshPointPos(penTarget, penTarget->GetPlacement().pl_PositionVector);
+        penBot->GetProps().m_bImportantPoint = TRUE;
       }
     }
   }
@@ -359,7 +359,7 @@ CEntity *ClosestEnemy(CPlayerBot *penBot, FLOAT &fLast, const SBotLogic &sbl) {
   CEntity *penReturn = NULL;
 
   // Don't search for enemies
-  if (!penBot->m_props.m_sbsBot.bTargetSearch) {
+  if (!penBot->GetProps().m_sbsBot.bTargetSearch) {
     return NULL;
   }
 
@@ -378,7 +378,7 @@ CEntity *ClosestEnemy(CPlayerBot *penBot, FLOAT &fLast, const SBotLogic &sbl) {
     CEntity *penCheck = iten;
 
     // If enemy (but not cannons - usually hard to reach)
-    if (penBot->m_props.m_sbsBot.iTargetType >= 1 && IsEnemyMonster(penBot, penCheck)) {
+    if (penBot->GetProps().m_sbsBot.iTargetType >= 1 && IsEnemyMonster(penBot, penCheck)) {
       // If not alive
       CEnemyBase *penEnemy = (CEnemyBase *)penCheck;
 
@@ -387,7 +387,7 @@ CEntity *ClosestEnemy(CPlayerBot *penBot, FLOAT &fLast, const SBotLogic &sbl) {
       }
 
     // If player and it's not a coop or a singleplayer game
-    } else if (penBot->m_props.m_sbsBot.iTargetType != 1 && IsEnemyPlayer(penBot, penCheck)) {
+    } else if (penBot->GetProps().m_sbsBot.iTargetType != 1 && IsEnemyPlayer(penBot, penCheck)) {
       // If not alive
       CPlayer *penEnemy = (CPlayer *)penCheck;
 
@@ -409,7 +409,7 @@ CEntity *ClosestEnemy(CPlayerBot *penBot, FLOAT &fLast, const SBotLogic &sbl) {
 
     // Target's target
     if (IsOfDllClass(penCheck, CPlayerBot_DLLClass)) {
-      penTargetEnemy = ((CPlayerBot *)penCheck)->m_props.m_penTarget;
+      penTargetEnemy = ((CPlayerBot *)penCheck)->GetProps().m_penTarget;
 
     } else if (IsDerivedFromClass(penCheck, "Enemy Base")) {
       penTargetEnemy = ((CEnemyBase *)penCheck)->m_penEnemy;

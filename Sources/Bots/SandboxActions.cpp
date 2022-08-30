@@ -195,8 +195,8 @@ static void CECIL_RemoveAllBots(void) {
   INDEX iBot = 0;
   BOOL bRemoved = FALSE;
 
-  for (iBot = 0; iBot < _cenPlayerBots.Count(); iBot++) {
-    CPlayerBot *penBot = _cenPlayerBots.Pointer(iBot);
+  for (iBot = 0; iBot < _aPlayerBots.Count(); iBot++) {
+    CPlayerBot *penBot = (CPlayerBot *)_aPlayerBots[iBot].pen;
 
     if (!ASSERT_ENTITY(penBot)) {
       continue;
@@ -230,8 +230,8 @@ static void CECIL_RemoveBot(CTString *pstrBotName) {
   CTString strBotName = *pstrBotName;
   BOOL bRemoved = FALSE;
 
-  for (INDEX iBot = 0; iBot < _cenPlayerBots.Count(); iBot++) {
-    CPlayerBot *penBot = _cenPlayerBots.Pointer(iBot);
+  for (INDEX iBot = 0; iBot < _aPlayerBots.Count(); iBot++) {
+    CPlayerBot *penBot = (CPlayerBot *)_aPlayerBots[iBot].pen;
 
     if (!ASSERT_ENTITY(penBot)) {
       continue;
@@ -764,29 +764,33 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
     // [Cecil] 2019-06-03: Add a new bot to the game
     case ESA_ADDBOT: {
       CPlayerCharacter pcBot;
-      nmMessage >> pcBot; // player character
+      nmMessage >> pcBot; // Player character
 
       SBotSettings sbsSettings;
       nmMessage >> sbsSettings;
 
-      // delete all predictors
+      // Delete all predictors
       wo.DeletePredictors();
 
-      // if there is no entity with that character in the world
+      // If there is no entity with that character in the world
       CPlayerBot *penNewBot = (CPlayerBot *)wo.FindEntityWithCharacter(pcBot);
 
       if (penNewBot == NULL) {
-        // create an entity for it
+        // Create an entity for it
         CPlacement3D pl(FLOAT3D(0.0f, 0.0f, 0.0f), ANGLE3D(0.0f, 0.0f, 0.0f));
 
         try {
           CTFileName fnmPlayer = CTString("Classes\\PlayerBot.ecl");
           penNewBot = (CPlayerBot *)wo.CreateEntity_t(pl, fnmPlayer);
 
-          // attach the character to it
+          // Add to the bot list
+          penNewBot->m_pBot = &_aPlayerBots.Push();
+          *penNewBot->m_pBot = penNewBot;
+
+          // Attach the character to it
           penNewBot->en_pcCharacter = pcBot;
 
-          // update settings and initialize
+          // Update settings and initialize
           penNewBot->UpdateBot(sbsSettings);
           penNewBot->Initialize();
 
@@ -806,7 +810,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
       INDEX iBot;
       nmMessage >> iBot; // bot index
 
-      CPlayerBot *penBot = _cenPlayerBots.Pointer(iBot);
+      CPlayerBot *penBot = (CPlayerBot *)_aPlayerBots[iBot].pen;
 
       // delete all predictors
       wo.DeletePredictors();
@@ -824,8 +828,8 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
       SBotSettings sbsSettings;
       nmMessage >> sbsSettings;
 
-      for (INDEX iBot = 0; iBot < _cenPlayerBots.Count(); iBot++) {
-        CPlayerBot *penBot = _cenPlayerBots.Pointer(iBot);
+      for (INDEX iBot = 0; iBot < _aPlayerBots.Count(); iBot++) {
+        CPlayerBot *penBot = (CPlayerBot *)_aPlayerBots[iBot].pen;
 
         // for only one specific bot or all bots
         if (strBotEdit == "" || penBot->GetName().Undecorated().Matches(strBotEdit)) {

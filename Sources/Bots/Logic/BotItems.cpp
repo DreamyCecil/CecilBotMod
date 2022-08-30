@@ -18,8 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "BotFunctions.h"
 
 // Shortcuts
-#define SETTINGS         (penBot->m_props.m_sbsBot)
-#define THOUGHT(_String) (penBot->m_props.m_btThoughts.Push(_String))
+#define SETTINGS         (penBot->GetProps().m_sbsBot)
+#define THOUGHT(_String) (penBot->GetProps().m_btThoughts.Push(_String))
 
 // [Cecil] 2021-06-14: Check if item is pickable
 BOOL IsItemPickable(class CPlayer *pen, class CItem *penItem, const BOOL &bCheckDist) {
@@ -54,7 +54,7 @@ void BotItemSearch(CPlayerBot *penBot, SBotLogic &sbl) {
     BOOL bWantItem = (fItemDist > fCloseItemDist);
 
     // [Cecil] TEMP 2022-05-11: Go for items in coop anyway
-    BOOL bImportantPoint = (penBot->m_props.m_bImportantPoint && !IsCoopGame());
+    BOOL bImportantPoint = (penBot->GetProps().m_bImportantPoint && !IsCoopGame());
 
     // Check if item is really needed (because going for an important point)
     BOOL bNeedItem = (!bImportantPoint || fItemDist < 8.0f);
@@ -65,8 +65,8 @@ void BotItemSearch(CPlayerBot *penBot, SBotLogic &sbl) {
 
       // Put searching on cooldown if selected some item
       if (penItem != NULL) {
-        penBot->m_props.m_penLastItem = penItem;
-        penBot->m_props.m_tmLastItemSearch = _pTimer->CurrentTick() + SETTINGS.fItemSearchCD;
+        penBot->GetProps().m_penLastItem = penItem;
+        penBot->GetProps().m_tmLastItemSearch = _pTimer->CurrentTick() + SETTINGS.fItemSearchCD;
 
         THOUGHT(CTString(0, "Going for ^c7f7fff%s", penItem->en_pecClass->ec_pdecDLLClass->dec_strName));
       }
@@ -74,16 +74,16 @@ void BotItemSearch(CPlayerBot *penBot, SBotLogic &sbl) {
   }
 
   // Has some item
-  if (penBot->m_props.m_penLastItem != NULL) {
+  if (penBot->GetProps().m_penLastItem != NULL) {
     // Item is pickable
-    if (IsItemPickable(penBot, (CItem *)&*penBot->m_props.m_penLastItem, TRUE)) {
+    if (IsItemPickable(penBot, (CItem *)&*penBot->GetProps().m_penLastItem, TRUE)) {
       sbl.ulFlags |= BLF_ITEMEXISTS;
-      penBot->m_props.m_penFollow = penBot->m_props.m_penLastItem;
+      penBot->GetProps().m_penFollow = penBot->GetProps().m_penLastItem;
 
     // Not pickable anymore
     } else {
-      penBot->m_props.m_penLastItem = NULL;
-      penBot->m_props.m_tmLastItemSearch = 0.0f;
+      penBot->GetProps().m_penLastItem = NULL;
+      penBot->GetProps().m_tmLastItemSearch = 0.0f;
 
       THOUGHT("^c7f7fffItem is no longer pickable");
     }
@@ -124,7 +124,7 @@ CEntity *GetClosestItem(CPlayerBot *penBot, FLOAT &fItemDist, const SBotLogic &s
   CEntity *penItem = ClosestItemType(penBot, CWeaponItem_DLLClass, fItemDist, sbl);
 
   // Within range
-  if (penItem != NULL && fItemDist < penBot->m_props.m_fTargetDist && fItemDist < SETTINGS.fWeaponDist) {
+  if (penItem != NULL && fItemDist < penBot->GetProps().m_fTargetDist && fItemDist < SETTINGS.fWeaponDist) {
     return penItem;
   }
   
@@ -201,7 +201,7 @@ CEntity *GetClosestItem(CPlayerBot *penBot, FLOAT &fItemDist, const SBotLogic &s
 // [Cecil] Closest item entity
 CEntity *ClosestItemType(CPlayerBot *penBot, const CDLLEntityClass &decClass, FLOAT &fDist, const SBotLogic &sbl) {
   // Can't search for items right now
-  if (!SETTINGS.bItemSearch || penBot->m_props.m_tmLastItemSearch > _pTimer->CurrentTick()) {
+  if (!SETTINGS.bItemSearch || penBot->GetProps().m_tmLastItemSearch > _pTimer->CurrentTick()) {
     return NULL;
   }
 
@@ -236,12 +236,12 @@ CEntity *ClosestItemType(CPlayerBot *penBot, const CDLLEntityClass &decClass, FL
   }}
 
   // If it's the same item as before, don't bother
-  if (penReturn == penBot->m_props.m_penLastItem) {
+  if (penReturn == penBot->GetProps().m_penLastItem) {
     penReturn = NULL;
   }
 
   // Reset last item
-  penBot->m_props.m_penLastItem = NULL;
+  penBot->GetProps().m_penLastItem = NULL;
 
   return penReturn;
 };

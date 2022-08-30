@@ -16,6 +16,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef _CECILBOTS_BOTMAIN_H
 #define _CECILBOTS_BOTMAIN_H
 
+#include "Bots/BotStructure.h"
+
 // [Cecil] 2019-05-28: NavMesh commands
 extern INDEX MOD_iRenderNavMesh;
 extern FLOAT MOD_fNavMeshRenderRange;
@@ -23,7 +25,10 @@ extern INDEX MOD_iNavMeshPoint;
 extern INDEX MOD_iNavMeshConnecting;
 
 // [Cecil] 2021-06-11: List of bot entities
-DECL_DLL extern CDynamicContainer<class CPlayerBot> _cenPlayerBots;
+DECL_DLL extern CStaticStackArray<SPlayerBot> _aPlayerBots;
+
+// Find index of a bot in the list by a pointer to the entity
+DECL_DLL INDEX FindBotByPointer(CPlayer *pen);
 
 // [Cecil] 2019-06-01: Initialize the bot mod
 DECL_DLL void CECIL_InitBotMod(void);

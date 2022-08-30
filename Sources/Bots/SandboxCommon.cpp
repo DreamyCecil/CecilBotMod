@@ -275,7 +275,7 @@ BOOL IsDerivedFromDllClass(CEntity *pen, const CDLLEntityClass &dec) {
 
 // [Cecil] 2021-06-12: Looping through players and bots
 INDEX CECIL_GetMaxPlayers(void) {
-  return CEntity::GetMaxPlayers() + _cenPlayerBots.Count();
+  return CEntity::GetMaxPlayers() + _aPlayerBots.Count();
 };
 
 CPlayer *CECIL_GetPlayerEntity(const INDEX &iPlayer) {
@@ -286,7 +286,7 @@ CPlayer *CECIL_GetPlayerEntity(const INDEX &iPlayer) {
     return (CPlayer *)CEntity::GetPlayerEntity(iPlayer);
   }
 
-  return _cenPlayerBots.Pointer(iPlayer - ctReal);
+  return (CPlayer *)_aPlayerBots[iPlayer - ctReal].pen;
 };
 
 // [Cecil] 2021-06-13: Get personal player index
@@ -294,7 +294,7 @@ INDEX CECIL_PlayerIndex(CPlayer *pen) {
   INDEX ctPlayers = CEntity::GetMaxPlayers();
 
   if (IsDerivedFromDllClass(pen, CPlayerBot_DLLClass)) {
-    INDEX iBot = _cenPlayerBots.Index((CPlayerBot *)pen);
+    INDEX iBot = FindBotByPointer(pen);
 
     // occupy the rest of the bits by bots
     return ctPlayers + (iBot % (32 - ctPlayers));

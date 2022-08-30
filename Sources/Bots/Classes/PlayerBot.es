@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Bots/Logic/BotMovement.h"
 #include "Bots/Logic/BotItems.h"
 
-#define THOUGHT(_String) (m_props.m_btThoughts.Push(_String))
+#define THOUGHT(_String) (GetProps().m_btThoughts.Push(_String))
 %}
 
 // [Cecil] 2022-05-01: Includes headers to these in "PlayerBot.h"
@@ -47,7 +47,7 @@ thumbnail "";
 
 properties:
 {
-  SBotProperties m_props; // Bot properties
+  SPlayerBot *m_pBot; // Bot reference
 }
 
 components:
@@ -56,16 +56,29 @@ components:
 functions:
   // Initialize the bot  
   void InitBot(void) {
-    m_props.Reset();
-    m_props.ResetLastPos(this);
+    GetProps().Reset();
+    GetProps().ResetLastPos(this);
   };
   
   // Bot destructor
   void EndBot(void) {
     // Remove from the bot list
-    if (_cenPlayerBots.IsMember(this)) {
-      _cenPlayerBots.Remove(this);
+    INDEX iBot = FindBotByPointer(this);
+
+    if (iBot != -1) {
+      // Replace current bot with the last one
+      SPlayerBot &pbRemoved = _aPlayerBots.Pop();
+
+      // Only if current index is below the last one
+      if (iBot < _aPlayerBots.Count()) {
+        _aPlayerBots[iBot] = pbRemoved;
+      }
     }
+  };
+
+  // Get bot properites
+  SBotProperties &GetProps(void) {
+    return m_pBot->props;
   };
 
   // Write to stream
@@ -88,7 +101,7 @@ functions:
 
   // Check if selected point is a current one
   BOOL CurrentPoint(CBotPathPoint *pbppExclude) {
-    return (pbppExclude != NULL && m_props.m_pbppCurrent == pbppExclude);
+    return (pbppExclude != NULL && GetProps().m_pbppCurrent == pbppExclude);
   };
 
   // Apply action for bots
@@ -128,7 +141,7 @@ functions:
 
     // Adjust bot's speed
     FLOAT3D &vTranslation = paAction.pa_vTranslation;
-    FLOAT fSpeedMul = m_props.m_sbsBot.fSpeedMul;
+    FLOAT fSpeedMul = GetProps().m_sbsBot.fSpeedMul;
 
     vTranslation(1) *= fSpeedMul;
     vTranslation(3) *= fSpeedMul;
@@ -136,15 +149,15 @@ functions:
 
   // [Cecil] 2018-10-15: Update bot settings
   void UpdateBot(const SBotSettings &sbs) {
-    m_props.m_sbsBot = sbs;
+    GetProps().m_sbsBot = sbs;
 
     // Adjust target type
-    if (m_props.m_sbsBot.iTargetType == -1)
+    if (GetProps().m_sbsBot.iTargetType == -1)
     {
       if (IsCoopGame()) {
-        m_props.m_sbsBot.iTargetType = 1; // Only enemies
+        GetProps().m_sbsBot.iTargetType = 1; // Only enemies
       } else {
-        m_props.m_sbsBot.iTargetType = 2; // Enemies and players
+        GetProps().m_sbsBot.iTargetType = 2; // Enemies and players
       }
     }
 
@@ -152,24 +165,24 @@ functions:
     CPlayerSettings *pps = (CPlayerSettings *)en_pcCharacter.pc_aubAppearance;
     
     // Third person view
-    if (m_props.m_sbsBot.b3rdPerson) {
+    if (GetProps().m_sbsBot.b3rdPerson) {
       pps->ps_ulFlags |= PSF_PREFER3RDPERSON;
     } else {
       pps->ps_ulFlags &= ~PSF_PREFER3RDPERSON;
     }
 
     // Change crosshair type
-    if (m_props.m_sbsBot.iCrosshair < 0) {
+    if (GetProps().m_sbsBot.iCrosshair < 0) {
       pps->ps_iCrossHairType = rand() % 7; // randomize
     } else {
-      pps->ps_iCrossHairType = m_props.m_sbsBot.iCrosshair;
+      pps->ps_iCrossHairType = GetProps().m_sbsBot.iCrosshair;
     }
   };
 
   // [Cecil] 2021-06-16: Perform a button action if possible
   BOOL ButtonAction(void) {
-    if (m_props.m_tmButtonAction <= _pTimer->CurrentTick()) {
-      m_props.m_tmButtonAction = _pTimer->CurrentTick() + 0.2f;
+    if (GetProps().m_tmButtonAction <= _pTimer->CurrentTick()) {
+      GetProps().m_tmButtonAction = _pTimer->CurrentTick() + 0.2f;
       return TRUE;
     }
     return FALSE;
@@ -178,7 +191,7 @@ functions:
   // [Cecil] 2021-06-16: Select new weapon
   void BotSelectNewWeapon(const INDEX &iSelect) {
     // Nothing to select or on a cooldown
-    if (iSelect == WPN_NOTHING || m_props.m_tmLastBotWeapon > _pTimer->CurrentTick()) {
+    if (iSelect == WPN_NOTHING || GetProps().m_tmLastBotWeapon > _pTimer->CurrentTick()) {
       return;
     }
 
@@ -192,7 +205,7 @@ functions:
     // Select it
     if (penWeapons->WeaponSelectOk((WeaponType)iSelect)) {
       penWeapons->SendEvent(EBegin());
-      m_props.m_tmLastBotWeapon = _pTimer->CurrentTick() + m_props.m_sbsBot.fWeaponCD;
+      GetProps().m_tmLastBotWeapon = _pTimer->CurrentTick() + GetProps().m_sbsBot.fWeaponCD;
     }
   };
 
@@ -201,22 +214,22 @@ functions:
     CPlayerWeapons *penWeapons = GetPlayerWeapons();
     
     // sniper scope
-    if (m_props.m_sbsBot.bSniperZoom && CanUseScope(this)) {
+    if (GetProps().m_sbsBot.bSniperZoom && CanUseScope(this)) {
       UseWeaponScope(this, pa, sbl);
     }
 
     // Pick weapon config
     const SBotWeaponConfig *aWeapons = sbl.aWeapons;
-    m_props.m_iBotWeapon = CT_BOT_WEAPONS - 1;
+    GetProps().m_iBotWeapon = CT_BOT_WEAPONS - 1;
 
     // [Cecil] 2021-06-16: Select knife for faster speed if haven't seen the enemy in a while
-    if (!IsCoopGame() && _pTimer->CurrentTick() - m_props.m_tmLastSawTarget > 2.0f)
+    if (!IsCoopGame() && _pTimer->CurrentTick() - GetProps().m_tmLastSawTarget > 2.0f)
     {
       for (INDEX iWeapon = 0; iWeapon < CT_BOT_WEAPONS; iWeapon++) {
         INDEX iType = aWeapons[iWeapon].bw_iType;
 
         if (iType == WPN_DEFAULT_1) {
-          m_props.m_iBotWeapon = iWeapon;
+          GetProps().m_iBotWeapon = iWeapon;
           sbl.iDesiredWeapon = WPN_DEFAULT_1;
           break;
         }
@@ -244,12 +257,12 @@ functions:
       }
 
       // Not allowed
-      if (m_props.m_sbsBot.iAllowedWeapons != -1 && !(m_props.m_sbsBot.iAllowedWeapons & WPN_FLAG(iWeaponType))) {
+      if (GetProps().m_sbsBot.iAllowedWeapons != -1 && !(GetProps().m_sbsBot.iAllowedWeapons & WPN_FLAG(iWeaponType))) {
         continue;
       }
 
       // Check if distance is okay
-      if (m_props.m_fTargetDist > fMax || m_props.m_fTargetDist < fMin) {
+      if (GetProps().m_fTargetDist > fMax || GetProps().m_fTargetDist < fMin) {
         continue;
       }
 
@@ -258,7 +271,7 @@ functions:
         continue;
       }
 
-      FLOAT fDistRatio = (m_props.m_fTargetDist - fMin) / (fMax - fMin); // From min to max [0 .. 1]
+      FLOAT fDistRatio = (GetProps().m_fTargetDist - fMin) / (fMax - fMin); // From min to max [0 .. 1]
       FLOAT fMul = fAccuracy + (1 - fAccuracy) * (1 - fDistRatio); // From min to max [fAccuracy .. 1]
 
       // Check damage
@@ -266,7 +279,7 @@ functions:
         // Select this weapon
         iSelect = iWeaponType;
         fLastDamage = aWeapons[iWeapon].bw_fDamage * fMul;
-        m_props.m_iBotWeapon = iWeapon;
+        GetProps().m_iBotWeapon = iWeapon;
       }
     }
 
@@ -277,9 +290,9 @@ functions:
   void BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
     const FLOAT3D &vBotPos = GetPlacement().pl_PositionVector;
 
-    if (DistanceToPos(vBotPos, m_props.m_vLastPos) > 2.0f) {
-      m_props.m_tmPosChange = _pTimer->CurrentTick();
-      m_props.m_vLastPos = vBotPos;
+    if (DistanceToPos(vBotPos, GetProps().m_vLastPos) > 2.0f) {
+      GetProps().m_tmPosChange = _pTimer->CurrentTick();
+      GetProps().m_vLastPos = vBotPos;
     }
 
     // Set bot's absolute viewpoint
@@ -287,43 +300,43 @@ functions:
     sbl.plBotView.RelativeToAbsolute(GetPlacement());
     
     // [Cecil] 2018-10-11 / 2018-10-13: Bot targeting and following
-    CEntity *penBotTarget = ClosestEnemy(this, m_props.m_fTargetDist, sbl);
+    CEntity *penBotTarget = ClosestEnemy(this, GetProps().m_fTargetDist, sbl);
 
     // Select new target only if it doesn't exist or after a cooldown
-    if (!ASSERT_ENTITY(m_props.m_penTarget) || m_props.m_tmLastBotTarget <= _pTimer->CurrentTick()) {
-      m_props.m_penTarget = penBotTarget;
-      m_props.m_tmLastBotTarget = _pTimer->CurrentTick() + m_props.m_sbsBot.fTargetCD;
+    if (!ASSERT_ENTITY(GetProps().m_penTarget) || GetProps().m_tmLastBotTarget <= _pTimer->CurrentTick()) {
+      GetProps().m_penTarget = penBotTarget;
+      GetProps().m_tmLastBotTarget = _pTimer->CurrentTick() + GetProps().m_sbsBot.fTargetCD;
 
       // [Cecil] 2021-06-14: Select new weapon immediately
-      m_props.m_tmLastBotWeapon = 0.0f;
+      GetProps().m_tmLastBotWeapon = 0.0f;
     }
 
-    m_props.m_penFollow = NULL;
+    GetProps().m_penFollow = NULL;
 
     // [Cecil] 2019-05-28: Follow players in cooperative
-    BOOL bFollowInCoop = (IsCoopGame() && m_props.m_sbsBot.iFollowPlayers != 0);
+    BOOL bFollowInCoop = (IsCoopGame() && GetProps().m_sbsBot.iFollowPlayers != 0);
 
     if (bFollowInCoop) {
       sbl.ulFlags |= BLF_FOLLOWPLAYER;
     }
 
     // Enemy exists
-    if (m_props.m_penTarget != NULL) {
+    if (GetProps().m_penTarget != NULL) {
       sbl.ulFlags |= BLF_ENEMYEXISTS;
-      sbl.peiTarget = (EntityInfo *)m_props.m_penTarget->GetEntityInfo();
+      sbl.peiTarget = (EntityInfo *)GetProps().m_penTarget->GetEntityInfo();
 
       // Can see the enemy
-      if (CastBotRay(this, m_props.m_penTarget, sbl, TRUE)) {
+      if (CastBotRay(this, GetProps().m_penTarget, sbl, TRUE)) {
         sbl.ulFlags |= BLF_SEEENEMY;
-        m_props.m_tmLastSawTarget = _pTimer->CurrentTick();
+        GetProps().m_tmLastSawTarget = _pTimer->CurrentTick();
       }
       
       // Follow the enemy
-      m_props.m_penFollow = m_props.m_penTarget;
+      GetProps().m_penFollow = GetProps().m_penTarget;
 
       // Stop following the player if detected an enemy
-      if (m_props.m_sbsBot.iFollowPlayers == 2) {
-        if (sbl.SeeEnemy() || m_props.m_fTargetDist < 16.0f) {
+      if (GetProps().m_sbsBot.iFollowPlayers == 2) {
+        if (sbl.SeeEnemy() || GetProps().m_fTargetDist < 16.0f) {
           sbl.ulFlags &= ~BLF_FOLLOWPLAYER;
         }
       }
@@ -333,40 +346,40 @@ functions:
     BotAim(this, pa, sbl);
 
     // Shoot if possible
-    if (m_props.m_sbsBot.bShooting) {
-      const SBotWeaponConfig &bwWeapon = sbl.aWeapons[m_props.m_iBotWeapon];
+    if (GetProps().m_sbsBot.bShooting) {
+      const SBotWeaponConfig &bwWeapon = sbl.aWeapons[GetProps().m_iBotWeapon];
 
       // Allowed to shoot
       BOOL bCanShoot = sbl.CanShoot();
       
       // Only shoot allowed weapons
-      if (m_props.m_sbsBot.iAllowedWeapons != -1) {
-        bCanShoot = bCanShoot && m_props.m_sbsBot.iAllowedWeapons & WPN_FLAG(GetPlayerWeapons()->m_iCurrentWeapon);
+      if (GetProps().m_sbsBot.iAllowedWeapons != -1) {
+        bCanShoot = bCanShoot && GetProps().m_sbsBot.iAllowedWeapons & WPN_FLAG(GetPlayerWeapons()->m_iCurrentWeapon);
       }
 
       // If allowed to shoot
       if (bCanShoot) {
         // Enough shooting time
-        if (m_props.m_tmShootTime <= 0.0f || m_props.m_tmShootTime > _pTimer->CurrentTick()) {
+        if (GetProps().m_tmShootTime <= 0.0f || GetProps().m_tmShootTime > _pTimer->CurrentTick()) {
           FireWeapon(this, pa, sbl);
 
-        } else if (Abs(m_props.m_tmShootTime - _pTimer->CurrentTick()) < 0.05f) {
+        } else if (Abs(GetProps().m_tmShootTime - _pTimer->CurrentTick()) < 0.05f) {
           THOUGHT("Stop shooting");
         }
 
         // Reset shooting time a few ticks later
-        if (m_props.m_tmShootTime + 0.05f <= _pTimer->CurrentTick()) {
+        if (GetProps().m_tmShootTime + 0.05f <= _pTimer->CurrentTick()) {
           // Shooting frequency
           FLOAT tmShotFreq = bwWeapon.bw_tmShotFreq;
 
           // This weapon has a certain shooting frequency
           if (tmShotFreq > 0.0f) {
-            m_props.m_tmShootTime = _pTimer->CurrentTick() + tmShotFreq;
+            GetProps().m_tmShootTime = _pTimer->CurrentTick() + tmShotFreq;
             THOUGHT(CTString(0, "Shoot for %.2fs", tmShotFreq));
 
           // No frequency
           } else {
-            m_props.m_tmShootTime = -1.0f;
+            GetProps().m_tmShootTime = -1.0f;
           }
         }
       }
@@ -382,13 +395,13 @@ functions:
         // Currently following players
         if (sbl.FollowPlayer()) {
           // Don't follow anything else
-          m_props.m_penFollow = NULL;
+          GetProps().m_penFollow = NULL;
 
           sbl.ulFlags |= BLF_SEEPLAYER;
 
           // Follow the player specifically
           if (fDistToPlayer > 5.0f) {
-            m_props.m_penFollow = penPlayer;
+            GetProps().m_penFollow = penPlayer;
             sbl.ulFlags |= BLF_FOLLOWING;
 
             // Player is too far
@@ -397,7 +410,7 @@ functions:
             }
 
           } else if (fDistToPlayer < 2.0f) {
-            m_props.m_penFollow = penPlayer;
+            GetProps().m_penFollow = penPlayer;
             sbl.ulFlags |= BLF_BACKOFF;
           }
 
@@ -461,10 +474,7 @@ functions:
 procedures:
   // Entry point
   Main() {
-    // add to the bot list
-    _cenPlayerBots.Add(this);
-
-    // initialize the player
+    // Initialize the player
     jump CPlayer::SubMain();
   };
 };

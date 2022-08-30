@@ -27,7 +27,20 @@ extern INDEX MOD_bEntityIDs;
 extern INDEX MOD_bBotThoughts;
 
 // [Cecil] 2021-06-11: List of bot entities
-extern CDynamicContainer<CPlayerBot> _cenPlayerBots = CDynamicContainer<CPlayerBot>();
+CStaticStackArray<SPlayerBot> _aPlayerBots;
+
+// Find index of a bot in the list by a pointer to the entity
+INDEX FindBotByPointer(CPlayer *pen) {
+  for (INDEX i = 0; i < _aPlayerBots.Count(); i++)
+  {
+    // Matching pointer
+    if (_aPlayerBots[i].pen == pen) {
+      return i;
+    }
+  }
+
+  return -1;
+};
 
 // [Cecil] 2021-06-12: Initialized bot mod
 static BOOL _bBotModInit = FALSE;
@@ -92,7 +105,7 @@ void CECIL_BotGameCleanup(void) {
   _pNavmesh->ClearNavMesh();
 
   // [Cecil] 2021-06-12: Clear bot list
-  _cenPlayerBots.Clear();
+  _aPlayerBots.Clear();
 };
 
 // [Cecil] Render extras on top of the world
@@ -298,8 +311,8 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
     }
 
     // [Cecil] 2019-06-04: Render bots' target points
-    for (INDEX iBot = 0; iBot < _cenPlayerBots.Count(); iBot++) {
-      CPlayerBot *penBot = _cenPlayerBots.Pointer(iBot);
+    for (INDEX iBot = 0; iBot < _aPlayerBots.Count(); iBot++) {
+      CPlayerBot *penBot = (CPlayerBot *)_aPlayerBots[iBot].pen;
 
       if (!ASSERT_ENTITY(penBot)) {
         continue;
@@ -310,8 +323,8 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
       FLOAT3D vCurPoint = FLOAT3D(0.0f, 0.0f, 0.0f);
 
       // current point
-      if (penBot->m_props.m_pbppCurrent != NULL) {
-        vCurPoint = penBot->m_props.m_pbppCurrent->bpp_vPos;
+      if (penBot->GetProps().m_pbppCurrent != NULL) {
+        vCurPoint = penBot->GetProps().m_pbppCurrent->bpp_vPos;
 
         if (ProjectLine(&prProjection, vBot, vCurPoint, vPos1, vPos2)) {
           pdp->DrawLine(vPos1(1), vPos1(2), vPos2(1), vPos2(2), 0xFFFF00FF);
@@ -319,8 +332,8 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
       }
 
       // target point
-      if (penBot->m_props.m_pbppTarget != NULL) {
-        vCurPoint = penBot->m_props.m_pbppTarget->bpp_vPos;
+      if (penBot->GetProps().m_pbppTarget != NULL) {
+        vCurPoint = penBot->GetProps().m_pbppTarget->bpp_vPos;
           
         if (ProjectLine(&prProjection, vBot, vCurPoint, vPos1, vPos2)) {
           pdp->DrawLine(vPos1(1), vPos1(2), vPos2(1), vPos2(2), 0xFF0000FF);
@@ -383,17 +396,17 @@ void CECIL_HUDOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjectio
       UBYTE ubAlpha = NormFloatToByte(1.0f - iThought / 50.0f);
       COLOR colText = LerpColor(0xFFFFFF00, 0x7F7F7F00, iThought / 15.0f) | ubAlpha;
 
-      pdp->PutText(penBot->m_props.m_btThoughts.strThoughts[iThought], pixX, pixY + iThought*pixThought, colText);
+      pdp->PutText(penBot->GetProps().m_btThoughts.strThoughts[iThought], pixX, pixY + iThought*pixThought, colText);
     }
 
     // target point
-    if (penBot->m_props.m_pbppCurrent != NULL) {
-      CTString strTarget(0, "Current Point: ^cffff00%d^r\nTarget Point: ^cff0000%d ^caf3f3f%s", penBot->m_props.m_pbppCurrent->bpp_iIndex,
-                         penBot->m_props.m_pbppTarget->bpp_iIndex, penBot->m_props.m_bImportantPoint ? "(Important)" : "");
+    if (penBot->GetProps().m_pbppCurrent != NULL) {
+      CTString strTarget(0, "Current Point: ^cffff00%d^r\nTarget Point: ^cff0000%d ^caf3f3f%s", penBot->GetProps().m_pbppCurrent->bpp_iIndex,
+                         penBot->GetProps().m_pbppTarget->bpp_iIndex, penBot->GetProps().m_bImportantPoint ? "(Important)" : "");
       pdp->PutText(strTarget, pixX, pixY + pixThought*17, 0xCCCCCCFF);
     }
 
-    CTString strTime(0, "Cur Time: %.2f\nShooting: %.2f", _pTimer->CurrentTick(), penBot->m_props.m_tmShootTime);
+    CTString strTime(0, "Cur Time: %.2f\nShooting: %.2f", _pTimer->CurrentTick(), penBot->GetProps().m_tmShootTime);
     pdp->PutText(strTime, pixX, pixY + pixThought*19, 0xCCCCCCFF);
   }
 };

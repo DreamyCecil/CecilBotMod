@@ -20,8 +20,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Bots/Logic/BotThoughts.h"
 #include "Bots/Logic/BotWeapons.h"
 
+#include "PathFinding/PathPoint.h"
+
 // Properties of a bot entity
-struct SBotProperties {
+struct DECL_DLL SBotProperties {
   CEntityPointer m_penTarget; // Shooting target
   CEntityPointer m_penFollow; // Following target
 
@@ -96,6 +98,61 @@ struct SBotProperties {
   // Reset last position to the current one
   void ResetLastPos(CEntity *penThis) {
     m_vLastPos = penThis->GetPlacement().pl_PositionVector;
+  };
+
+  // Assignment operator
+  SBotProperties &operator=(const SBotProperties &props) {
+    if (&props == this) {
+      return *this;
+    }
+
+    m_penTarget        = props.m_penTarget;
+    m_penFollow        = props.m_penFollow;
+    m_tmLastBotTarget  = props.m_tmLastBotTarget;
+    m_tmLastSawTarget  = props.m_tmLastSawTarget;
+    m_tmButtonAction   = props.m_tmButtonAction;
+    m_tmPosChange      = props.m_tmPosChange;
+    m_vLastPos         = props.m_vLastPos;
+    m_fTargetDist      = props.m_fTargetDist;
+    m_fSideDir         = props.m_fSideDir;
+    m_tmChangeBotDir   = props.m_tmChangeBotDir;
+    m_vAccuracy        = props.m_vAccuracy;
+    m_tmBotAccuracy    = props.m_tmBotAccuracy;
+    m_tmChangePath     = props.m_tmChangePath;
+    m_tmPickImportant  = props.m_tmPickImportant;
+    m_bImportantPoint  = props.m_bImportantPoint;
+    m_iBotWeapon       = props.m_iBotWeapon;
+    m_tmLastBotWeapon  = props.m_tmLastBotWeapon;
+    m_tmShootTime      = props.m_tmShootTime;
+    m_tmLastItemSearch = props.m_tmLastItemSearch;
+    m_penLastItem      = props.m_penLastItem;
+    m_pbppCurrent      = props.m_pbppCurrent;
+    m_pbppTarget       = props.m_pbppTarget;
+    m_ulPointFlags     = props.m_ulPointFlags;
+
+    memcpy(&m_sbsBot, &props.m_sbsBot, sizeof(SBotSettings));
+    m_btThoughts.Reset();
+
+    return *this;
+  };
+};
+
+// Pointer to the bot entity with properties attached to it
+struct DECL_DLL SPlayerBot {
+  SBotProperties props;
+  CPlayerEntity *pen;
+
+  // Default constructor from entity
+  SPlayerBot(CPlayerEntity *penSet = NULL) : pen(penSet)
+  {
+  };
+
+  // Assignment operator
+  SPlayerBot &operator=(const SPlayerBot &pbOther) {
+    props = pbOther.props;
+    pen = pbOther.pen;
+
+    return *this;
   };
 };
 

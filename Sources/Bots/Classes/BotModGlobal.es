@@ -44,10 +44,10 @@ functions:
     *ostr << _iLastPoint; // [Cecil] TEMP
 
     // write bots in order
-    *ostr << _cenPlayerBots.Count();
+    *ostr << _aPlayerBots.Count();
 
-    for (INDEX iBot = 0; iBot < _cenPlayerBots.Count(); iBot++) {
-      CPlayerBot *penBot = _cenPlayerBots.Pointer(iBot);
+    for (INDEX iBot = 0; iBot < _aPlayerBots.Count(); iBot++) {
+      CPlayerBot *penBot = (CPlayerBot *)_aPlayerBots[iBot].pen;
       *ostr << (ULONG)penBot->en_ulID;
     }
   };
@@ -65,14 +65,16 @@ functions:
     INDEX ctBots;
     *istr >> ctBots;
 
-    _cenPlayerBots.Clear();
+    _aPlayerBots.Clear();
 
     for (INDEX iBot = 0; iBot < ctBots; iBot++) {
       ULONG ulID;
       *istr >> ulID;
 
       CPlayerBot *penBot = (CPlayerBot *)FindEntityByID(GetWorld(), ulID);
-      _cenPlayerBots.Add(penBot);
+      
+      penBot->m_pBot = &_aPlayerBots.Push();
+      *penBot->m_pBot = penBot;
     }
   };
 
