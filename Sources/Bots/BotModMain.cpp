@@ -30,7 +30,7 @@ extern INDEX MOD_bBotThoughts;
 CStaticStackArray<SPlayerBot> _aPlayerBots;
 
 // Find index of a bot in the list by a pointer to the entity
-INDEX FindBotByPointer(CPlayer *pen) {
+INDEX FindBotByPointer(CPlayerEntity *pen) {
   for (INDEX i = 0; i < _aPlayerBots.Count(); i++)
   {
     // Matching pointer

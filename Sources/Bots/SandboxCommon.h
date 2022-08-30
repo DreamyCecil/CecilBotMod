@@ -83,7 +83,7 @@ DECL_DLL CPlayer *CECIL_GetPlayerEntity(const INDEX &iPlayer);
   if (!ASSERT_ENTITY(_Player)) continue;
 
 // [Cecil] 2021-06-13: Get personal player index
-DECL_DLL INDEX CECIL_PlayerIndex(CPlayer *pen);
+DECL_DLL INDEX CECIL_PlayerIndex(CPlayerEntity *pen);
 
 // [Cecil] Check player and bot entities
 #define IS_PLAYER(_Entity) IsDerivedFromDllClass(_Entity, CPlayer_DLLClass)

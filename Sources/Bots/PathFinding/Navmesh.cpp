@@ -176,8 +176,10 @@ CBotPathPoint *CBotNavmesh::FindPointByID(const INDEX &iPoint) {
 };
 
 // Find some important point
-CBotPathPoint *CBotNavmesh::FindImportantPoint(CPlayer *penBot, const INDEX &iPoint) {
+CBotPathPoint *CBotNavmesh::FindImportantPoint(SPlayerBot &pb, const INDEX &iPoint) {
   if (bnm_pwoWorld == NULL) {
+    ASSERT(FALSE);
+
     CPrintF("NavMesh::FindImportantPoint : Cannot find the world!\n");
     return NULL;
   }
@@ -200,7 +202,7 @@ CBotPathPoint *CBotNavmesh::FindImportantPoint(CPlayer *penBot, const INDEX &iPo
     CEntity *penEntity = pbpp->bpp_penImportant;
     
     // not important at the moment
-    if (penEntity == NULL || !ImportantForNavMesh(penBot, penEntity)) {
+    if (penEntity == NULL || !ImportantForNavMesh(pb, penEntity)) {
       continue;
     }
 

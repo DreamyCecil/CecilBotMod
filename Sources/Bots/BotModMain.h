@@ -28,7 +28,7 @@ extern INDEX MOD_iNavMeshConnecting;
 DECL_DLL extern CStaticStackArray<SPlayerBot> _aPlayerBots;
 
 // Find index of a bot in the list by a pointer to the entity
-DECL_DLL INDEX FindBotByPointer(CPlayer *pen);
+DECL_DLL INDEX FindBotByPointer(CPlayerEntity *pen);
 
 // [Cecil] 2019-06-01: Initialize the bot mod
 DECL_DLL void CECIL_InitBotMod(void);

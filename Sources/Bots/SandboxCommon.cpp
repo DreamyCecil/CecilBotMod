@@ -290,7 +290,7 @@ CPlayer *CECIL_GetPlayerEntity(const INDEX &iPlayer) {
 };
 
 // [Cecil] 2021-06-13: Get personal player index
-INDEX CECIL_PlayerIndex(CPlayer *pen) {
+INDEX CECIL_PlayerIndex(CPlayerEntity *pen) {
   INDEX ctPlayers = CEntity::GetMaxPlayers();
 
   if (IsDerivedFromDllClass(pen, CPlayerBot_DLLClass)) {

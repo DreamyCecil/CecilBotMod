@@ -639,6 +639,9 @@
     <ClCompile Include="..\Bots\Hotkeys.cpp">
       <Filter>Source Files\Bots sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\Bots\BotStructure.cpp">
+      <Filter>Source Files\Bots sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\Common.h">

@@ -62,35 +62,35 @@ extern const SBotWeaponConfig _abwCooperativeWeapons[CT_BOT_WEAPONS] = {
 };
 
 // Currently zooming in with a scope or not
-BOOL UsingScope(CPlayerBot *pen) {
-  return pen->GetPlayerWeapons()->m_bSniping;
+BOOL UsingScope(SPlayerBot &pb) {
+  return pb.GetWeapons()->m_bSniping;
 };
 
 // Able to use the scope or not
-BOOL CanUseScope(CPlayerBot *pen) {
-  return (pen->GetPlayerWeapons()->m_iCurrentWeapon == WEAPON_SNIPER);
+BOOL CanUseScope(SPlayerBot &pb) {
+  return (pb.GetWeapons()->m_iCurrentWeapon == WEAPON_SNIPER);
 };
 
 // Use weapon scope for a bot
-void UseWeaponScope(CPlayerBot *pen, CPlayerAction &pa, const SBotLogic &sbl) {
+void UseWeaponScope(SPlayerBot &pb, CPlayerAction &pa, const SBotLogic &sbl) {
   // unable to press the button this tick
-  if (!pen->ButtonAction()) {
+  if (!pb.ButtonAction()) {
     return;
   }
 
   // zoom in if enemy is visible
-  if (!UsingScope(pen) && sbl.SeeEnemy()) {
+  if (!UsingScope(pb) && sbl.SeeEnemy()) {
     pa.pa_ulButtons |= PLACT_SNIPER_USE|PLACT_SNIPER_ZOOMIN;
 
   // zoom out if can't see the enemy
-  } else if (UsingScope(pen) && !sbl.SeeEnemy()) {
+  } else if (UsingScope(pb) && !sbl.SeeEnemy()) {
     pa.pa_ulButtons |= PLACT_SNIPER_USE;
   }
 };
 
 // Fire the weapon now
-void FireWeapon(CPlayerBot *penBot, CPlayerAction &pa, const SBotLogic &sbl) {
-  const SBotWeaponConfig &bwWeapon = sbl.aWeapons[penBot->GetProps().m_iBotWeapon];
+void FireWeapon(SPlayerBot &pb, CPlayerAction &pa, const SBotLogic &sbl) {
+  const SBotWeaponConfig &bwWeapon = sbl.aWeapons[pb.props.m_iBotWeapon];
 
   BOOL bUseSpecial = FALSE;
   FLOAT fSpecial = bwWeapon.bw_fSpecialRange;
@@ -99,11 +99,11 @@ void FireWeapon(CPlayerBot *penBot, CPlayerAction &pa, const SBotLogic &sbl) {
   if (fSpecial != 0.0f) {
     // if further than the reversed percentage
     if (fSpecial < 0.0f) {
-      bUseSpecial = (penBot->GetProps().m_fTargetDist <= bwWeapon.bw_fMaxDistance * -fSpecial);
+      bUseSpecial = (pb.props.m_fTargetDist <= bwWeapon.bw_fMaxDistance * -fSpecial);
 
     // if closer than the percentage
     } else {
-      bUseSpecial = (penBot->GetProps().m_fTargetDist >= bwWeapon.bw_fMaxDistance * fSpecial);
+      bUseSpecial = (pb.props.m_fTargetDist >= bwWeapon.bw_fMaxDistance * fSpecial);
     }
   }
 

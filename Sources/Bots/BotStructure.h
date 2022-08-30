@@ -154,6 +154,33 @@ struct DECL_DLL SPlayerBot {
 
     return *this;
   };
+
+  // Retrieve player weapons class
+  class CPlayerWeapons *GetWeapons(void);
+
+  // Write bot properties
+  void WriteBot(CTStream *strm);
+
+  // Read bot properties
+  void ReadBot(CTStream *strm);
+
+  // Update bot settings
+  void UpdateBot(const SBotSettings &sbs);
+
+  // Perform a button action if possible
+  BOOL ButtonAction(void);
+
+  // Check if selected point is a current one
+  BOOL CurrentPoint(CBotPathPoint *pbppExclude);
+
+  // Select new weapon
+  void BotSelectNewWeapon(const INDEX &iSelect);
+
+  // Bot weapon logic
+  void BotWeapons(CPlayerAction &pa, SBotLogic &sbl);
+
+  // Complete bot logic
+  void BotThinking(CPlayerAction &pa, SBotLogic &sbl);
 };
 
 #endif // _CECILBOTS_BOTSTRUCTURE_H

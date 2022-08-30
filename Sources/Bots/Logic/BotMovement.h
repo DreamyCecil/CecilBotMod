@@ -20,15 +20,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "BotFunctions.h"
 
 // [Cecil] 2021-06-25: Too long since the last position change
-BOOL NoPosChange(CPlayerBot *pen);
+BOOL NoPosChange(SPlayerBot &pb);
 
 // [Cecil] 2021-06-14: Try to find some path
-void BotPathFinding(CPlayerBot *pen, SBotLogic &sbl);
+void BotPathFinding(SPlayerBot &pb, SBotLogic &sbl);
 
 // [Cecil] 2021-06-15: Set bot aim
-void BotAim(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl);
+void BotAim(SPlayerBot &pb, CPlayerAction &pa, SBotLogic &sbl);
 
 // [Cecil] 2021-06-14: Set bot movement
-void BotMovement(CPlayerBot *pen, CPlayerAction &pa, SBotLogic &sbl);
+void BotMovement(SPlayerBot &pb, CPlayerAction &pa, SBotLogic &sbl);
 
 #endif // _CECILBOTS_BOTMOVEMENT_H

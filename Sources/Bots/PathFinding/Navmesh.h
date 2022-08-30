@@ -69,7 +69,7 @@ class DECL_DLL CBotNavmesh {
     // Find a point by its ID
     CBotPathPoint *FindPointByID(const INDEX &iPoint);
     // Find some important point
-    CBotPathPoint *FindImportantPoint(CPlayer *penBot, const INDEX &iPoint);
+    CBotPathPoint *FindImportantPoint(SPlayerBot &pb, const INDEX &iPoint);
 
     // Generate the NavMesh
     void GenerateNavmesh(CWorld *pwo);

@@ -317,6 +317,7 @@ copy Debug\$(TargetName).lib $(SolutionDir)..\Bin\Debug\ &gt;nul</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Bots\BotModMain.cpp" />
+    <ClCompile Include="..\Bots\BotStructure.cpp" />
     <ClCompile Include="..\Bots\CustomPackets.cpp" />
     <ClCompile Include="..\Bots\Hotkeys.cpp" />
     <ClCompile Include="..\Bots\Logic\BotFunctions.cpp" />
