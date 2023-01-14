@@ -130,7 +130,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
       const BOOL bFlags = (MOD_iRenderNavMesh > 3);
 
       const CBotPathPoint *pbppClosest = NULL;
-      
+
       // bots don't need to select points
       if (!IsDerivedFromDllClass(penOwner, CPlayerBot_DLLClass)) {
         pbppClosest = NearestNavMeshPointPos(penOwner, penOwner->GetPlayerWeapons()->m_vRayHit);
@@ -139,14 +139,10 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
       FOREACHINDYNAMICCONTAINER(_pNavmesh->bnm_cbppPoints, CBotPathPoint, itbpp) {
         CBotPathPoint *pbpp = itbpp;
         INDEX iPointID = pbpp->bpp_iIndex;
-        
+
         FLOAT3D vPointOnScreen;
         FLOAT3D vPoint1 = pbpp->bpp_vPos;
         prProjection.ProjectCoordinate(pbpp->bpp_vPos, vPointOnScreen);
-
-        if (vPointOnScreen(3) > 0.0f) {
-          continue;
-        }
 
         vPointOnScreen(2) = -vPointOnScreen(2) + pdp->GetHeight();
 
@@ -164,6 +160,30 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
           continue;
         }
 
+        // [Cecil] TEMP: Draw polygons
+        if (pbpp->bpp_bppoPolygon != NULL) {
+          CBrushPolygon &bpo = *pbpp->bpp_bppoPolygon->bppo_bpoPolygon;
+
+          const INDEX ctEdges = bpo.bpo_abpePolygonEdges.Count();
+          INDEX iEdge = 0;
+
+          FOREACHINSTATICARRAY(bpo.bpo_abpePolygonEdges, CBrushPolygonEdge, itbpe) {
+            // Get edge vertices (edge direction is irrelevant here!)
+            const FLOAT3D &vVertex0 = itbpe->bpe_pbedEdge->bed_pbvxVertex0->bvx_vAbsolute;
+            const FLOAT3D &vVertex1 = itbpe->bpe_pbedEdge->bed_pbvxVertex1->bvx_vAbsolute;
+
+            FLOAT3D vOnScreen1, vOnScreen2;
+
+            if (ProjectLine(&prProjection, vVertex0, vVertex1, vOnScreen1, vOnScreen2)) {
+              pdp->DrawLine(vOnScreen1(1), vOnScreen1(2), vOnScreen2(1), vOnScreen2(2),
+                            //HSVToColor(INDEX(FLOAT(iEdge * 2 + 1) / ctEdges * 255) % 256, 255, 255)
+                            HSVToColor((iPointID * 160) % 256, 255, 255) | UBYTE(ubPointAlpha * 0.5f));
+            }
+
+            iEdge++;
+          }
+        }
+
         // highlight closest point for selection
         BOOL bClosestPoint = (pbppClosest == pbpp);
         CBotPathPoint *pbppSelected = _pNavmesh->FindPointByID(MOD_iNavMeshPoint);
@@ -173,7 +193,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
           // range
           for (INDEX iRange = 0; iRange < 3; iRange++) {
             FLOAT3D vRangeDir = FLOAT3D(CosFast(iRange * 60.0f), 0.0f, SinFast(iRange * 60.0f)) * pbpp->bpp_fRange;
-            
+
             FLOAT3D vRangeEnd1, vRangeEnd2;
             prProjection.ProjectCoordinate(vPoint1 + vRangeDir, vRangeEnd1);
             prProjection.ProjectCoordinate(vPoint1 - vRangeDir, vRangeEnd2);
@@ -186,7 +206,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
             if ((vRangeEnd1 - vRangeEnd2).Length() < 12.0f) {
               continue;
             }
-            
+
             vRangeEnd1(2) = -vRangeEnd1(2) + pdp->GetHeight();
             vRangeEnd2(2) = -vRangeEnd2(2) + pdp->GetHeight();
 
@@ -199,10 +219,10 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
           {FOREACHINDYNAMICCONTAINER(pbpp->bpp_cbppPoints, CBotPathPoint, itbppT) {
             CBotPathPoint *pbppT = itbppT;
             ctTargets++;
-          
+
             FLOAT3D vOnScreen1, vOnScreen2;
             FLOAT3D vPoint2 = pbppT->bpp_vPos;
-          
+
             if (ProjectLine(&prProjection, vPoint1, vPoint2, vOnScreen1, vOnScreen2)) {
               pdp->DrawLine(vOnScreen1(1), vOnScreen1(2), vOnScreen2(1), vOnScreen2(2), C_ORANGE | UBYTE(ubPointAlpha * 0.5f));
             }
@@ -231,29 +251,29 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
             ANGLE3D aOrigin = pbpp->bpp_plLockOrigin.pl_OrientationAngle;
 
             FLOAT3D vOnScreen1, vEntityOnScreen, vOriginOnScreen;
-            
+
             // from point to entity
             if (ProjectLine(&prProjection, vPoint1, vEntity, vOnScreen1, vEntityOnScreen)) {
               pdp->DrawLine(vOnScreen1(1), vOnScreen1(2), vEntityOnScreen(1), vEntityOnScreen(2), 0xFFFF7F00 | UBYTE(ubPointAlpha * 0.5f));
             }
-            
+
             // from entity to origin position
             if ((vEntity - vOrigin).Length() > 0.01f && ProjectLine(&prProjection, vEntity, vOrigin, vEntityOnScreen, vOriginOnScreen)) {
               pdp->DrawLine(vEntityOnScreen(1), vEntityOnScreen(2), vOriginOnScreen(1), vOriginOnScreen(2), 0x7FFF7F00 | ubPointAlpha);
             }
-            
+
             // different origin angle
             if ((aEntity - aOrigin).Length() > 0.1f) {
               FLOATmatrix3D mOrigin;
               MakeRotationMatrixFast(mOrigin, aOrigin);
-              
+
               // origin angle
               FLOAT3D vAngle = FLOAT3D(0.0f, 0.0f, -2.0f) * mOrigin;
 
               if (ProjectLine(&prProjection, vOrigin, vOrigin + vAngle, vEntityOnScreen, vOriginOnScreen)) {
                 pdp->DrawLine(vEntityOnScreen(1), vEntityOnScreen(2), vOriginOnScreen(1), vOriginOnScreen(2), 0x7F7FFF00 | ubPointAlpha);
               }
-              
+
               // derived angle
               vAngle = FLOAT3D(0.0f, 0.0f, -2.0f) * penLock->GetRotationMatrix();
 
@@ -272,40 +292,44 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
             }
           }
         }
-        
-        // selected point
-        if (pbppSelected == pbpp) {
-          pdp->DrawPoint(vPointOnScreen(1), vPointOnScreen(2), 0xFF000000 | ubPointAlpha, 10);
 
-        // point for selection
-        } else if (bClosestPoint) {
-          pdp->DrawPoint(vPointOnScreen(1), vPointOnScreen(2), 0x00990000 | ubPointAlpha, 10);
+        // Draw the point itself
+        if (vPointOnScreen(3) < 0.0f)
+        {
+          // Selected point
+          if (pbppSelected == pbpp) {
+            pdp->DrawPoint(vPointOnScreen(1), vPointOnScreen(2), 0xFF000000 | ubPointAlpha, 10);
 
-        // normal point
-        } else {
-          pdp->DrawPoint(vPointOnScreen(1), vPointOnScreen(2), 0xFFFF0000 | ubPointAlpha, 5);
-        }
+          // Point for selection
+          } else if (bClosestPoint) {
+            pdp->DrawPoint(vPointOnScreen(1), vPointOnScreen(2), 0x00990000 | ubPointAlpha, 10);
 
-        // point IDs
-        if (bIDs) {
-          CTString strPoint;
-          strPoint.PrintF("ID: %d", iPointID);
-
-          // point flags
-          if (bFlags) {
-            #define POINT_DESC(_Type) strPoint += ((pbpp->bpp_ulFlags & PPF_##_Type) ? "\n " #_Type : "")
-
-            POINT_DESC(WALK);
-            POINT_DESC(JUMP);
-            POINT_DESC(CROUCH);
-            POINT_DESC(OVERRIDE);
-            POINT_DESC(UNREACHABLE);
-            POINT_DESC(TELEPORT);
-
-            #undef POINT_DESC
+          // Normal point
+          } else {
+            pdp->DrawPoint(vPointOnScreen(1), vPointOnScreen(2), 0xFFFF0000 | ubPointAlpha, 5);
           }
 
-          pdp->PutTextC(strPoint, vPointOnScreen(1), vPointOnScreen(2) + 16, 0xFFFFFF00 | ubPointAlpha);
+          // Point IDs
+          if (bIDs) {
+            CTString strPoint;
+            strPoint.PrintF("ID: %d", iPointID);
+
+            // Point flags
+            if (bFlags) {
+              #define POINT_DESC(_Type) strPoint += ((pbpp->bpp_ulFlags & PPF_##_Type) ? "\n " #_Type : "")
+
+              POINT_DESC(WALK);
+              POINT_DESC(JUMP);
+              POINT_DESC(CROUCH);
+              POINT_DESC(OVERRIDE);
+              POINT_DESC(UNREACHABLE);
+              POINT_DESC(TELEPORT);
+
+              #undef POINT_DESC
+            }
+
+            pdp->PutTextC(strPoint, vPointOnScreen(1), vPointOnScreen(2) + 16, 0xFFFFFF00 | ubPointAlpha);
+          }
         }
       }
     }
@@ -317,7 +341,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
       if (!ASSERT_ENTITY(penBot)) {
         continue;
       }
-      
+
       FLOAT3D vPos1, vPos2;
       FLOAT3D vBot = penBot->GetLerpedPlacement().pl_PositionVector;
       FLOAT3D vCurPoint = FLOAT3D(0.0f, 0.0f, 0.0f);
@@ -334,7 +358,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
       // target point
       if (penBot->GetProps().m_pbppTarget != NULL) {
         vCurPoint = penBot->GetProps().m_pbppTarget->bpp_vPos;
-          
+
         if (ProjectLine(&prProjection, vBot, vCurPoint, vPos1, vPos2)) {
           pdp->DrawLine(vPos1(1), vPos1(2), vPos2(1), vPos2(2), 0xFF0000FF);
         }
@@ -353,7 +377,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
       if (fDist > 192.0f) {
         continue;
       }
-      
+
       FLOAT3D vEntityID;
       prProjection.ProjectCoordinate(pen->GetLerpedPlacement().pl_PositionVector, vEntityID);
 
@@ -387,7 +411,7 @@ void CECIL_HUDOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjectio
     pdp->SetTextAspect(1.0f);
 
     CPlayerBot *penBot = (CPlayerBot *)penOwner;
-    
+
     PIX pixX = 16 * fScaling;
     PIX pixY = 56 * fScaling;
     PIX pixThought = 18 * fScaling;
