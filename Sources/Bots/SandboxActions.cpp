@@ -294,7 +294,13 @@ static void CECIL_SetWeapons(INDEX iWeapon, INDEX bPlayer) {
 // --- Navmesh creation
 
 // [Cecil] 2018-11-10: Quick Function For NavMeshGenerator
+#ifdef _SE1_10
+static void CECIL_GenerateNavMesh(void *pArgs) {
+  INDEX iPoints = NEXTARGUMENT(INDEX);
+#else
 static void CECIL_GenerateNavMesh(INDEX iPoints) {
+#endif
+
   CPrintF(MODCOM_NAME("GenerateNavMesh:\n"));
 
   if (!_pNetwork->IsServer()) {
