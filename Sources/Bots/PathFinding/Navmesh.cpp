@@ -530,6 +530,53 @@ void CBotNavmesh::ConnectPoints(INDEX iPoint) {
   }
 };
 
+// Remove orphan points
+void CBotNavmesh::CleanupPoints(void) {
+  CDynamicContainer<CBotPathPoint> cToRemove;
+  CDynamicContainer<CBotPathPoint> cToKeep;
+
+  FOREACHINDYNAMICCONTAINER(bnm_cbppPoints, CBotPathPoint, itbpp) {
+    CBotPathPoint *pbpp = itbpp;
+
+    // No targets
+    if (pbpp->bpp_cbppPoints.Count() == 0) {
+      if (!cToKeep.IsMember(pbpp)) {
+        cToRemove.Add(pbpp);
+      }
+      continue;
+    }
+
+    INDEX ctTargets = pbpp->bpp_cbppPoints.Count();
+
+    for (INDEX iTarget = 0; iTarget < ctTargets; iTarget++) {
+      CBotPathPoint *pbppTarget = pbpp->bpp_cbppPoints.Pointer(iTarget);
+
+      // Mark this point as targeted
+      if (!cToKeep.IsMember(pbppTarget)) {
+        cToKeep.Add(pbppTarget);
+      }
+
+      // Remove from points to remove
+      if (cToRemove.IsMember(pbpp)) {
+        cToRemove.Remove(pbppTarget);
+      }
+    }
+  }
+
+  CPrintF("Removed %d orphan points\n", cToRemove.Count());
+
+  while (cToRemove.Count() > 0) {
+    CBotPathPoint *pbppRemove = cToRemove.Pointer(0);
+
+    // Remove from navmesh
+    bnm_cbppPoints.Remove(pbppRemove);
+
+    // Delete from memory
+    cToRemove.Remove(pbppRemove);
+    delete pbppRemove;
+  }
+};
+
 // [Cecil] Local path points list
 static CDynamicContainer<CPathPoint> _cppPoints;
 // [Cecil] Open and closed lists of nodes

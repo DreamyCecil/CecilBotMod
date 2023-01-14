@@ -75,6 +75,8 @@ class DECL_DLL CBotNavmesh {
     void GenerateNavmesh(CWorld *pwo);
     // Connect all points together
     void ConnectPoints(INDEX iPoint);
+    // Remove orphan points
+    void CleanupPoints(void);
 };
 
 // [Cecil] 2018-10-23: Bot NavMesh

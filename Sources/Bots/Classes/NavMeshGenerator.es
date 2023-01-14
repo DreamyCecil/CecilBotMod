@@ -82,6 +82,9 @@ procedures:
 
     _iLastPoint = m_iPoint; // [Cecil] TEMP
 
+    // Cleanup useless points
+    _pNavmesh->CleanupPoints();
+
     Destroy();
     return;
   }
