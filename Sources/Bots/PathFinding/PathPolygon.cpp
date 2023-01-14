@@ -18,70 +18,83 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Navmesh.h"
 
 // Constructor & Destructor
-CBotPathPolygon::CBotPathPolygon(void) {
-  #if NAVMESH_GEN_TYPE == NAVMESH_POLYGONS
-    bppo_avVertices.Clear();
-
-  #else
-    bppo_avVertices.New(3);
-
-    bppo_avVertices[0] = FLOAT3D(0.0f, 0.0f, 0.0f);
-    bppo_avVertices[1] = FLOAT3D(0.0f, 0.0f, 0.0f);
-    bppo_avVertices[2] = FLOAT3D(0.0f, 0.0f, 0.0f);
-  #endif
+CPathPolygon::CPathPolygon(void)
+{
 };
 
-CBotPathPolygon::~CBotPathPolygon(void) {
+CPathPolygon::~CPathPolygon(void) {
   bppo_avVertices.Clear();
 };
 
+// Copy constructor
+CPathPolygon::CPathPolygon(const CPathPolygon &bppoOther) {
+  bppo_bpoPolygon = bppoOther.bppo_bpoPolygon;
+
+  INDEX ct = bppoOther.bppo_avVertices.Count();
+
+  for (INDEX i = 0; i < ct; i++) {
+    bppo_avVertices.Push() = bppoOther.bppo_avVertices[i];
+  }
+};
+
 // Writing & Reading
-void CBotPathPolygon::WritePolygon(CTStream *strm) {
+void CPathPolygon::WritePolygon(CTStream *strm) {
   strm->WriteID_t("PPO2"); // Path POlygon v2
 
   // write vertex count
-  *strm << bppo_avVertices.Count();
-  
+  INDEX ctVtx = bppo_avVertices.Count();
+  *strm << ctVtx;
+
   // write vertices
-  for (INDEX iVtx = 0; iVtx < bppo_avVertices.Count(); iVtx++) {
+  for (INDEX iVtx = 0; iVtx < ctVtx; iVtx++) {
     *strm << bppo_avVertices[iVtx];
   }
 };
 
-void CBotPathPolygon::ReadPolygon(CTStream *strm) {
+void CPathPolygon::ReadPolygon(CTStream *strm) {
   if (strm->PeekID_t() == CChunkID("PPO1")) {
     strm->ExpectID_t("PPO1"); // Path POlygon v1
-    
+
     // read three vertices
-    bppo_avVertices.New(3);
-    *strm >> bppo_avVertices[0] >> bppo_avVertices[1] >> bppo_avVertices[2];
+    FLOAT3D vVtx;
+
+    for (INDEX iVtx = 0; iVtx < 3; iVtx++) {
+      *strm >> vVtx;
+      bppo_avVertices.Push() = vVtx;
+    }
 
   } else {
     strm->ExpectID_t("PPO2"); // Path POlygon v2
-    
+
     // read vertex count
     INDEX ctVtx;
     *strm >> ctVtx;
-    
+
     // read vertices
-    bppo_avVertices.New(ctVtx);
+    FLOAT3D vVtx;
 
     for (INDEX iVtx = 0; iVtx < ctVtx; iVtx++) {
-      *strm >> bppo_avVertices[iVtx];
+      *strm >> vVtx;
+      bppo_avVertices.Push() = vVtx;
     }
   }
 };
 
 // Absolute center position of this polygon
-FLOAT3D CBotPathPolygon::Center(void) {
-  #if NAVMESH_GEN_TYPE == NAVMESH_POLYGONS
+FLOAT3D CPathPolygon::Center(void) {
+  #if NAVMESH_GEN_TYPE != NAVMESH_TRIANGLES
     FLOAT3D vCenter = FLOAT3D(0.0f, 0.0f, 0.0f);
+    const INDEX ctVertices = bppo_avVertices.Count();
 
-    for (INDEX i = 0; i < bppo_avVertices.Count(); i++) {
+    if (ctVertices == 0) {
+      return vCenter;
+    }
+
+    for (INDEX i = 0; i < ctVertices; i++) {
       vCenter += bppo_avVertices[i];
     }
 
-    return vCenter / (FLOAT)Max((INDEX)bppo_avVertices.Count(), (INDEX)1);
+    return vCenter / ctVertices;
 
   #else
     FLOAT3D vCenter = bppo_avVertices[0] + bppo_avVertices[1] + bppo_avVertices[2];

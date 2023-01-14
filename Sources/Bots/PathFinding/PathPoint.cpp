@@ -164,7 +164,7 @@ void CBotPathPoint::ReadPoint(CTStream *strm, INDEX iVersion) {
   *strm >> bPolygon;
 
   if (bPolygon) {
-    bpp_bppoPolygon = new CBotPathPolygon;
+    bpp_bppoPolygon = new CPathPolygon;
     bpp_bppoPolygon->ReadPolygon(strm);
   }
 };

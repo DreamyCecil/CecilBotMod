@@ -17,17 +17,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define _CECILBOTS_PATHPOLYGON_H
 
 // [Cecil] 2018-10-24: Bot Path Polygons
-class DECL_DLL CBotPathPolygon {
+class DECL_DLL CPathPolygon {
   public:
     // Original brush polygon
     CBrushPolygon *bppo_bpoPolygon;
 
     // Vertex positions of this polygon (should always be three)
-    CStaticArray<FLOAT3D> bppo_avVertices;
+    CStaticStackArray<FLOAT3D> bppo_avVertices;
 
     // Constructor & Destructor
-    CBotPathPolygon(void);
-    ~CBotPathPolygon(void);
+    CPathPolygon(void);
+    ~CPathPolygon(void);
+
+    // Copy constructor
+    CPathPolygon(const CPathPolygon &bppoOther);
 
     // Writing & Reading
     void WritePolygon(CTStream *strm);

@@ -65,7 +65,7 @@ class DECL_DLL CBotNavmesh {
     void ClearNavMesh(void);
 
     // Add a new path point to the navmesh
-    CBotPathPoint *AddPoint(const FLOAT3D &vPoint, CBotPathPolygon *bppo);
+    CBotPathPoint *AddPoint(const FLOAT3D &vPoint, CPathPolygon *bppo);
     // Find a point by its ID
     CBotPathPoint *FindPointByID(const INDEX &iPoint);
     // Find some important point

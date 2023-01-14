@@ -147,7 +147,7 @@ void CBotNavmesh::ClearNavMesh(void) {
 };
 
 // Add a new path point to the navmesh
-CBotPathPoint *CBotNavmesh::AddPoint(const FLOAT3D &vPoint, CBotPathPolygon *bppo) {
+CBotPathPoint *CBotNavmesh::AddPoint(const FLOAT3D &vPoint, CPathPolygon *bppo) {
   CBotPathPoint *bppNew = new CBotPathPoint;
   bppNew->bpp_iIndex = bnm_iNextPointID++;
   bppNew->bpp_vPos = vPoint;
@@ -234,6 +234,21 @@ CBotPathPoint *CBotNavmesh::FindImportantPoint(SPlayerBot &pb, const INDEX &iPoi
   return NULL;
 };
 
+// Get vertices of a specific polygon triangle
+static void GetPolygonTriangle(CBrushPolygon *pbpo, INDEX iTriangle, CDynamicContainer<CBrushVertex> &cOutput) {
+  // Go through triangle vertices
+  for (INDEX iEnd = 0; iEnd < 3; iEnd++) {
+    // Get transformed end vertices
+    INDEX iElem0 = pbpo->bpo_aiTriangleElements[iTriangle * 3 + (iEnd + 0)];
+    INDEX iElem1 = pbpo->bpo_aiTriangleElements[iTriangle * 3 + (iEnd + 1) % 3];
+    INDEX iElem2 = pbpo->bpo_aiTriangleElements[iTriangle * 3 + (iEnd + 2) % 3];
+
+    cOutput.Add(pbpo->bpo_apbvxTriangleVertices[iElem0]);
+    cOutput.Add(pbpo->bpo_apbvxTriangleVertices[iElem1]);
+    cOutput.Add(pbpo->bpo_apbvxTriangleVertices[iElem2]);
+  }
+};
+
 void CBotNavmesh::GenerateNavmesh(CWorld *pwo) {
   if (bnm_bGenerated) {
     CPrintF("Already generated!\n");
@@ -271,72 +286,60 @@ void CBotNavmesh::GenerateNavmesh(CWorld *pwo) {
     #if NAVMESH_GEN_TYPE != NAVMESH_TRIANGLES
       INDEX ctVtx = pbpo->bpo_aiTriangleElements.Count();
 
-      // create path polygon
-      CBotPathPolygon *bppoNew = new CBotPathPolygon;
-      #if NAVMESH_GEN_TYPE == NAVMESH_POLYGONS
-        bppoNew->bppo_avVertices.New(ctVtx);
-      #endif
+      // Create path polygon
+      CPathPolygon *bppoNew = new CPathPolygon;
       bppoNew->bppo_bpoPolygon = pbpo;
 
-      // center position
+      // Center position
       FLOAT3D vPoint = FLOAT3D(0.0f, 0.0f, 0.0f);
 
       for (INDEX iVtx = 0; iVtx < ctVtx; iVtx++) {
-        // get polygon vertex
+        // Get polygon vertex
         INDEX iElement = pbpo->bpo_aiTriangleElements[iVtx];
         CBrushVertex *pbvx = pbpo->bpo_apbvxTriangleVertices[iElement];
 
-        // add new vertex position
-        #if NAVMESH_GEN_TYPE == NAVMESH_POLYGONS
-          bppoNew->bppo_avVertices[iVtx] = pbvx->bvx_vAbsolute;
-        #endif
+        // Add new vertex position
+        bppoNew->bppo_avVertices.Push() = pbvx->bvx_vAbsolute;
 
         vPoint += pbvx->bvx_vAbsolute;
       }
 
-      // average position
+      // Average position
       vPoint /= ctVtx;
 
-      // shift it up a little bit
+      // Shift it up a little bit
       vPoint(2) += 0.5f;
       
-      // check if there's a similar point already
+      // Check if there's a similar point already
       CBotPathPoint *pbppCheck = NULL;
       
-      #if NAVMESH_GEN_TYPE == NAVMESH_POLYGONS
-        FOREACHINDYNAMICCONTAINER(bnm_cbppPoints, CBotPathPoint, itbpp) {
-          pbppCheck = itbpp;
+      FOREACHINDYNAMICCONTAINER(bnm_cbppPoints, CBotPathPoint, itbpp) {
+        pbppCheck = itbpp;
 
-          FLOAT fDiff = (pbppCheck->bpp_vPos - vPoint).Length();
+        FLOAT fDiff = (pbppCheck->bpp_vPos - vPoint).Length();
 
-          if (fDiff <= 1.0f) {
-            break;
-          }
-
-          pbppCheck = NULL;
+        if (fDiff <= 1.0f) {
+          break;
         }
-      #endif
+
+        pbppCheck = NULL;
+      }
 
       if (pbppCheck == NULL) {
-        // create a new point
+        // Create a new point
         AddPoint(vPoint, bppoNew);
 
       } else {
-        // move vertices from this polygon to the similar one
-        #if NAVMESH_GEN_TYPE == NAVMESH_POLYGONS
-          if (pbppCheck->bpp_bppoPolygon != NULL) {
-            CStaticArray<FLOAT3D> &avVertices = pbppCheck->bpp_bppoPolygon->bppo_avVertices;
+        // Move vertices from this polygon to the similar one
+        if (pbppCheck->bpp_bppoPolygon != NULL) {
+          CStaticStackArray<FLOAT3D> &avVertices = pbppCheck->bpp_bppoPolygon->bppo_avVertices;
 
-            INDEX ctSimilar = avVertices.Count();
-            avVertices.Expand(ctSimilar + ctVtx);
-
-            for (INDEX iMoveVtx = 0; iMoveVtx < ctVtx; iMoveVtx++) {
-              avVertices[ctSimilar + iMoveVtx] = bppoNew->bppo_avVertices[iMoveVtx];
-            }
+          for (INDEX iMoveVtx = 0; iMoveVtx < ctVtx; iMoveVtx++) {
+            avVertices.Push() = bppoNew->bppo_avVertices[iMoveVtx];
           }
-        #endif
+        }
 
-        // delete polygon
+        // Delete polygon
         delete bppoNew;
       }
     
@@ -344,52 +347,44 @@ void CBotNavmesh::GenerateNavmesh(CWorld *pwo) {
       INDEX ctTris = pbpo->bpo_aiTriangleElements.Count() / 3;
 
       for (INDEX iTri = 0; iTri < ctTris; iTri++) {
-        for (INDEX iEnd = 0; iEnd < 3; iEnd++) {
-          // get transformed end vertices
-          INDEX iElem0 = pbpo->bpo_aiTriangleElements[iTri * 3 + (iEnd + 0)];
-          INDEX iElem1 = pbpo->bpo_aiTriangleElements[iTri * 3 + (iEnd + 1) % 3];
-          INDEX iElem2 = pbpo->bpo_aiTriangleElements[iTri * 3 + (iEnd + 2) % 3];
+        CDynamicContainer<CBrushVertex> cVtx;
+        GetPolygonTriangle(pbpo, iTri, cVtx);
 
-          CBrushVertex *pbvx0 = pbpo->bpo_apbvxTriangleVertices[iElem0];
-          CBrushVertex *pbvx1 = pbpo->bpo_apbvxTriangleVertices[iElem1];
-          CBrushVertex *pbvx2 = pbpo->bpo_apbvxTriangleVertices[iElem2];
+        // Create path polygon
+        CPathPolygon *bppoNew = new CPathPolygon;
+        bppoNew->bppo_avVertices.Push() = cVtx[0].bvx_vAbsolute;
+        bppoNew->bppo_avVertices.Push() = cVtx[1].bvx_vAbsolute;
+        bppoNew->bppo_avVertices.Push() = cVtx[2].bvx_vAbsolute;
+        bppoNew->bppo_bpoPolygon = pbpo;
 
-          // create path polygon
-          CBotPathPolygon *bppoNew = new CBotPathPolygon;
-          bppoNew->bppo_avVertices[0] = pbvx0->bvx_vAbsolute;
-          bppoNew->bppo_avVertices[1] = pbvx1->bvx_vAbsolute;
-          bppoNew->bppo_avVertices[2] = pbvx2->bvx_vAbsolute;
-          bppoNew->bppo_bpoPolygon = pbpo;
-          
-          // find center position
-          FLOAT3D vPoint = ((pbvx0->bvx_vAbsolute)
-                          + (pbvx1->bvx_vAbsolute)
-                          + (pbvx2->bvx_vAbsolute)) / 3.0f;
-          // shift it up a little bit
-          vPoint(2) += 0.5f;
+        // Find center position
+        FLOAT3D vPoint = ((cVtx[0].bvx_vAbsolute)
+                        + (cVtx[1].bvx_vAbsolute)
+                        + (cVtx[2].bvx_vAbsolute)) / 3.0f;
+        // Shift it up a little bit
+        vPoint(2) += 0.5f;
 
-          // check if there's a similar point already
-          BOOL bSkip = FALSE;
+        // Check if there's a similar point already
+        BOOL bSkip = FALSE;
 
-          FOREACHINDYNAMICCONTAINER(bnm_cbppPoints, CBotPathPoint, itbpp) {
-            CBotPathPoint *pbppCheck = itbpp;
+        FOREACHINDYNAMICCONTAINER(bnm_cbppPoints, CBotPathPoint, itbpp) {
+          CBotPathPoint *pbppCheck = itbpp;
 
-            FLOAT fDiff = (pbppCheck->bpp_vPos - vPoint).Length();
+          FLOAT fDiff = (pbppCheck->bpp_vPos - vPoint).Length();
 
-            if (fDiff <= 1.0f) {
-              bSkip = TRUE;
-              break;
-            }
+          if (fDiff <= 1.0f) {
+            bSkip = TRUE;
+            break;
           }
+        }
 
-          if (!bSkip) {
-            // create a new point
-            AddPoint(vPoint, bppoNew);
+        if (!bSkip) {
+          // Create a new point
+          AddPoint(vPoint, bppoNew);
 
-          } else {
-            // delete polygon
-            delete bppoNew;
-          }
+        } else {
+          // Delete polygon
+          delete bppoNew;
         }
       }
     #endif

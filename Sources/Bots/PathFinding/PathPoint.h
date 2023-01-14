@@ -43,7 +43,7 @@ class DECL_DLL CBotPathPoint {
     CPlacement3D bpp_plLockOrigin; // origin placement of the locking entity
 
     // Polygon of this point
-    CBotPathPolygon *bpp_bppoPolygon;
+    CPathPolygon *bpp_bppoPolygon;
 
     // Possible connections
     CDynamicContainer<CBotPathPoint> bpp_cbppPoints;
