@@ -158,7 +158,7 @@ CBotPathPoint *CBotNavmesh::AddPoint(const FLOAT3D &vPoint, CPathPolygon *bppo) 
 };
 
 // Find a point by its ID
-CBotPathPoint *CBotNavmesh::FindPointByID(const INDEX &iPoint) {
+CBotPathPoint *CBotNavmesh::FindPointByID(INDEX iPoint) {
   // ID can't be negative
   if (iPoint < 0) {
     return NULL;
@@ -176,7 +176,7 @@ CBotPathPoint *CBotNavmesh::FindPointByID(const INDEX &iPoint) {
 };
 
 // Find some important point
-CBotPathPoint *CBotNavmesh::FindImportantPoint(SPlayerBot &pb, const INDEX &iPoint) {
+CBotPathPoint *CBotNavmesh::FindImportantPoint(SPlayerBot &pb, INDEX iPoint) {
   if (bnm_pwoWorld == NULL) {
     ASSERT(FALSE);
 
@@ -260,26 +260,28 @@ void CBotNavmesh::GenerateNavmesh(CWorld *pwo) {
 
   INDEX iPoly = 0;
 
-  // go through all brush polygons
+  // Go through all brush polygons
   FOREACHINSTATICARRAY(pwo->wo_baBrushes.ba_apbpo, CBrushPolygon *, itbpo) {
     CBrushPolygon *pbpo = itbpo.Current();
     
-    // add every polygon to the NavMesh
+    // Add every polygon to the NavMesh
     bnm_apbpoPolygons[iPoly] = pwo->wo_baBrushes.ba_apbpo[iPoly];
     iPoly++;
 
-    // skip passable polygons
+    // Skip passable polygons
     if (pbpo->bpo_ulFlags & BPOF_PASSABLE) {
       continue;
     }
 
-    // not a flat polygon
-    if (!FlatPolygon(pwo, pbpo)) {
+    // Skip field brushes
+    CBrush3D *pbr = pbpo->bpo_pbscSector->bsc_pbmBrushMip->bm_pbrBrush;
+
+    if (pbr->br_penEntity->GetRenderType() == CEntity::RT_FIELDBRUSH) {
       continue;
     }
 
-    // [Cecil] TEMP 2021-06-16: Polygon is too small
-    if (pbpo->CalculateArea() < 4.0) {
+    // Not a flat polygon
+    if (!FlatPolygon(pwo, pbpo)) {
       continue;
     }
 
@@ -393,7 +395,7 @@ void CBotNavmesh::GenerateNavmesh(CWorld *pwo) {
   CPrintF("%d polygons, generated %d points\n", bnm_apbpoPolygons.Count(), bnm_cbppPoints.Count());
 };
 
-void CBotNavmesh::ConnectPoints(const INDEX &iPoint) {
+void CBotNavmesh::ConnectPoints(INDEX iPoint) {
   if (iPoint < 0 || iPoint >= bnm_cbppPoints.Count()) {
     return;
   }
@@ -406,19 +408,17 @@ void CBotNavmesh::ConnectPoints(const INDEX &iPoint) {
   }
 
   // brush polygon of this point
-  #if NAVMESH_GEN_TYPE == NAVMESH_EDGES
-    CBrushPolygon *pbpoCurrent = bppCurrent->bpp_bppoPolygon->bppo_bpoPolygon;
-  #endif
+  CBrushPolygon *pbpoCurrent = bppCurrent->bpp_bppoPolygon->bppo_bpoPolygon;
 
   INDEX ctConnections = 0;
 
-  // for each point, go through all points again
+  // For each point, go through all points again
   INDEX ctPoints = bnm_cbppPoints.Count();
 
   for (INDEX iPointIter = 0; iPointIter < ctPoints; iPointIter++) {
     CBotPathPoint *bppTarget = bnm_cbppPoints.Pointer(iPointIter);
 
-    // skip itself, with no polygon, existing targets, high points
+    // Skip itself, with no polygon, existing targets, high points
     if (bppCurrent == bppTarget || bppTarget->bpp_bppoPolygon == NULL
      || bppCurrent->bpp_cbppPoints.IsMember(bppTarget)
      /*|| bppTarget->bpp_vPos(2) - bppCurrent->bpp_vPos(2) > 3.5f*/) {
@@ -428,39 +428,39 @@ void CBotNavmesh::ConnectPoints(const INDEX &iPoint) {
     BOOL bConnect = FALSE;
     CBotPathPoint *bppMiddle = NULL;
 
-    // try to connect close vertices
+    // Try to connect close vertices
     INDEX iVertices = 0;
     FLOAT3D vVertexPos[2];
 
-    #if NAVMESH_GEN_TYPE == NAVMESH_EDGES
-      // brush polygon of the target point
-      CBrushPolygon *pbpoTarget = bppTarget->bpp_bppoPolygon->bppo_bpoPolygon;
+    // Brush polygon of the target point
+    CBrushPolygon *pbpoTarget = bppTarget->bpp_bppoPolygon->bppo_bpoPolygon;
 
+    #if NAVMESH_GEN_TYPE == NAVMESH_EDGES
       INDEX ctTris = pbpoCurrent->bpo_aiTriangleElements.Count() / 3;
       
       for (INDEX iTri = 0; iTri < ctTris; iTri++) {
         for (INDEX iEnd = 0; iEnd < 3; iEnd++) {
-          // get transformed end vertex
+          // Get transformed end vertex
           INDEX iElement = pbpoCurrent->bpo_aiTriangleElements[iTri * 3 + iEnd];
 
-          // get vertex position
+          // Get vertex position
           FLOAT3D vVtx = pbpoCurrent->bpo_apbvxTriangleVertices[iElement]->bvx_vAbsolute;
 
-          // distance from the vertex to one of the edges on the target polygon
+          // Distance from the vertex to one of the edges on the target polygon
           FLOAT fDist = pbpoTarget->GetDistanceFromEdges(vVtx);
 
-          // if close enough
+          // If close enough
           if (fDist <= 0.5f) {
-            // remember vertex position
+            // Remember vertex position
             if (iVertices < 2) {
               vVertexPos[iVertices] = vVtx;
             }
 
-            // count it
+            // Count it
             iVertices++;
           }
 
-          // create middle point that connects these two points
+          // Create middle point that connects these two points
           if (iVertices >= 2) {
             FLOAT3D vMiddlePoint = (vVertexPos[0] + vVertexPos[1]) / 2.0f;
             vMiddlePoint(2) += 0.5f;
@@ -522,15 +522,11 @@ void CBotNavmesh::ConnectPoints(const INDEX &iPoint) {
     }
   }
 
-  // delete targetless point
   if (ctConnections <= 0) {
-    bnm_cbppPoints.Remove(bppCurrent);
-    delete bppCurrent;
-
-    CPrintF("Point %d/%d: No connections\n", iPoint+1, bnm_cbppPoints.Count());
+    CPrintF("Point %d/%d: No connections\n", iPoint + 1, bnm_cbppPoints.Count());
 
   } else {
-    CPrintF("Point %d/%d: Connected to %d points\n", iPoint+1, bnm_cbppPoints.Count(), ctConnections);
+    CPrintF("Point %d/%d: Connected to %d points\n", iPoint + 1, bnm_cbppPoints.Count(), ctConnections);
   }
 };
 

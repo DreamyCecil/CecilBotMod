@@ -67,14 +67,14 @@ class DECL_DLL CBotNavmesh {
     // Add a new path point to the navmesh
     CBotPathPoint *AddPoint(const FLOAT3D &vPoint, CPathPolygon *bppo);
     // Find a point by its ID
-    CBotPathPoint *FindPointByID(const INDEX &iPoint);
+    CBotPathPoint *FindPointByID(INDEX iPoint);
     // Find some important point
-    CBotPathPoint *FindImportantPoint(SPlayerBot &pb, const INDEX &iPoint);
+    CBotPathPoint *FindImportantPoint(SPlayerBot &pb, INDEX iPoint);
 
     // Generate the NavMesh
     void GenerateNavmesh(CWorld *pwo);
     // Connect all points together
-    void ConnectPoints(const INDEX &iPoint);
+    void ConnectPoints(INDEX iPoint);
 };
 
 // [Cecil] 2018-10-23: Bot NavMesh
