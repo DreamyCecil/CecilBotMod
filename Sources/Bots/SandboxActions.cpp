@@ -274,6 +274,22 @@ static void CECIL_BotUpdate(void) {
   CECIL_AddBlockToAllSessions(nsbBotUpdate);
 };
 
+// [Cecil] 2023-01-15: Bot teleporting
+static void CECIL_BotTeleport(void) {
+  CPrintF(MODCOM_NAME("BotTeleport:\n"));
+
+  if (!_pNetwork->IsServer()) {
+    CPrintF("  <not a server>\n");
+    return;
+  }
+
+  CCecilStreamBlock nsbBotUpdate = CECIL_BotServerPacket(ESA_TELEPORTBOTS);
+  nsbBotUpdate << BOT_strBotEdit; // Bot name
+
+  // put the message in buffer to be sent to all sessions
+  CECIL_AddBlockToAllSessions(nsbBotUpdate);
+};
+
 // [Cecil] 2021-06-18: Change all weapons
 static void CECIL_SetWeapons(INDEX iWeapon, INDEX bPlayer) {
   CPrintF(MODCOM_NAME("SetWeapons:\n"));
@@ -344,7 +360,7 @@ static void CECIL_NavMeshLoad(void) {
 };
 
 // [Cecil] 2021-06-16: Quick function for NavMesh clearing
-static void CECIL_NavMeshClear(INDEX iPoints) {
+static void CECIL_NavMeshClear(void) {
   CPrintF(MODCOM_NAME("NavMeshClear:\n"));
 
   if (!_pNetwork->IsServer()) {
@@ -632,6 +648,7 @@ extern void CECIL_InitSandboxActions(void) {
   _pShell->DeclareSymbol("user void " MODCOM_NAME("RemoveBot(CTString);"), &CECIL_RemoveBot);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("RemoveAllBots(void);"), &CECIL_RemoveAllBots);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("BotUpdate(void);"), &CECIL_BotUpdate);
+  _pShell->DeclareSymbol("user void " MODCOM_NAME("BotTeleport(void);"), &CECIL_BotTeleport);
 
   _pShell->DeclareSymbol("user void " MODCOM_NAME("GenerateNavMesh(INDEX);"), &CECIL_GenerateNavMesh);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("NavMeshSave(void);"), &CECIL_NavMeshSave);
@@ -818,14 +835,14 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
     // [Cecil] 2021-06-12: Remove the bot
     case ESA_REMBOT: {
       INDEX iBot;
-      nmMessage >> iBot; // bot index
+      nmMessage >> iBot; // Bot index
 
       CPlayerBot *penBot = (CPlayerBot *)_aPlayerBots[iBot].pen;
 
-      // delete all predictors
+      // Delete all predictors
       wo.DeletePredictors();
 
-      // inform entity of disconnnection
+      // Inform entity of disconnnection
       CPrintF(TRANS("Removed %s\n"), penBot->GetPlayerName());
       penBot->Disconnect();
     } break;
@@ -841,10 +858,33 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
       for (INDEX iBot = 0; iBot < _aPlayerBots.Count(); iBot++) {
         CPlayerBotController &pb = _aPlayerBots[iBot];
 
-        // for only one specific bot or all bots
+        // For only one specific bot or all bots
         if (strBotEdit == "" || pb.pen->GetName().Undecorated().Matches(strBotEdit)) {
           pb.UpdateBot(sbsSettings);
           CPrintF(" Updated Bot: %s^r\n", pb.pen->GetName());
+        }
+      }
+    } break;
+
+    // Bot teleporting
+    case ESA_TELEPORTBOTS: {
+      CTString strBotEdit;
+      nmMessage >> strBotEdit;
+
+      // No player
+      if (pen == NULL) {
+        break;
+      }
+
+      CPrintF(" Teleported Bots to %s^r\n", pen->GetName());
+
+      for (INDEX iBot = 0; iBot < _aPlayerBots.Count(); iBot++) {
+        CPlayerBotController &pb = _aPlayerBots[iBot];
+
+        // Only one specific bot or all bots
+        if (strBotEdit == "" || pb.pen->GetName().Undecorated().Matches(strBotEdit)) {
+          pb.pen->Teleport(pen->GetPlacement(), FALSE);
+          CPrintF(" - %s^r\n", pb.pen->GetName());
         }
       }
     } break;
@@ -856,7 +896,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
       UBYTE bPlayer;
       nmMessage >> bPlayer;
 
-      // add default weapons to the desired one
+      // Add default weapons to the desired one
       INDEX iSetWeapons = WPN_DEFAULT_MASK | iWeapon;
 
       FOREACHINDYNAMICCONTAINER(wo.wo_cenEntities, CEntity, iten) {
@@ -871,12 +911,12 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
           penFound->Reinitialize();
 
         } else {
-          // player markers
+          // Player markers
           if (IsDerivedFromDllClass(penFound, CPlayerMarker_DLLClass)) {
             ((CPlayerMarker *)penFound)->m_iGiveWeapons = iSetWeapons;
           }
 
-          // current player weapons
+          // Current player weapons
           if (IsDerivedFromDllClass(penFound, CPlayerWeapons_DLLClass)) {
             ((CPlayerWeapons *)penFound)->m_iAvailableWeapons = iSetWeapons;
 
@@ -888,7 +928,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
               }
             }
 
-            // force change from the current weapon
+            // Force change from the current weapon
             ((CPlayerWeapons *)penFound)->WeaponSelectOk(WPN_DEFAULT_2);
             penFound->SendEvent(EBegin());
           }
@@ -927,7 +967,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
 
     // NavMesh state
     case ESA_NAVMESH_LOAD: {
-      // load the NavMesh
+      // Load the NavMesh
       try {
         _pNavmesh->LoadNavmesh(wo);
 
@@ -950,14 +990,14 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
       FLOAT fOffset, fGridSnap;
       nmMessage >> fOffset >> fGridSnap;
 
-      // no player
+      // No player
       if (pen == NULL) {
         break;
       }
 
       FLOAT3D vPoint = pen->GetPlacement().pl_PositionVector + FLOAT3D(0.0f, fOffset, 0.0f) * pen->GetRotationMatrix();
 
-      // snap to some grid
+      // Snap to some grid
       if (fGridSnap > 0.0f) {
         for (INDEX iPos = 1; iPos <= 3; iPos++) {
           Snap(vPoint(iPos), fGridSnap);
@@ -966,7 +1006,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
 
       CBotPathPoint *pbppNext = _pNavmesh->AddPoint(vPoint, NULL);
 
-      // connect with the previous point like in a chain
+      // Connect with the previous point like in a chain
       if (iConnect > 0) {
         CBotPathPoint *pbppPrev = _pNavmesh->FindPointByID(iTargetPoint);
 
@@ -985,17 +1025,17 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
       CBotPathPoint *pbpp = _pNavmesh->FindPointByID(iCurrentPoint);
 
       if (pbpp != NULL) {
-        // remove this point from every connection
+        // Remove this point from every connection
         FOREACHINDYNAMICCONTAINER(_pNavmesh->bnm_cbppPoints, CBotPathPoint, itbpp) {
           CBotPathPoint *pbppCheck = itbpp;
 
-          // remove connection with this point
+          // Remove connection with this point
           if (pbppCheck->bpp_cbppPoints.IsMember(pbpp)) {
             pbppCheck->bpp_cbppPoints.Remove(pbpp);
           }
         }
 
-        // remove point from the NavMesh
+        // Remove point from the NavMesh
         _pNavmesh->bnm_cbppPoints.Remove(pbpp);
         delete pbpp;
 
@@ -1050,7 +1090,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
       FLOAT fOffset;
       nmMessage >> fOffset;
 
-      // no player
+      // No player
       if (pen == NULL) {
         break;
       }

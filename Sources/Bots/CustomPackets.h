@@ -29,6 +29,7 @@ enum ESandboxAction {
   ESA_ADDBOT, // Add a new bot
   ESA_REMBOT, // Remove a bot
   ESA_UPDATEBOT, // Update bot settings
+  ESA_TELEPORTBOTS, // Teleport specific bots to the player
 
   ESA_SETWEAPONS, // Change all weapons in the world
 
