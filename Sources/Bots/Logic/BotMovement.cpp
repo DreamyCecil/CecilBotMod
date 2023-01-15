@@ -20,9 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "BotMovement.h"
 
 // Shortcuts
-#define SETTINGS         (pb.props.m_sbsBot)
-#define WEAPON           (pb.GetWeapons())
-#define THOUGHT(_String) (pb.props.m_btThoughts.Push(_String))
+#define SETTINGS (pb.props.m_sbsBot)
+#define WEAPON   (pb.GetWeapons())
 
 // [Cecil] 2021-06-25: Too long since the last position change
 BOOL NoPosChange(SPlayerBot &pb) {
@@ -73,7 +72,8 @@ void BotPathFinding(SPlayerBot &pb, SBotLogic &sbl) {
         if (pbppImportant != NULL) {
           pb.props.m_pbppTarget = pbppImportant;
           pb.props.m_bImportantPoint = TRUE;
-          THOUGHT(CTString(0, "New important point: ^caf3f3f%d", pbppImportant->bpp_iIndex));
+
+          pb.props.Thought("New important point: ^caf3f3f%d", pbppImportant->bpp_iIndex);
         }
       }
 
@@ -104,7 +104,7 @@ void BotPathFinding(SPlayerBot &pb, SBotLogic &sbl) {
       // Reset important point
       if (pb.props.m_pbppTarget->bpp_pbppNext == NULL) {
         pb.props.m_bImportantPoint = FALSE;
-        THOUGHT("^caf3f3fReached important point");
+        pb.props.Thought("^caf3f3fReached important point");
 
         // Reset the path if no target
         if (penTarget == NULL) {
@@ -116,7 +116,7 @@ void BotPathFinding(SPlayerBot &pb, SBotLogic &sbl) {
       // Proceed to the next important point
       } else {
         pb.props.m_pbppTarget = pb.props.m_pbppTarget->bpp_pbppNext;
-        THOUGHT("^c3f3fafNext important point");
+        pb.props.Thought("^c3f3fafNext important point");
       }
 
       // Use important entity
@@ -214,7 +214,7 @@ void BotPathFinding(SPlayerBot &pb, SBotLogic &sbl) {
       }
 
       if (pb.props.m_pbppCurrent != NULL) {
-        THOUGHT(strThought);
+        pb.props.Thought(strThought);
       }
 
     // No target point

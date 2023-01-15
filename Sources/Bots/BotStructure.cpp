@@ -24,7 +24,27 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "EntitiesMP/Player.h"
 #include "EntitiesMP/PlayerWeapons.h"
 
-#define THOUGHT(_String) (props.m_btThoughts.Push(_String))
+// Add new bot thought
+void SBotProperties::Thought(const char *strFormat, ...) {
+  // Don't bother
+  extern INDEX MOD_bBotThoughts;
+  if (!MOD_bBotThoughts) return;
+
+  va_list arg;
+  va_start(arg, strFormat);
+
+  CTString strNew;
+  strNew.VPrintF(strFormat, arg);
+
+  va_end(arg);
+
+  // Update the last thought if it's the same
+  if (m_btThoughts.strLast == strNew) {
+    m_btThoughts.SetLast(strNew);
+  } else {
+    m_btThoughts.Push(strNew);
+  }
+};
 
 // Retrieve player weapons class
 CPlayerWeapons *SPlayerBot::GetWeapons(void) {
@@ -379,7 +399,7 @@ void SPlayerBot::BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
         FireWeapon(*this, pa, sbl);
 
       } else if (Abs(props.m_tmShootTime - _pTimer->CurrentTick()) < 0.05f) {
-        THOUGHT("Stop shooting");
+        props.Thought("Stop shooting");
       }
 
       // Reset shooting time a few ticks later
@@ -390,7 +410,7 @@ void SPlayerBot::BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
         // This weapon has a certain shooting frequency
         if (tmShotFreq > 0.0f) {
           props.m_tmShootTime = _pTimer->CurrentTick() + tmShotFreq;
-          THOUGHT(CTString(0, "Shoot for %.2fs", tmShotFreq));
+          props.Thought("Shoot for %.2fs", tmShotFreq);
 
         // No frequency
         } else {

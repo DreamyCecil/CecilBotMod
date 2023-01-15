@@ -138,6 +138,9 @@ struct DECL_DLL SBotProperties {
 
     return *this;
   };
+
+  // Add new bot thought
+  void Thought(const char *strFormat, ...);
 };
 
 // Pointer to the bot entity with properties attached to it

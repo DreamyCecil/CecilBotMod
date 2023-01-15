@@ -18,8 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "BotFunctions.h"
 
 // Shortcuts
-#define SETTINGS         (pb.props.m_sbsBot)
-#define THOUGHT(_String) (pb.props.m_btThoughts.Push(_String))
+#define SETTINGS (pb.props.m_sbsBot)
 
 // [Cecil] 2021-06-14: Check if item is pickable
 BOOL IsItemPickable(SPlayerBot &pb, class CItem *penItem, const BOOL &bCheckDist) {
@@ -68,7 +67,7 @@ void BotItemSearch(SPlayerBot &pb, SBotLogic &sbl) {
         pb.props.m_penLastItem = penItem;
         pb.props.m_tmLastItemSearch = _pTimer->CurrentTick() + SETTINGS.fItemSearchCD;
 
-        THOUGHT(CTString(0, "Going for ^c7f7fff%s", penItem->en_pecClass->ec_pdecDLLClass->dec_strName));
+        pb.props.Thought("Going for ^c7f7fff%s", penItem->en_pecClass->ec_pdecDLLClass->dec_strName);
       }
     }
   }
@@ -85,7 +84,7 @@ void BotItemSearch(SPlayerBot &pb, SBotLogic &sbl) {
       pb.props.m_penLastItem = NULL;
       pb.props.m_tmLastItemSearch = 0.0f;
 
-      THOUGHT("^c7f7fffItem is no longer pickable");
+      pb.props.Thought("^c7f7fffItem is no longer pickable");
     }
   }
 };

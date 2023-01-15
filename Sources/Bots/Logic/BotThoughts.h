@@ -40,10 +40,14 @@ struct SBotThoughts {
     for (INDEX i = 15; i > 0; i--) {
       strThoughts[i] = strThoughts[i - 1];
     }
+    SetLast(str);
+  };
 
+  // Set new last thought
+  void SetLast(const CTString &str) {
     strThoughts[0].PrintF("[%s] %s", TimeToString(_pTimer->CurrentTick()), str);
     strLast = str;
-  }
+  };
 };
 
 #endif // _CECILBOTS_BOTTHOUGHTS_H
