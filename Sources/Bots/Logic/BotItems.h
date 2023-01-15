@@ -21,19 +21,4 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define MAX_ITEM_DIST 256.0f
 
-// [Cecil] 2021-06-14: Check if item is pickable
-BOOL IsItemPickable(CPlayerBotController &pb, class CItem *penItem, const BOOL &bCheckDist);
-
-// [Cecil] 2021-06-17: Search for an item
-void BotItemSearch(CPlayerBotController &pb, SBotLogic &sbl);
-
-// [Cecil] 2021-06-28: Distance to a specific item type
-FLOAT GetItemDist(CPlayerBotController &pb, CEntity *penItem);
-
-// [Cecil] 2021-06-14: Determine the closest item
-CEntity *GetClosestItem(CPlayerBotController &pb, FLOAT &fItemDist, const SBotLogic &sbl);
-
-// [Cecil] Closest item entity
-CEntity *ClosestItemType(CPlayerBotController &pb, const CDLLEntityClass &decClass, FLOAT &fDist, const SBotLogic &sbl);
-
 #endif // _CECILBOTS_BOTITEMS_H

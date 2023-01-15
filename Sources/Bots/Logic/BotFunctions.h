@@ -22,31 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // [Cecil] 2019-05-28: Find nearest NavMesh point to some position
 CBotPathPoint *NearestNavMeshPointPos(CEntity *pen, const FLOAT3D &vCheck);
 
-// [Cecil] 2021-06-21: Find nearest NavMesh point to the bot
-CBotPathPoint *NearestNavMeshPointBot(CPlayerBotController &pb, BOOL bSkipCurrent);
-
-// [Cecil] 2019-06-05: Check if this entity is important for a path point
-BOOL ImportantForNavMesh(CPlayerBotController &pb, CEntity *penEntity);
-
-// [Cecil] 2021-06-25: Use important entity
-void UseImportantEntity(CPlayerBotController &pb, CEntity *penEntity);
-
-// [Cecil] Cast bot view ray
-BOOL CastBotRay(CPlayerBotController &pb, CEntity *penTarget, const SBotLogic &sbl, BOOL bPhysical);
-
 // [Cecil] Cast path point ray
 BOOL CastPathPointRay(const FLOAT3D &vSource, const FLOAT3D &vPoint, FLOAT &fDist, BOOL bPhysical);
-
-// [Cecil] 2021-06-13: Check if it's an enemy player
-BOOL IsEnemyPlayer(CPlayerBotController &pb, CEntity *penEnemy);
-
-// [Cecil] 2021-06-19: Check if it's a monster enemy
-BOOL IsEnemyMonster(CPlayerBotController &pb, CEntity *penEnemy);
-
-// [Cecil] 2018-10-11: Bot enemy searching
-CEntity *ClosestEnemy(CPlayerBotController &pb, FLOAT &fLastDist, const SBotLogic &sbl);
-
-// [Cecil] 2019-05-30: Find closest real player
-CEntity *ClosestRealPlayer(CPlayerBotController &pb, FLOAT3D vCheckPos, FLOAT &fDist);
 
 #endif // _CECILBOTS_BOTFUNCTIONS_H

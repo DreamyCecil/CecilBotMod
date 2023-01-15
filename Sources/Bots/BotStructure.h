@@ -190,6 +190,77 @@ class DECL_DLL CPlayerBotController {
 
     // Complete bot logic
     void BotThinking(CPlayerAction &pa, SBotLogic &sbl);
+
+  // Various functions
+  public:
+    // Find nearest NavMesh point to the bot
+    CBotPathPoint *NearestNavMeshPointBot(BOOL bSkipCurrent);
+
+    // Check if this entity is important for a path point
+    BOOL ImportantForNavMesh(CEntity *penEntity);
+
+    // Use important entity
+    void UseImportantEntity(CEntity *penEntity);
+
+    // Check if it's an enemy player
+    BOOL IsEnemyPlayer(CEntity *penEnemy);
+
+    // Check if it's a monster enemy
+    BOOL IsEnemyMonster(CEntity *penEnemy);
+
+    // Bot enemy searching
+    CEntity *ClosestEnemy(FLOAT &fLastDist, const SBotLogic &sbl);
+
+    // Find closest real player
+    CEntity *ClosestRealPlayer(FLOAT3D vCheckPos, FLOAT &fDist);
+
+    // Cast bot view ray
+    BOOL CastBotRay(CEntity *penTarget, const SBotLogic &sbl, BOOL bPhysical);
+
+  // Items
+  public:
+    // Check if item is pickable
+    BOOL IsItemPickable(class CItem *penItem, const BOOL &bCheckDist);
+
+    // Search for an item
+    void BotItemSearch(SBotLogic &sbl);
+
+    // Distance to a specific item type
+    FLOAT GetItemDist(CEntity *penItem);
+
+    // Determine the closest item
+    CEntity *GetClosestItem(FLOAT &fItemDist, const SBotLogic &sbl);
+
+    // Closest item entity
+    CEntity *ClosestItemType(const CDLLEntityClass &decClass, FLOAT &fDist, const SBotLogic &sbl);
+
+  // Movement
+  public:
+    // Too long since the last position change
+    BOOL NoPosChange(void);
+
+    // Try to find some path
+    void BotPathFinding(SBotLogic &sbl);
+
+    // Set bot aim
+    void BotAim(CPlayerAction &pa, SBotLogic &sbl);
+
+    // Set bot movement
+    void BotMovement(CPlayerAction &pa, SBotLogic &sbl);
+
+  // Weapons
+  public:
+    // Currently zooming in with a scope or not
+    BOOL UsingScope(void);
+
+    // Able to use the scope or not
+    BOOL CanUseScope(void);
+
+    // Use weapon scope for a bot now
+    void UseWeaponScope(CPlayerAction &pa, const SBotLogic &sbl);
+
+    // Fire the weapon now
+    void FireWeapon(CPlayerAction &pa, const SBotLogic &sbl);
 };
 
 #endif // _CECILBOTS_BOTSTRUCTURE_H

@@ -1643,9 +1643,6 @@
     <ClInclude Include="..\Bots\Logic\BotLogic.h">
       <Filter>Header Files\Bots headers\Logic</Filter>
     </ClInclude>
-    <ClInclude Include="..\Bots\Logic\BotMovement.h">
-      <Filter>Header Files\Bots headers\Logic</Filter>
-    </ClInclude>
     <ClInclude Include="..\Bots\Logic\BotSettings.h">
       <Filter>Header Files\Bots headers\Logic</Filter>
     </ClInclude>

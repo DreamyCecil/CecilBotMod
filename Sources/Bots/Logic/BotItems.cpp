@@ -18,28 +18,28 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "BotFunctions.h"
 
 // Shortcuts
-#define SETTINGS (pb.props.m_sbsBot)
+#define SETTINGS (props.m_sbsBot)
 
 // [Cecil] 2021-06-14: Check if item is pickable
-BOOL IsItemPickable(CPlayerBotController &pb, class CItem *penItem, const BOOL &bCheckDist) {
+BOOL CPlayerBotController::IsItemPickable(class CItem *penItem, const BOOL &bCheckDist) {
   // [Cecil] TEMP: Too far
-  if (bCheckDist && DistanceTo(pb.pen, penItem) > GetItemDist(pb, penItem)) {
+  if (bCheckDist && DistanceTo(pen, penItem) > GetItemDist(penItem)) {
     return FALSE;
   }
 
-  BOOL bPicked = (1 << CECIL_PlayerIndex(pb.pen)) & penItem->m_ulPickedMask;
+  BOOL bPicked = (1 << CECIL_PlayerIndex(pen)) & penItem->m_ulPickedMask;
 
   return !bPicked && (penItem->en_RenderType == CEntity::RT_MODEL
                    || penItem->en_RenderType == CEntity::RT_SKAMODEL);
 };
 
 // [Cecil] 2021-06-17: Search for an item
-void BotItemSearch(CPlayerBotController &pb, SBotLogic &sbl) {
+void CPlayerBotController::BotItemSearch(SBotLogic &sbl) {
   // Check for nearby items
   FLOAT fItemDist = MAX_ITEM_DIST;
 
   // Need this to determine the distance to the closest one
-  CEntity *penItem = ClosestItemType(pb, CItem_DLLClass, fItemDist, sbl);
+  CEntity *penItem = ClosestItemType(CItem_DLLClass, fItemDist, sbl);
 
   if (penItem != NULL) {
     // Determine close distance for the item
@@ -53,44 +53,44 @@ void BotItemSearch(CPlayerBotController &pb, SBotLogic &sbl) {
     BOOL bWantItem = (fItemDist > fCloseItemDist);
 
     // [Cecil] TEMP 2022-05-11: Go for items in coop anyway
-    BOOL bImportantPoint = (pb.props.m_bImportantPoint && !IsCoopGame());
+    BOOL bImportantPoint = (props.m_bImportantPoint && !IsCoopGame());
 
     // Check if item is really needed (because going for an important point)
     BOOL bNeedItem = (!bImportantPoint || fItemDist < 8.0f);
 
     if (bWantItem && bNeedItem) {
       // Determine the closest item
-      penItem = GetClosestItem(pb, fItemDist, sbl);
+      penItem = GetClosestItem(fItemDist, sbl);
 
       // Put searching on cooldown if selected some item
       if (penItem != NULL) {
-        pb.props.m_penLastItem = penItem;
-        pb.props.m_tmLastItemSearch = _pTimer->CurrentTick() + SETTINGS.fItemSearchCD;
+        props.m_penLastItem = penItem;
+        props.m_tmLastItemSearch = _pTimer->CurrentTick() + SETTINGS.fItemSearchCD;
 
-        pb.props.Thought("Going for ^c7f7fff%s", penItem->en_pecClass->ec_pdecDLLClass->dec_strName);
+        props.Thought("Going for ^c7f7fff%s", penItem->en_pecClass->ec_pdecDLLClass->dec_strName);
       }
     }
   }
 
   // Has some item
-  if (pb.props.m_penLastItem != NULL) {
+  if (props.m_penLastItem != NULL) {
     // Item is pickable
-    if (IsItemPickable(pb, (CItem *)&*pb.props.m_penLastItem, TRUE)) {
+    if (IsItemPickable((CItem *)&*props.m_penLastItem, TRUE)) {
       sbl.ulFlags |= BLF_ITEMEXISTS;
-      pb.props.m_penFollow = pb.props.m_penLastItem;
+      props.m_penFollow = props.m_penLastItem;
 
     // Not pickable anymore
     } else {
-      pb.props.m_penLastItem = NULL;
-      pb.props.m_tmLastItemSearch = 0.0f;
+      props.m_penLastItem = NULL;
+      props.m_tmLastItemSearch = 0.0f;
 
-      pb.props.Thought("^c7f7fffItem is no longer pickable");
+      props.Thought("^c7f7fffItem is no longer pickable");
     }
   }
 };
 
 // [Cecil] 2021-06-28: Distance to a specific item type
-FLOAT GetItemDist(CPlayerBotController &pb, CEntity *penItem) {
+FLOAT CPlayerBotController::GetItemDist(CEntity *penItem) {
   // Weapons and powerups
   if (IsOfDllClass(penItem, CWeaponItem_DLLClass)
    || IsOfDllClass(penItem, CPowerUpItem_DLLClass)) {
@@ -118,21 +118,21 @@ FLOAT GetItemDist(CPlayerBotController &pb, CEntity *penItem) {
 };
 
 // [Cecil] 2021-06-14: Determine the closest item
-CEntity *GetClosestItem(CPlayerBotController &pb, FLOAT &fItemDist, const SBotLogic &sbl) {
+CEntity *CPlayerBotController::GetClosestItem(FLOAT &fItemDist, const SBotLogic &sbl) {
   // Run towards the weapon
-  CEntity *penItem = ClosestItemType(pb, CWeaponItem_DLLClass, fItemDist, sbl);
+  CEntity *penItem = ClosestItemType(CWeaponItem_DLLClass, fItemDist, sbl);
 
   // Within range
-  if (penItem != NULL && fItemDist < pb.props.m_fTargetDist && fItemDist < SETTINGS.fWeaponDist) {
+  if (penItem != NULL && fItemDist < props.m_fTargetDist && fItemDist < SETTINGS.fWeaponDist) {
     return penItem;
   }
   
   // Need health
-  const FLOAT fBotHealth = pb.pen->GetHealth();
+  const FLOAT fBotHealth = pen->GetHealth();
   
   if (fBotHealth < SETTINGS.fHealthSearch) {
     // Run towards health
-    penItem = ClosestItemType(pb, CHealthItem_DLLClass, fItemDist, sbl);
+    penItem = ClosestItemType(CHealthItem_DLLClass, fItemDist, sbl);
     
     // Within range
     if (penItem != NULL && fItemDist < SETTINGS.fHealthDist) {
@@ -152,7 +152,7 @@ CEntity *GetClosestItem(CPlayerBotController &pb, FLOAT &fItemDist, const SBotLo
   }
 
   // Run towards power ups
-  penItem = ClosestItemType(pb, CPowerUpItem_DLLClass, fItemDist, sbl);
+  penItem = ClosestItemType(CPowerUpItem_DLLClass, fItemDist, sbl);
   
   // Within range
   if (penItem != NULL && fItemDist < SETTINGS.fWeaponDist) {
@@ -160,12 +160,12 @@ CEntity *GetClosestItem(CPlayerBotController &pb, FLOAT &fItemDist, const SBotLo
   }
 
   // [Cecil] TODO: Try to find 'm_fArmor' from the property list
-  CPlayer *penPlayer = (CPlayer *)pb.pen;
+  CPlayer *penPlayer = (CPlayer *)pen;
 
   // Need armor
   if (penPlayer->m_fArmor < 100.0f) {
     // Run towards armor
-    penItem = ClosestItemType(pb, CArmorItem_DLLClass, fItemDist, sbl);
+    penItem = ClosestItemType(CArmorItem_DLLClass, fItemDist, sbl);
   
     // Within range
     if (penItem != NULL && fItemDist < SETTINGS.fArmorDist) {
@@ -185,11 +185,11 @@ CEntity *GetClosestItem(CPlayerBotController &pb, FLOAT &fItemDist, const SBotLo
   }
 
   // Run towards ammo
-  penItem = ClosestItemType(pb, CAmmoPack_DLLClass, fItemDist, sbl);
+  penItem = ClosestItemType(CAmmoPack_DLLClass, fItemDist, sbl);
 
   if (penItem == NULL) {
     // Search for ammo if no ammo packs
-    penItem = ClosestItemType(pb, CAmmoItem_DLLClass, fItemDist, sbl);
+    penItem = ClosestItemType(CAmmoItem_DLLClass, fItemDist, sbl);
   }
 
   // Within range
@@ -201,9 +201,9 @@ CEntity *GetClosestItem(CPlayerBotController &pb, FLOAT &fItemDist, const SBotLo
 };
 
 // [Cecil] Closest item entity
-CEntity *ClosestItemType(CPlayerBotController &pb, const CDLLEntityClass &decClass, FLOAT &fDist, const SBotLogic &sbl) {
+CEntity *CPlayerBotController::ClosestItemType(const CDLLEntityClass &decClass, FLOAT &fDist, const SBotLogic &sbl) {
   // Can't search for items right now
-  if (!SETTINGS.bItemSearch || pb.props.m_tmLastItemSearch > _pTimer->CurrentTick()) {
+  if (!SETTINGS.bItemSearch || props.m_tmLastItemSearch > _pTimer->CurrentTick()) {
     return NULL;
   }
 
@@ -211,17 +211,17 @@ CEntity *ClosestItemType(CPlayerBotController &pb, const CDLLEntityClass &decCla
   fDist = MAX_ITEM_DIST;
 
   // For each bot item
-  {FOREACHINDYNAMICCONTAINER(pb.pen->GetWorld()->wo_cenEntities, CEntity, iten) {
+  {FOREACHINDYNAMICCONTAINER(pen->GetWorld()->wo_cenEntities, CEntity, iten) {
     CEntity *penCheck = iten;
 
     // If not an item or already picked up
     if (!IsDerivedFromDllClass(penCheck, decClass)
-     || !IsItemPickable(pb, (CItem *)penCheck, TRUE)) {
+     || !IsItemPickable((CItem *)penCheck, TRUE)) {
       continue;
     }
 
     // If not visible
-    if (SETTINGS.bItemVisibility && !CastBotRay(pb, penCheck, sbl, TRUE)) {
+    if (SETTINGS.bItemVisibility && !CastBotRay(penCheck, sbl, TRUE)) {
       continue;
     }
 
@@ -238,12 +238,12 @@ CEntity *ClosestItemType(CPlayerBotController &pb, const CDLLEntityClass &decCla
   }}
 
   // If it's the same item as before, don't bother
-  if (penReturn == pb.props.m_penLastItem) {
+  if (penReturn == props.m_penLastItem) {
     penReturn = NULL;
   }
 
   // Reset last item
-  pb.props.m_penLastItem = NULL;
+  props.m_penLastItem = NULL;
 
   return penReturn;
 };

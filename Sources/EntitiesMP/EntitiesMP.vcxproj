@@ -595,7 +595,6 @@ copy Debug\$(TargetName).lib $(SolutionDir)..\Bin\Debug\ &gt;nul</Command>
     <ClInclude Include="..\Bots\Logic\BotFunctions.h" />
     <ClInclude Include="..\Bots\Logic\BotItems.h" />
     <ClInclude Include="..\Bots\Logic\BotLogic.h" />
-    <ClInclude Include="..\Bots\Logic\BotMovement.h" />
     <ClInclude Include="..\Bots\Logic\BotSettings.h" />
     <ClInclude Include="..\Bots\Logic\BotThoughts.h" />
     <ClInclude Include="..\Bots\Logic\BotWeapons.h" />

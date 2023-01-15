@@ -202,7 +202,7 @@ CBotPathPoint *CBotNavmesh::FindImportantPoint(CPlayerBotController &pb, INDEX i
     CEntity *penEntity = pbpp->bpp_penImportant;
     
     // not important at the moment
-    if (penEntity == NULL || !ImportantForNavMesh(pb, penEntity)) {
+    if (penEntity == NULL || !pb.ImportantForNavMesh(penEntity)) {
       continue;
     }
 

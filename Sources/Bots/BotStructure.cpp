@@ -18,7 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "BotStructure.h"
 
 #include "Bots/Logic/BotFunctions.h"
-#include "Bots/Logic/BotMovement.h"
 #include "Bots/Logic/BotItems.h"
 
 #include "EntitiesMP/Player.h"
@@ -247,8 +246,8 @@ void CPlayerBotController::BotWeapons(CPlayerAction &pa, SBotLogic &sbl) {
   CPlayerWeapons *penWeapons = GetWeapons();
     
   // User sniper scope
-  if (props.m_sbsBot.bSniperZoom && CanUseScope(*this)) {
-    UseWeaponScope(*this, pa, sbl);
+  if (props.m_sbsBot.bSniperZoom && CanUseScope()) {
+    UseWeaponScope(pa, sbl);
   }
 
   // Pick weapon config
@@ -335,7 +334,7 @@ void CPlayerBotController::BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
   sbl.plBotView.RelativeToAbsolute(pen->GetPlacement());
     
   // Bot targeting and following
-  CEntity *penBotTarget = ClosestEnemy(*this, props.m_fTargetDist, sbl);
+  CEntity *penBotTarget = ClosestEnemy(props.m_fTargetDist, sbl);
 
   // Select new target only if it doesn't exist or after a cooldown
   if (!ASSERT_ENTITY(props.m_penTarget) || props.m_tmLastBotTarget <= _pTimer->CurrentTick()) {
@@ -361,7 +360,7 @@ void CPlayerBotController::BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
     sbl.peiTarget = (EntityInfo *)props.m_penTarget->GetEntityInfo();
 
     // Can see the enemy
-    if (CastBotRay(*this, props.m_penTarget, sbl, TRUE)) {
+    if (CastBotRay(props.m_penTarget, sbl, TRUE)) {
       sbl.ulFlags |= BLF_SEEENEMY;
       props.m_tmLastSawTarget = _pTimer->CurrentTick();
     }
@@ -378,7 +377,7 @@ void CPlayerBotController::BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
   }
 
   // Aim at the target
-  BotAim(*this, pa, sbl);
+  BotAim(pa, sbl);
 
   // Shoot if possible
   if (props.m_sbsBot.bShooting) {
@@ -396,7 +395,7 @@ void CPlayerBotController::BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
     if (bCanShoot) {
       // Enough shooting time
       if (props.m_tmShootTime <= 0.0f || props.m_tmShootTime > _pTimer->CurrentTick()) {
-        FireWeapon(*this, pa, sbl);
+        FireWeapon(pa, sbl);
 
       } else if (Abs(props.m_tmShootTime - _pTimer->CurrentTick()) < 0.05f) {
         props.Thought("Stop shooting");
@@ -423,7 +422,7 @@ void CPlayerBotController::BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
   // Follow players
   if (bFollowInCoop) {
     FLOAT fDistToPlayer = -1.0f;
-    CEntity *penPlayer = ClosestRealPlayer(*this, vBotPos, fDistToPlayer);
+    CEntity *penPlayer = ClosestRealPlayer(vBotPos, fDistToPlayer);
       
     // Player exists
     if (penPlayer != NULL) {
@@ -440,7 +439,7 @@ void CPlayerBotController::BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
           sbl.ulFlags |= BLF_FOLLOWING;
 
           // Player is too far
-          if (fDistToPlayer > 100.0f || !CastBotRay(*this, penPlayer, sbl, TRUE)) {
+          if (fDistToPlayer > 100.0f || !CastBotRay(penPlayer, sbl, TRUE)) {
             sbl.ulFlags &= ~BLF_SEEPLAYER;
           }
 
@@ -477,15 +476,15 @@ void CPlayerBotController::BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
   }
     
   // Search for items (more important than players)
-  BotItemSearch(*this, sbl);
+  BotItemSearch(sbl);
 
   // Try to find a path to the target
-  BotPathFinding(*this, sbl);
+  BotPathFinding(sbl);
 
   // Aim
   pa.pa_aRotation(1) += sbl.aAim(1);
   pa.pa_aRotation(2) += sbl.aAim(2);
 
   // Set bot movement
-  BotMovement(*this, pa, sbl);
+  BotMovement(pa, sbl);
 };

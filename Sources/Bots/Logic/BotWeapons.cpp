@@ -62,57 +62,57 @@ extern const SBotWeaponConfig _abwCooperativeWeapons[CT_BOT_WEAPONS] = {
 };
 
 // Currently zooming in with a scope or not
-BOOL UsingScope(CPlayerBotController &pb) {
-  return pb.GetWeapons()->m_bSniping;
+BOOL CPlayerBotController::UsingScope(void) {
+  return GetWeapons()->m_bSniping;
 };
 
 // Able to use the scope or not
-BOOL CanUseScope(CPlayerBotController &pb) {
-  return (pb.GetWeapons()->m_iCurrentWeapon == WEAPON_SNIPER);
+BOOL CPlayerBotController::CanUseScope(void) {
+  return (GetWeapons()->m_iCurrentWeapon == WEAPON_SNIPER);
 };
 
 // Use weapon scope for a bot
-void UseWeaponScope(CPlayerBotController &pb, CPlayerAction &pa, const SBotLogic &sbl) {
-  // unable to press the button this tick
-  if (!pb.ButtonAction()) {
+void CPlayerBotController::UseWeaponScope(CPlayerAction &pa, const SBotLogic &sbl) {
+  // Unable to press the button this tick
+  if (!ButtonAction()) {
     return;
   }
 
-  // zoom in if enemy is visible
-  if (!UsingScope(pb) && sbl.SeeEnemy()) {
-    pa.pa_ulButtons |= PLACT_SNIPER_USE|PLACT_SNIPER_ZOOMIN;
+  // Zoom in if enemy is visible
+  if (!UsingScope() && sbl.SeeEnemy()) {
+    pa.pa_ulButtons |= PLACT_SNIPER_USE | PLACT_SNIPER_ZOOMIN;
 
-  // zoom out if can't see the enemy
-  } else if (UsingScope(pb) && !sbl.SeeEnemy()) {
+  // Zoom out if can't see the enemy
+  } else if (UsingScope() && !sbl.SeeEnemy()) {
     pa.pa_ulButtons |= PLACT_SNIPER_USE;
   }
 };
 
 // Fire the weapon now
-void FireWeapon(CPlayerBotController &pb, CPlayerAction &pa, const SBotLogic &sbl) {
-  const SBotWeaponConfig &bwWeapon = sbl.aWeapons[pb.props.m_iBotWeapon];
+void CPlayerBotController::FireWeapon(CPlayerAction &pa, const SBotLogic &sbl) {
+  const SBotWeaponConfig &bwWeapon = sbl.aWeapons[props.m_iBotWeapon];
 
   BOOL bUseSpecial = FALSE;
   FLOAT fSpecial = bwWeapon.bw_fSpecialRange;
 
-  // can use special at some range
+  // Can use special at some range
   if (fSpecial != 0.0f) {
-    // if further than the reversed percentage
+    // If further than the reversed percentage
     if (fSpecial < 0.0f) {
-      bUseSpecial = (pb.props.m_fTargetDist <= bwWeapon.bw_fMaxDistance * -fSpecial);
+      bUseSpecial = (props.m_fTargetDist <= bwWeapon.bw_fMaxDistance * -fSpecial);
 
-    // if closer than the percentage
+    // If closer than the percentage
     } else {
-      bUseSpecial = (pb.props.m_fTargetDist >= bwWeapon.bw_fMaxDistance * fSpecial);
+      bUseSpecial = (props.m_fTargetDist >= bwWeapon.bw_fMaxDistance * fSpecial);
     }
   }
 
-  // use special
+  // Use special
   if (bUseSpecial) {
     // [Cecil] NOTE: Vanilla has no specials, it can be a secondary fire or some ability in a mod
     NOTHING;
 
-  // just shoot
+  // Just shoot
   } else {
     pa.pa_ulButtons |= PLACT_FIRE;
   }

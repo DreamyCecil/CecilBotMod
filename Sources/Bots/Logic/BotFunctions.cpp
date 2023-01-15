@@ -68,7 +68,7 @@ CBotPathPoint *NearestNavMeshPointPos(CEntity *pen, const FLOAT3D &vCheck) {
 };
 
 // [Cecil] 2021-06-21: Find nearest NavMesh point to the bot
-CBotPathPoint *NearestNavMeshPointBot(CPlayerBotController &pb, BOOL bSkipCurrent) {
+CBotPathPoint *CPlayerBotController::NearestNavMeshPointBot(BOOL bSkipCurrent) {
   if (_pNavmesh->bnm_cbppPoints.Count() <= 0) {
     return NULL;
   }
@@ -76,8 +76,8 @@ CBotPathPoint *NearestNavMeshPointBot(CPlayerBotController &pb, BOOL bSkipCurren
   // Bot's body center
   FLOAT3D vBot;
 
-  EntityInfo *peiBot = (EntityInfo *)pb.pen->GetEntityInfo();
-  GetEntityInfoPosition(pb.pen, peiBot->vTargetCenter, vBot);
+  EntityInfo *peiBot = (EntityInfo *)pen->GetEntityInfo();
+  GetEntityInfoPosition(pen, peiBot->vTargetCenter, vBot);
 
   FLOAT fDist = 1000.0f;
   CBotPathPoint *pbppNearest = NULL;
@@ -87,7 +87,7 @@ CBotPathPoint *NearestNavMeshPointBot(CPlayerBotController &pb, BOOL bSkipCurren
     FLOAT3D vPosDiff = (pbpp->bpp_vPos - vBot);
 
     // Vertical and horizontal position differences
-    FLOAT3D vDiffV = VerticalDiff(vPosDiff, pb.pen->en_vGravityDir);
+    FLOAT3D vDiffV = VerticalDiff(vPosDiff, pen->en_vGravityDir);
     FLOAT3D vDiffH = vPosDiff + vDiffV;
     
     // Apply range to horizontal difference
@@ -96,7 +96,7 @@ CBotPathPoint *NearestNavMeshPointBot(CPlayerBotController &pb, BOOL bSkipCurren
     // Distance to the point
     FLOAT fToPoint = FLOAT3D(fDiffH, vDiffV.Length(), 0.0f).Length();
 
-    BOOL bNotCurrent = (!bSkipCurrent || !pb.CurrentPoint(pbpp));
+    BOOL bNotCurrent = (!bSkipCurrent || !CurrentPoint(pbpp));
 
     if (fToPoint < fDist && bNotCurrent) {
       pbppNearest = pbpp;
@@ -108,10 +108,10 @@ CBotPathPoint *NearestNavMeshPointBot(CPlayerBotController &pb, BOOL bSkipCurren
 };
 
 // [Cecil] 2019-06-05: Check if this entity is important for a path point
-BOOL ImportantForNavMesh(CPlayerBotController &pb, CEntity *penEntity) {
+BOOL CPlayerBotController::ImportantForNavMesh(CEntity *penEntity) {
   // Is item pickable
   if (IsDerivedFromClass(penEntity, "Item")) {
-    return IsItemPickable(pb, (CItem *)penEntity, FALSE);
+    return IsItemPickable((CItem *)penEntity, FALSE);
 
   // Is switch usable
   } else if (IsOfClass(penEntity, "Switch")) {
@@ -120,7 +120,7 @@ BOOL ImportantForNavMesh(CPlayerBotController &pb, CEntity *penEntity) {
   // Is moving brush usable
   } else if (IsOfClass(penEntity, "Moving Brush")) {
     CEntity *penSwitch = ((CMovingBrush *)penEntity)->m_penSwitch;
-    return ImportantForNavMesh(pb, penSwitch);
+    return ImportantForNavMesh(penSwitch);
 
   // Can go to markers
   } else if (IsDerivedFromClass(penEntity, "Marker")) {
@@ -131,7 +131,7 @@ BOOL ImportantForNavMesh(CPlayerBotController &pb, CEntity *penEntity) {
 };
 
 // [Cecil] 2021-06-25: Use important entity
-void UseImportantEntity(CPlayerBotController &pb, CEntity *penEntity) {
+void CPlayerBotController::UseImportantEntity(CEntity *penEntity) {
   if (!ASSERT_ENTITY(penEntity)) {
     return;
   }
@@ -139,31 +139,31 @@ void UseImportantEntity(CPlayerBotController &pb, CEntity *penEntity) {
   // Press the switch
   if (IsOfDllClass(penEntity, CSwitch_DLLClass)) {
     if (((CSwitch &)*penEntity).m_bUseable) {
-      SendToTarget(penEntity, EET_TRIGGER, pb.pen);
+      SendToTarget(penEntity, EET_TRIGGER, pen);
     }
 
   // Use the moving brush
   } else if (IsOfDllClass(penEntity, CMovingBrush_DLLClass)) {
     CEntity *penSwitch = ((CMovingBrush *)penEntity)->m_penSwitch;
-    UseImportantEntity(pb, penSwitch);
+    UseImportantEntity(penSwitch);
 
   // Go to the point near the marker target
   } else if (IsOfDllClass(penEntity, CMarker_DLLClass)) {
-    if (IsDerivedFromDllClass(pb.pen, CPlayerBot_DLLClass)) {
+    if (IsDerivedFromDllClass(pen, CPlayerBot_DLLClass)) {
       CEntity *penTarget = penEntity->GetTarget();
 
       if (penTarget != NULL) {
-        pb.props.m_pbppTarget = NearestNavMeshPointPos(penTarget, penTarget->GetPlacement().pl_PositionVector);
-        pb.props.m_bImportantPoint = TRUE;
+        props.m_pbppTarget = NearestNavMeshPointPos(penTarget, penTarget->GetPlacement().pl_PositionVector);
+        props.m_bImportantPoint = TRUE;
       }
     }
   }
 };
 
 // [Cecil] Cast bot view ray
-BOOL CastBotRay(CPlayerBotController &pb, CEntity *penTarget, const SBotLogic &sbl, BOOL bPhysical) {
+BOOL CPlayerBotController::CastBotRay(CEntity *penTarget, const SBotLogic &sbl, BOOL bPhysical) {
   // [Cecil] TEMP: Target is too far
-  if (DistanceTo(pb.pen, penTarget) > 1000.0f) {
+  if (DistanceTo(pen, penTarget) > 1000.0f) {
     return FALSE;
   }
 
@@ -176,12 +176,12 @@ BOOL CastBotRay(CPlayerBotController &pb, CEntity *penTarget, const SBotLogic &s
   }
 
   FLOAT3D vTarget = penTarget->GetPlacement().pl_PositionVector + vBody;
-  CCastRay crBot(pb.pen, sbl.ViewPos(), vTarget);
+  CCastRay crBot(pen, sbl.ViewPos(), vTarget);
 
   crBot.cr_ttHitModels = CCastRay::TT_NONE;
   crBot.cr_bHitTranslucentPortals = TRUE;
   crBot.cr_bPhysical = bPhysical;
-  CastRayFlags(crBot, pb.pen->GetWorld(), (bPhysical ? BPOF_PASSABLE : 0));
+  CastRayFlags(crBot, pen->GetWorld(), (bPhysical ? BPOF_PASSABLE : 0));
 
   return (vTarget - crBot.cr_vHit).Length() <= 0.1f;
 };
@@ -200,13 +200,13 @@ BOOL CastPathPointRay(const FLOAT3D &vSource, const FLOAT3D &vPoint, FLOAT &fDis
 };
 
 // [Cecil] 2021-06-13: Check if it's an enemy player
-BOOL IsEnemyPlayer(CPlayerBotController &pb, CEntity *penEnemy) {
+BOOL CPlayerBotController::IsEnemyPlayer(CEntity *penEnemy) {
   // Not a player
   if (!IS_PLAYER(penEnemy)) {
     return FALSE;
   }
 
-  const CTString &strTeam = pb.pen->en_pcCharacter.GetTeam();
+  const CTString &strTeam = pen->en_pcCharacter.GetTeam();
 
   // No team has been set
   if (strTeam == "") {
@@ -218,7 +218,7 @@ BOOL IsEnemyPlayer(CPlayerBotController &pb, CEntity *penEnemy) {
 };
 
 // [Cecil] 2021-06-19: Check if it's a monster enemy
-BOOL IsEnemyMonster(CPlayerBotController &pb, CEntity *penEnemy) {
+BOOL CPlayerBotController::IsEnemyMonster(CEntity *penEnemy) {
   // simple class type check
   return IsDerivedFromDllClass(penEnemy, CEnemyBase_DLLClass)
       /*&& !IsOfDllClass(penEnemy, CCannonStatic_DLLClass)
@@ -226,11 +226,11 @@ BOOL IsEnemyMonster(CPlayerBotController &pb, CEntity *penEnemy) {
 };
 
 // [Cecil] 2018-10-11: Bot enemy searching
-CEntity *ClosestEnemy(CPlayerBotController &pb, FLOAT &fLast, const SBotLogic &sbl) {
+CEntity *CPlayerBotController::ClosestEnemy(FLOAT &fLast, const SBotLogic &sbl) {
   CEntity *penReturn = NULL;
 
   // Don't search for enemies
-  if (!pb.props.m_sbsBot.bTargetSearch) {
+  if (!props.m_sbsBot.bTargetSearch) {
     return NULL;
   }
 
@@ -245,11 +245,11 @@ CEntity *ClosestEnemy(CPlayerBotController &pb, FLOAT &fLast, const SBotLogic &s
   CEntity *penLastTarget = NULL;
 
   // For each entity in the world
-  {FOREACHINDYNAMICCONTAINER(pb.pen->GetWorld()->wo_cenEntities, CEntity, iten) {
+  {FOREACHINDYNAMICCONTAINER(pen->GetWorld()->wo_cenEntities, CEntity, iten) {
     CEntity *penCheck = iten;
 
     // If enemy (but not cannons - usually hard to reach)
-    if (pb.props.m_sbsBot.iTargetType >= 1 && IsEnemyMonster(pb, penCheck)) {
+    if (props.m_sbsBot.iTargetType >= 1 && IsEnemyMonster(penCheck)) {
       // If not alive
       CEnemyBase *penEnemy = (CEnemyBase *)penCheck;
 
@@ -258,11 +258,11 @@ CEntity *ClosestEnemy(CPlayerBotController &pb, FLOAT &fLast, const SBotLogic &s
       }
 
     // If player and it's not a coop or a singleplayer game
-    } else if (pb.props.m_sbsBot.iTargetType != 1 && IsEnemyPlayer(pb, penCheck)) {
+    } else if (props.m_sbsBot.iTargetType != 1 && IsEnemyPlayer(penCheck)) {
       // If not alive
       CPlayer *penEnemy = (CPlayer *)penCheck;
 
-      if (penEnemy == pb.pen || !(penEnemy->GetFlags() & ENF_ALIVE) || penEnemy->GetHealth() <= 0.0f) {
+      if (penEnemy == pen || !(penEnemy->GetFlags() & ENF_ALIVE) || penEnemy->GetHealth() <= 0.0f) {
         continue;
       }
 
@@ -275,7 +275,7 @@ CEntity *ClosestEnemy(CPlayerBotController &pb, FLOAT &fLast, const SBotLogic &s
 
     FLOAT fHealth = ((CMovableEntity *)penCheck)->GetHealth();
     FLOAT fDist = DistanceToPos(sbl.ViewPos(), vEnemy);
-    BOOL bCurrentVisible = CastBotRay(pb, penCheck, sbl, TRUE);
+    BOOL bCurrentVisible = CastBotRay(penCheck, sbl, TRUE);
     CEntity *penTargetEnemy = NULL;
 
     // Target's target
@@ -290,7 +290,7 @@ CEntity *ClosestEnemy(CPlayerBotController &pb, FLOAT &fLast, const SBotLogic &s
     if (bCurrentVisible)                 iPriority++;
     if (fHealth < fLastHP)               iPriority++;
     if (fDist < fLast || fLast == -1.0f) iPriority++;
-    if (penTargetEnemy == pb.pen)        iPriority++;
+    if (penTargetEnemy == pen)           iPriority++;
 
     // If more priorities have been fulfilled
     if (iPriority >= iLastPriority) {
@@ -317,7 +317,7 @@ CEntity *ClosestEnemy(CPlayerBotController &pb, FLOAT &fLast, const SBotLogic &s
 };
 
 // [Cecil] 2019-05-30: Find closest real player
-CEntity *ClosestRealPlayer(CPlayerBotController &pb, FLOAT3D vCheckPos, FLOAT &fDist) {
+CEntity *CPlayerBotController::ClosestRealPlayer(FLOAT3D vCheckPos, FLOAT &fDist) {
   CEntity *penReturn = NULL;
   fDist = -1.0f;
 
