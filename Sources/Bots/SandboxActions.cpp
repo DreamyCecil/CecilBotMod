@@ -672,6 +672,7 @@ extern void CECIL_InitSandboxActions(void) {
   _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fSpeedMul;"       ), &_sbsBotSettings.fSpeedMul);
   _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bStrafe;"         ), &_sbsBotSettings.bStrafe);
   _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bJump;"           ), &_sbsBotSettings.bJump);
+  _pShell->DeclareSymbol("persistent user INDEX " BOTCOM_NAME("bAvoidPits;"      ), &_sbsBotSettings.bAvoidPits);
 
   _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fPrediction;"     ), &_sbsBotSettings.fPrediction);
   _pShell->DeclareSymbol("persistent user FLOAT " BOTCOM_NAME("fPredictRnd;"     ), &_sbsBotSettings.fPredictRnd);

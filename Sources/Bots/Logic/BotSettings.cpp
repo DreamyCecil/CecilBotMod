@@ -17,8 +17,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "BotSettings.h"
 
 static void PresetDummy(SBotSettings &sbs) {
-  sbs.b3rdPerson = TRUE;
-  sbs.iCrosshair = -1;
   sbs.fRespawnDelay = 0.0f;
 
   sbs.bSniperZoom = FALSE;
@@ -58,8 +56,6 @@ static void PresetDummy(SBotSettings &sbs) {
 };
 
 static void PresetEasy(SBotSettings &sbs) {
-  sbs.b3rdPerson = TRUE;
-  sbs.iCrosshair = -1;
   sbs.fRespawnDelay = 3.0f;
 
   sbs.bSniperZoom = TRUE;
@@ -99,8 +95,6 @@ static void PresetEasy(SBotSettings &sbs) {
 };
 
 static void PresetNormal(SBotSettings &sbs) {
-  sbs.b3rdPerson = TRUE;
-  sbs.iCrosshair = -1;
   sbs.fRespawnDelay = 1.0f;
 
   sbs.bSniperZoom = TRUE;
@@ -140,8 +134,6 @@ static void PresetNormal(SBotSettings &sbs) {
 };
 
 static void PresetHard(SBotSettings &sbs) {
-  sbs.b3rdPerson = TRUE;
-  sbs.iCrosshair = -1;
   sbs.fRespawnDelay = 0.0f;
 
   sbs.bSniperZoom = TRUE;

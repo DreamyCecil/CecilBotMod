@@ -510,8 +510,8 @@ void CPlayerBotController::BotMovement(CPlayerAction &pa, SBotLogic &sbl) {
           if (bShouldCrouch) {
             fVerticalMove = -1.0f;
 
-          // Jump if allowed
-          } else if (bShouldJump && SETTINGS.bJump) {
+          // Jump if allowed (not while avoiding pits)
+          } else if (bShouldJump && SETTINGS.bJump && !SETTINGS.bAvoidPits) {
             fVerticalMove = 1.0f;
 
           } else {
@@ -534,13 +534,13 @@ void CPlayerBotController::BotMovement(CPlayerAction &pa, SBotLogic &sbl) {
     }
 
     // Check if there's a bottomless pit ahead
-    if (!bInLiquid && props.m_pbppCurrent == NULL) {
+    if (SETTINGS.bAvoidPits && !bInLiquid && props.m_pbppCurrent == NULL) {
       // If found a pit in the movement direction
       if (CheckPit(vBotMovement, 0.0f, 3.0f)) {
         bAvoid = FALSE;
 
         // Able to jump over
-        if (!CheckPit(vBotMovement, 0.0f, 8.0f)) {
+        if (SETTINGS.bJump && !CheckPit(vBotMovement, 0.0f, 8.0f)) {
           fVerticalMove = 1.0f;
 
         } else {

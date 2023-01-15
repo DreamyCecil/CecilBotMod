@@ -46,9 +46,10 @@ struct DECL_DLL SBotSettings {
   FLOAT fTargetCD; // Target selection cooldown
   
   INDEX iFollowPlayers; // Follow players in coop or not (0 - no, 1 - yes, 2 - until there's a visible enemy)
-  FLOAT fSpeedMul; // Speed multiplier
-  INDEX bStrafe;   // Strafe near the target or not
-  INDEX bJump;     // Jump or not
+  FLOAT fSpeedMul;  // Speed multiplier
+  INDEX bStrafe;    // Strafe near the target or not
+  INDEX bJump;      // Jump or not
+  INDEX bAvoidPits; // Avoid bottomless pits or not
   
   FLOAT fPrediction; // Position prediction multiplier
   FLOAT fPredictRnd; // Prediction randomness
@@ -70,6 +71,11 @@ struct DECL_DLL SBotSettings {
   // Constructor
   SBotSettings(void) {
     Reset(BDF_NORMAL);
+
+    // Difficulty independent
+    b3rdPerson = TRUE;
+    iCrosshair = -1;
+    bAvoidPits = FALSE;
   };
   
   // Reset settings to a certain difficulty preset
