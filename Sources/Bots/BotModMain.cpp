@@ -420,17 +420,27 @@ void CECIL_HUDOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProjectio
       UBYTE ubAlpha = NormFloatToByte(1.0f - iThought / 50.0f);
       COLOR colText = LerpColor(0xFFFFFF00, 0x7F7F7F00, iThought / 15.0f) | ubAlpha;
 
-      pdp->PutText(penBot->GetProps().m_btThoughts.strThoughts[iThought], pixX, pixY + iThought*pixThought, colText);
+      pdp->PutText(penBot->GetProps().m_btThoughts.strThoughts[iThought], pixX, pixY + iThought * pixThought, colText);
     }
 
-    // target point
+    // Target point
     if (penBot->GetProps().m_pbppCurrent != NULL) {
-      CTString strTarget(0, "Current Point: ^cffff00%d^r\nTarget Point: ^cff0000%d ^caf3f3f%s", penBot->GetProps().m_pbppCurrent->bpp_iIndex,
+      CTString strPoints(0, "Current Point: ^cffff00%d^r    Target Point: ^cff0000%d ^caf3f3f%s", penBot->GetProps().m_pbppCurrent->bpp_iIndex,
                          penBot->GetProps().m_pbppTarget->bpp_iIndex, penBot->GetProps().m_bImportantPoint ? "(Important)" : "");
-      pdp->PutText(strTarget, pixX, pixY + pixThought*17, 0xCCCCCCFF);
+      pdp->PutText(strPoints, pixX, pixY + pixThought * 17, 0xCCCCCCFF);
     }
 
-    CTString strTime(0, "Cur Time: %.2f\nShooting: %.2f", _pTimer->CurrentTick(), penBot->GetProps().m_tmShootTime);
-    pdp->PutText(strTime, pixX, pixY + pixThought*19, 0xCCCCCCFF);
+    // Target enemy
+    CTString strTarget = "Target: N/A";
+
+    if (penBot->GetProps().m_penTarget != NULL) {
+      strTarget.PrintF("Target: %s", penBot->GetProps().m_penTarget->GetName());
+    }
+
+    pdp->PutText(strTarget, pixX, pixY + pixThought * 18, 0xCCCCCCFF);
+
+    // Time
+    CTString strTime(0, "Cur Time: %.2f    Shooting: %.2f", _pTimer->CurrentTick(), penBot->GetProps().m_tmShootTime);
+    pdp->PutText(strTime, pixX, pixY + pixThought * 19, 0xCCCCCCFF);
   }
 };
