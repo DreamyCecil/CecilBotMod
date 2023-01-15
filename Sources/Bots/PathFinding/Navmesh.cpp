@@ -176,7 +176,7 @@ CBotPathPoint *CBotNavmesh::FindPointByID(INDEX iPoint) {
 };
 
 // Find some important point
-CBotPathPoint *CBotNavmesh::FindImportantPoint(SPlayerBot &pb, INDEX iPoint) {
+CBotPathPoint *CBotNavmesh::FindImportantPoint(CPlayerBotController &pb, INDEX iPoint) {
   if (bnm_pwoWorld == NULL) {
     ASSERT(FALSE);
 

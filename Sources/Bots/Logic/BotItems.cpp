@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SETTINGS (pb.props.m_sbsBot)
 
 // [Cecil] 2021-06-14: Check if item is pickable
-BOOL IsItemPickable(SPlayerBot &pb, class CItem *penItem, const BOOL &bCheckDist) {
+BOOL IsItemPickable(CPlayerBotController &pb, class CItem *penItem, const BOOL &bCheckDist) {
   // [Cecil] TEMP: Too far
   if (bCheckDist && DistanceTo(pb.pen, penItem) > GetItemDist(pb, penItem)) {
     return FALSE;
@@ -34,7 +34,7 @@ BOOL IsItemPickable(SPlayerBot &pb, class CItem *penItem, const BOOL &bCheckDist
 };
 
 // [Cecil] 2021-06-17: Search for an item
-void BotItemSearch(SPlayerBot &pb, SBotLogic &sbl) {
+void BotItemSearch(CPlayerBotController &pb, SBotLogic &sbl) {
   // Check for nearby items
   FLOAT fItemDist = MAX_ITEM_DIST;
 
@@ -90,7 +90,7 @@ void BotItemSearch(SPlayerBot &pb, SBotLogic &sbl) {
 };
 
 // [Cecil] 2021-06-28: Distance to a specific item type
-FLOAT GetItemDist(SPlayerBot &pb, CEntity *penItem) {
+FLOAT GetItemDist(CPlayerBotController &pb, CEntity *penItem) {
   // Weapons and powerups
   if (IsOfDllClass(penItem, CWeaponItem_DLLClass)
    || IsOfDllClass(penItem, CPowerUpItem_DLLClass)) {
@@ -118,7 +118,7 @@ FLOAT GetItemDist(SPlayerBot &pb, CEntity *penItem) {
 };
 
 // [Cecil] 2021-06-14: Determine the closest item
-CEntity *GetClosestItem(SPlayerBot &pb, FLOAT &fItemDist, const SBotLogic &sbl) {
+CEntity *GetClosestItem(CPlayerBotController &pb, FLOAT &fItemDist, const SBotLogic &sbl) {
   // Run towards the weapon
   CEntity *penItem = ClosestItemType(pb, CWeaponItem_DLLClass, fItemDist, sbl);
 
@@ -201,7 +201,7 @@ CEntity *GetClosestItem(SPlayerBot &pb, FLOAT &fItemDist, const SBotLogic &sbl) 
 };
 
 // [Cecil] Closest item entity
-CEntity *ClosestItemType(SPlayerBot &pb, const CDLLEntityClass &decClass, FLOAT &fDist, const SBotLogic &sbl) {
+CEntity *ClosestItemType(CPlayerBotController &pb, const CDLLEntityClass &decClass, FLOAT &fDist, const SBotLogic &sbl) {
   // Can't search for items right now
   if (!SETTINGS.bItemSearch || pb.props.m_tmLastItemSearch > _pTimer->CurrentTick()) {
     return NULL;

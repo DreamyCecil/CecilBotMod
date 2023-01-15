@@ -68,15 +68,15 @@ inline const SBotWeaponConfig *PickWeaponConfig(void) {
 #define WPN_HAS_AMMO(_Plw, _Weapon) (_Plw->HasAmmo((WeaponType)_Weapon))
 
 // Currently zooming in with a scope or not
-BOOL UsingScope(struct SPlayerBot &pb);
+BOOL UsingScope(class CPlayerBotController &pb);
 
 // Able to use the scope or not
-BOOL CanUseScope(struct SPlayerBot &pb);
+BOOL CanUseScope(class CPlayerBotController &pb);
 
 // Use weapon scope for a bot now
-void UseWeaponScope(struct SPlayerBot &pb, CPlayerAction &pa, const SBotLogic &sbl);
+void UseWeaponScope(class CPlayerBotController &pb, CPlayerAction &pa, const SBotLogic &sbl);
 
 // Fire the weapon now
-void FireWeapon(struct SPlayerBot &pb, CPlayerAction &pa, const SBotLogic &sbl);
+void FireWeapon(class CPlayerBotController &pb, CPlayerAction &pa, const SBotLogic &sbl);
 
 #endif // _CECILBOTS_BOTWEAPONS_H

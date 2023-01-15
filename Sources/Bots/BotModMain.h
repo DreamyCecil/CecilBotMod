@@ -24,8 +24,8 @@ extern FLOAT MOD_fNavMeshRenderRange;
 extern INDEX MOD_iNavMeshPoint;
 extern INDEX MOD_iNavMeshConnecting;
 
-// [Cecil] 2021-06-11: List of bot entities
-DECL_DLL extern CStaticStackArray<SPlayerBot> _aPlayerBots;
+// [Cecil] 2021-06-11: List of bots
+DECL_DLL extern CStaticStackArray<CPlayerBotController> _aPlayerBots;
 
 // Find index of a bot in the list by a pointer to the entity
 DECL_DLL INDEX FindBotByPointer(CPlayerEntity *pen);

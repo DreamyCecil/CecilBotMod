@@ -62,17 +62,17 @@ extern const SBotWeaponConfig _abwCooperativeWeapons[CT_BOT_WEAPONS] = {
 };
 
 // Currently zooming in with a scope or not
-BOOL UsingScope(SPlayerBot &pb) {
+BOOL UsingScope(CPlayerBotController &pb) {
   return pb.GetWeapons()->m_bSniping;
 };
 
 // Able to use the scope or not
-BOOL CanUseScope(SPlayerBot &pb) {
+BOOL CanUseScope(CPlayerBotController &pb) {
   return (pb.GetWeapons()->m_iCurrentWeapon == WEAPON_SNIPER);
 };
 
 // Use weapon scope for a bot
-void UseWeaponScope(SPlayerBot &pb, CPlayerAction &pa, const SBotLogic &sbl) {
+void UseWeaponScope(CPlayerBotController &pb, CPlayerAction &pa, const SBotLogic &sbl) {
   // unable to press the button this tick
   if (!pb.ButtonAction()) {
     return;
@@ -89,7 +89,7 @@ void UseWeaponScope(SPlayerBot &pb, CPlayerAction &pa, const SBotLogic &sbl) {
 };
 
 // Fire the weapon now
-void FireWeapon(SPlayerBot &pb, CPlayerAction &pa, const SBotLogic &sbl) {
+void FireWeapon(CPlayerBotController &pb, CPlayerAction &pa, const SBotLogic &sbl) {
   const SBotWeaponConfig &bwWeapon = sbl.aWeapons[pb.props.m_iBotWeapon];
 
   BOOL bUseSpecial = FALSE;

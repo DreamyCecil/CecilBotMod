@@ -47,12 +47,12 @@ void SBotProperties::Thought(const char *strFormat, ...) {
 };
 
 // Retrieve player weapons class
-CPlayerWeapons *SPlayerBot::GetWeapons(void) {
+CPlayerWeapons *CPlayerBotController::GetWeapons(void) {
   return ((CPlayer *)pen)->GetPlayerWeapons();
 };
 
 // Write bot properties
-void SPlayerBot::WriteBot(CTStream *strm) {
+void CPlayerBotController::WriteBot(CTStream *strm) {
   // Write entity pointers
   if (props.m_penTarget != NULL) {
     *strm << (INDEX)props.m_penTarget->en_ulID;
@@ -117,7 +117,7 @@ void SPlayerBot::WriteBot(CTStream *strm) {
 };
 
 // Read bot properties
-void SPlayerBot::ReadBot(CTStream *strm) {
+void CPlayerBotController::ReadBot(CTStream *strm) {
   // Read entity pointers
   INDEX iEntity;
 
@@ -176,7 +176,7 @@ void SPlayerBot::ReadBot(CTStream *strm) {
 };
 
 // Update bot settings
-void SPlayerBot::UpdateBot(const SBotSettings &sbs) {
+void CPlayerBotController::UpdateBot(const SBotSettings &sbs) {
   props.m_sbsBot = sbs;
 
   // Adjust target type
@@ -208,7 +208,7 @@ void SPlayerBot::UpdateBot(const SBotSettings &sbs) {
 };
 
 // Perform a button action if possible
-BOOL SPlayerBot::ButtonAction(void) {
+BOOL CPlayerBotController::ButtonAction(void) {
   if (props.m_tmButtonAction <= _pTimer->CurrentTick()) {
     props.m_tmButtonAction = _pTimer->CurrentTick() + 0.2f;
     return TRUE;
@@ -217,12 +217,12 @@ BOOL SPlayerBot::ButtonAction(void) {
 };
 
 // Check if selected point is a current one
-BOOL SPlayerBot::CurrentPoint(CBotPathPoint *pbppExclude) {
+BOOL CPlayerBotController::CurrentPoint(CBotPathPoint *pbppExclude) {
   return (pbppExclude != NULL && props.m_pbppCurrent == pbppExclude);
 };
 
 // Select new weapon
-void SPlayerBot::BotSelectNewWeapon(const INDEX &iSelect) {
+void CPlayerBotController::BotSelectNewWeapon(const INDEX &iSelect) {
   // Nothing to select or on a cooldown
   if (iSelect == WPN_NOTHING || props.m_tmLastBotWeapon > _pTimer->CurrentTick()) {
     return;
@@ -243,7 +243,7 @@ void SPlayerBot::BotSelectNewWeapon(const INDEX &iSelect) {
 };
 
 // Bot weapon logic
-void SPlayerBot::BotWeapons(CPlayerAction &pa, SBotLogic &sbl) {
+void CPlayerBotController::BotWeapons(CPlayerAction &pa, SBotLogic &sbl) {
   CPlayerWeapons *penWeapons = GetWeapons();
     
   // User sniper scope
@@ -322,7 +322,7 @@ void SPlayerBot::BotWeapons(CPlayerAction &pa, SBotLogic &sbl) {
 };
 
 // Complete bot logic
-void SPlayerBot::BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
+void CPlayerBotController::BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
   const FLOAT3D &vBotPos = pen->GetPlacement().pl_PositionVector;
 
   if (DistanceToPos(vBotPos, props.m_vLastPos) > 2.0f) {

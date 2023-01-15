@@ -791,7 +791,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
           penNewBot = (CPlayerBot *)wo.CreateEntity_t(pl, fnmPlayer);
 
           // Add to the bot list
-          SPlayerBot &pbNew = _aPlayerBots.Push();
+          CPlayerBotController &pbNew = _aPlayerBots.Push();
 
           penNewBot->m_pBot = &pbNew;
           *penNewBot->m_pBot = penNewBot;
@@ -838,7 +838,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
       nmMessage >> sbsSettings;
 
       for (INDEX iBot = 0; iBot < _aPlayerBots.Count(); iBot++) {
-        SPlayerBot &pb = _aPlayerBots[iBot];
+        CPlayerBotController &pb = _aPlayerBots[iBot];
 
         // for only one specific bot or all bots
         if (strBotEdit == "" || pb.pen->GetName().Undecorated().Matches(strBotEdit)) {

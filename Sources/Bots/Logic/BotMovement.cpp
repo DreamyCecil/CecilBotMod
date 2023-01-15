@@ -24,7 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define WEAPON   (pb.GetWeapons())
 
 // [Cecil] 2021-06-25: Too long since the last position change
-BOOL NoPosChange(SPlayerBot &pb) {
+BOOL NoPosChange(CPlayerBotController &pb) {
   if (_pTimer->CurrentTick() - pb.props.m_tmPosChange > 1.0f) {
     pb.props.m_tmPosChange = _pTimer->CurrentTick();
     return TRUE;
@@ -33,7 +33,7 @@ BOOL NoPosChange(SPlayerBot &pb) {
 };
 
 // [Cecil] 2021-06-14: Try to find some path
-void BotPathFinding(SPlayerBot &pb, SBotLogic &sbl) {
+void BotPathFinding(CPlayerBotController &pb, SBotLogic &sbl) {
   if (_pNavmesh->bnm_cbppPoints.Count() <= 0) {
     return;
   }
@@ -228,7 +228,7 @@ void BotPathFinding(SPlayerBot &pb, SBotLogic &sbl) {
 };
 
 // [Cecil] 2021-06-15: Set bot aim
-void BotAim(SPlayerBot &pb, CPlayerAction &pa, SBotLogic &sbl) {
+void BotAim(CPlayerBotController &pb, CPlayerAction &pa, SBotLogic &sbl) {
   // [Cecil] 2021-06-16: Aim in the walking direction if haven't seen the enemy in a while
   if (_pTimer->CurrentTick() - pb.props.m_tmLastSawTarget > 2.0f)
   {
@@ -349,7 +349,7 @@ void BotAim(SPlayerBot &pb, CPlayerAction &pa, SBotLogic &sbl) {
 };
 
 // [Cecil] 2021-06-14: Set bot movement
-void BotMovement(SPlayerBot &pb, CPlayerAction &pa, SBotLogic &sbl) {
+void BotMovement(CPlayerBotController &pb, CPlayerAction &pa, SBotLogic &sbl) {
   // No need to set any moving speed if nowhere to go
   if (!sbl.EnemyExists() && !sbl.ItemExists()
    && pb.props.m_penFollow == NULL && pb.props.m_pbppCurrent == NULL) {

@@ -41,7 +41,8 @@ thumbnail "";
 
 properties:
 {
-  SPlayerBot *m_pBot; // Bot reference
+  // Controller of this entity
+  CPlayerBotController *m_pBot;
 }
 
 components:
@@ -61,7 +62,7 @@ functions:
 
     if (iBot != -1) {
       // Replace current bot with the last one
-      SPlayerBot &pbRemoved = _aPlayerBots.Pop();
+      CPlayerBotController &pbRemoved = _aPlayerBots.Pop();
 
       // Only if current index is below the last one
       if (iBot < _aPlayerBots.Count()) {
