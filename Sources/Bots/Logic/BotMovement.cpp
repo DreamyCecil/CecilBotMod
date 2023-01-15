@@ -346,6 +346,60 @@ void CPlayerBotController::BotAim(CPlayerAction &pa, SBotLogic &sbl) {
   }
 };
 
+// Check for a bottomless pit in front of the bot in some direction
+BOOL CPlayerBotController::CheckPit(FLOAT3D vMovement, FLOAT fHeadingDir, FLOAT fDistance) {
+  if (fDistance <= 0.0f) {
+    return FALSE;
+  }
+
+  ANGLE3D aMoveDir;
+
+  DirectionVectorToAngles(vMovement, aMoveDir);
+  aMoveDir(1) += fHeadingDir;
+  AnglesToDirectionVector(aMoveDir, vMovement);
+
+  // Movement direction offset
+  vMovement = vMovement.SafeNormalize() * fDistance;
+
+  const FLOAT3D vBot = pen->GetPlacement().pl_PositionVector;
+
+  // Set custom values for the check
+  const FLOAT3D vNextPos = pen->en_vNextPosition;
+  const FLOAT fStepDnHeight = pen->en_fStepDnHeight;
+
+  pen->en_vNextPosition = vBot + (vMovement + FLOAT3D(0.0f,  2.0f, 0.0f)) * pen->GetRotationMatrix();
+  pen->en_fStepDnHeight = 16.0f;
+
+  // Check if there's any proper polygon below the position
+  BOOL bFall = pen->WouldFallInNextPosition();
+
+  // Restore values
+  pen->en_vNextPosition = vNextPos;
+  pen->en_fStepDnHeight = fStepDnHeight;
+
+  return bFall;
+};
+
+// Try to avoid bottomless pits around the bot
+FLOAT CPlayerBotController::AvoidPits(const FLOAT3D &vMovement, FLOAT fDistance) {
+  const FLOAT fSideAngle = 45.0f * props.m_fSideDir;
+
+  // Check on one side
+  if (!CheckPit(vMovement, fSideAngle, fDistance)) {
+    return fSideAngle;
+
+  // Check on the opposite side
+  } else if (!CheckPit(vMovement, -fSideAngle, fDistance)) {
+    return -fSideAngle;
+
+  // Check closer behind
+  } else if (!CheckPit(vMovement, 180.0f, fDistance - 1.0f)) {
+    return 180.0f;
+  }
+
+  return 0.0f;
+};
+
 // [Cecil] 2021-06-14: Set bot movement
 void CPlayerBotController::BotMovement(CPlayerAction &pa, SBotLogic &sbl) {
   // No need to set any moving speed if nowhere to go
@@ -469,10 +523,70 @@ void CPlayerBotController::BotMovement(CPlayerAction &pa, SBotLogic &sbl) {
   }
 
   // Try to avoid obstacles
-  BOOL bNowhereToGo = (props.m_pbppCurrent == NULL || NoPosChange());
+  BOOL bAvoid = FALSE;
+  BOOL bPit = FALSE;
 
-  if (bNowhereToGo && GetWeapons()->m_fRayHitDistance < 4.0f
-   && !(GetWeapons()->m_penRayHit->GetPhysicsFlags() & EPF_MOVABLE)) {
+  // If nowhere to go
+  if (props.m_pbppCurrent == NULL || NoPosChange()) {
+    // Ignore movable obstacles up close
+    if (GetWeapons()->m_fRayHitDistance < 4.0f) {
+      bAvoid = !(GetWeapons()->m_penRayHit != NULL && GetWeapons()->m_penRayHit->GetPhysicsFlags() & EPF_MOVABLE);
+    }
+
+    // Check if there's a bottomless pit ahead
+    if (!bInLiquid && props.m_pbppCurrent == NULL) {
+      // If found a pit in the movement direction
+      if (CheckPit(vBotMovement, 0.0f, 3.0f)) {
+        bAvoid = FALSE;
+
+        // Able to jump over
+        if (!CheckPit(vBotMovement, 0.0f, 8.0f)) {
+          fVerticalMove = 1.0f;
+
+        } else {
+          bPit = TRUE;
+
+          ANGLE3D aMoveDir;
+          DirectionVectorToAngles(vBotMovement, aMoveDir);
+
+          // Check 3 meters in front
+          FLOAT fAvoid = AvoidPits(vBotMovement, 3.0f);
+
+          if (fAvoid != 0.0f) {
+            // Go to the side
+            aMoveDir(1) += fAvoid;
+            AnglesToDirectionVector(aMoveDir, vBotMovement);
+
+            // Check 2 meters to the side
+            FLOAT fAvoid2 = AvoidPits(vBotMovement, 2.0f);
+
+            if (fAvoid2 != 0.0f) {
+              // Go to the side
+              aMoveDir(1) += fAvoid2;
+              AnglesToDirectionVector(aMoveDir, vBotMovement);
+
+              fAvoid = fAvoid2;
+            }
+
+          // Go backwards
+          } else {
+            fAvoid = 180.0f;
+            aMoveDir(1) += 180.0f;
+            AnglesToDirectionVector(aMoveDir, vBotMovement);
+          }
+
+          props.Thought("Bottomless pit: %d", (INDEX)fAvoid);
+        }
+      }
+
+    // Avoid upon no pos change
+    } else {
+      bAvoid = TRUE;
+    }
+  }
+
+  // Strafe around obstacles up close
+  if (bAvoid && !bPit) {
     // Only jump if following players
     if (sbl.SeePlayer()) {
       fVerticalMove = 1.0f;

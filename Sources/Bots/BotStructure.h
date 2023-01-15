@@ -245,6 +245,12 @@ class DECL_DLL CPlayerBotController {
     // Set bot aim
     void BotAim(CPlayerAction &pa, SBotLogic &sbl);
 
+    // Check for a bottomless pit in front of the bot in some direction
+    BOOL CheckPit(FLOAT3D vMovement, FLOAT fHeadingDir, FLOAT fDistance);
+
+    // Try to avoid bottomless pits around the bot
+    FLOAT AvoidPits(const FLOAT3D &vMovement, FLOAT fDistance);
+
     // Set bot movement
     void BotMovement(CPlayerAction &pa, SBotLogic &sbl);
 
