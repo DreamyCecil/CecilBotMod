@@ -18,7 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // [Cecil] 2021-06-20: Bot thoughts
 struct SBotThoughts {
-  CTString strThoughts[16]; // thoughts
+  CTString strThoughts[16]; // Thoughts
+  CTString strLast; // Last thought text
 
   // Constructor
   SBotThoughts(void) {
@@ -30,15 +31,18 @@ struct SBotThoughts {
     for (INDEX i = 0; i < 16; i++) {
       strThoughts[i] = "";
     }
+
+    strLast = "";
   };
 
   // Push new thought
   void Push(const CTString &str) {
     for (INDEX i = 15; i > 0; i--) {
-      strThoughts[i] = strThoughts[i-1];
+      strThoughts[i] = strThoughts[i - 1];
     }
 
-    strThoughts[0] = CTString(0, "[%s] %s", TimeToString(_pTimer->CurrentTick()), str);
+    strThoughts[0].PrintF("[%s] %s", TimeToString(_pTimer->CurrentTick()), str);
+    strLast = str;
   }
 };
 
