@@ -326,7 +326,7 @@ static void CECIL_SetWeapons(INDEX iWeapon, INDEX bPlayer) {
 // --- Navmesh creation
 
 // [Cecil] 2018-11-10: Quick Function For NavMeshGenerator
-#ifdef _SE1_10
+#if SE1_VER == SE1_110
 static void CECIL_GenerateNavMesh(void *pArgs) {
   INDEX iPoints = NEXTARGUMENT(INDEX);
 #else
