@@ -72,22 +72,68 @@ static CCecilStreamBlock CECIL_BotServerPacket(const INDEX &iAction) {
 
 // [Cecil] 2021-08-28: Populate current bot names
 extern void CopyBotNames(void) {
-  // clear current names
+  // Clear current names
   BOT_cnCurrentNames.Clear();
 
-  for (int i = 0; i < BOT_astrNames.Count(); i++) {
+  for (INDEX i = 0; i < BOT_astrNames.Count(); i++) {
     BOT_cnCurrentNames.Add(&BOT_astrNames[i]);
   }
 };
 
 // [Cecil] 2021-08-28: Populate current bot skins
 extern void CopyBotSkins(void) {
-  // clear current skins
+  // Clear current skins
   BOT_cnCurrentSkins.Clear();
 
-  for (int i = 0; i < BOT_astrSkins.Count(); i++) {
+  for (INDEX i = 0; i < BOT_astrSkins.Count(); i++) {
     BOT_cnCurrentSkins.Add(&BOT_astrSkins[i]);
   }
+};
+
+// Get random bot name
+static const CTString &GetRandomName(void) {
+  INDEX ctNames = BOT_cnCurrentNames.Count();
+
+  // Restore the name container
+  if (ctNames <= 0) {
+    CopyBotNames();
+    ctNames = BOT_cnCurrentNames.Count();
+  }
+
+  // No names
+  if (ctNames <= 0) {
+    static const CTString strDefault = "Bot";
+    return strDefault;
+  }
+
+  // Pull out a random name
+  CTString *pstrName = BOT_cnCurrentNames.Pointer(rand() % ctNames);
+  BOT_cnCurrentNames.Remove(pstrName);
+
+  return *pstrName;
+};
+
+// Get random bot skin
+static const CTString &GetRandomSkin(void) {
+  INDEX ctSkins = BOT_cnCurrentSkins.Count();
+
+  // Restore the skin container
+  if (ctSkins <= 0) {
+    CopyBotSkins();
+    ctSkins = BOT_cnCurrentSkins.Count();
+  }
+
+  // No skins
+  if (ctSkins <= 0) {
+    static const CTString strDefault = "SeriousSam";
+    return strDefault;
+  }
+
+  // Pull out a random skin
+  CTString *pstrSkin = BOT_cnCurrentSkins.Pointer(rand() % ctSkins);
+  //BOT_cnCurrentSkins.Remove(pstrSkin);
+
+  return *pstrSkin;
 };
 
 // [Cecil] 2018-10-15: Config reset
@@ -118,40 +164,10 @@ static void CECIL_AddBot(CTString *pstrBotName, CTString *pstrBotSkin, CTString 
     CPrintF("  <not a server>\n");
     return;
   }
-  
-  // pick random name if none
-  if (strBotName == "") {
-    INDEX ctNames = BOT_cnCurrentNames.Count();
 
-    // restore names
-    if (ctNames <= 1) {
-      CopyBotNames();
-      ctNames = BOT_cnCurrentNames.Count();
-    }
-
-    CTString *pstrName = BOT_cnCurrentNames.Pointer(rand() % ctNames);
-    strBotName = (ctNames > 0) ? *pstrName : "Bot";
-
-    // remove this name from the list
-    BOT_cnCurrentNames.Remove(pstrName);
-  }
-  
-  // pick random skin if none
-  if (strBotSkin == "") {
-    INDEX ctSkins = BOT_cnCurrentSkins.Count();
-
-    // restore skins
-    if (ctSkins <= 0) {
-      CopyBotSkins();
-      ctSkins = BOT_cnCurrentSkins.Count();
-    }
-
-    CTString *pstrSkin = BOT_cnCurrentSkins.Pointer(rand() % ctSkins);
-    strBotSkin = (ctSkins > 0) ? *pstrSkin : "SeriousSam";
-
-    // remove this skin from the list
-    //BOT_cnCurrentSkins.Remove(pstrSkin);
-  }
+  // Pick random name and skin if there are none
+  if (strBotName == "") strBotName = GetRandomName();
+  if (strBotSkin == "") strBotSkin = GetRandomSkin();
 
   CPlayerCharacter pcBot;
   CPlayerSettings *pps = (CPlayerSettings *)pcBot.pc_aubAppearance;
