@@ -38,6 +38,9 @@ country roads
 ^a80^cffffff[^cffaaff^affnotBOTZ^a80^cffffff]^r ^cffffaa^iMighty-Skeletor
 ^a80^cffffff[^cffaaff^affnotBOTZ^a80^cffffff]^r ^cffffaa^ibasillisk
 ^a80^cffffff[^cffaaff^affnotBOTZ^a80^cffffff]^r ^cffffaa^iEvanLegion
+^a80^cffffff[^caaffaa^affnotBOTZ^a80^cffffff]^r ^cffffaa^ienVADER
+^a80^cffffff[^caaffaa^affnotBOTZ^a80^cffffff]^r ^cffffaa^iBeand3bt
+^a80^cffffff[^caaffaa^affnotBOTZ^a80^cffffff]^r ^cffffaa^iNot Safe 4 You
 ^b"^B\_(``/)_/^b"
 Player 69
 ^cffffff^a30Kappa
@@ -57,3 +60,12 @@ Sussus Amogus
 ^cc8a2c8Lilac Dragon
 ^isand undertable
 Hotdog
+^c6f3f00Expand Dong
+^cff7fff^f7PINKIE PIE
+^cff0000Unofficial 1.08 Testing
+^cbbd1eb[Dev] ^cffffffCreamy Devil
+^c5bcefa[M^cf5a9b8ad^cffffffel^cf5a9b8in^c5bcefae]
+^i^cfe332fSaul Goodman
+rule
+^c7f00ffPurple Teletubby
+^b^i^cccddcch ^caaddaa4 ^cccddccx ^caaddaa0 ^cccddccr
