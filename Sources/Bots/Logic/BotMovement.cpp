@@ -427,7 +427,7 @@ void CPlayerBotController::BotMovement(CPlayerAction &pa, SBotLogic &sbl) {
 
   // Avoid the target in front of the bot
   FLOAT fStrafe = Clamp(fStrafeRange * fHealthRatio, 3.0f, 16.0f);
-  
+
   // [Cecil] TODO: Try to find 'm_pstState' from the property list
   CPlayer *penPlayer = (CPlayer *)pen;
 
@@ -526,63 +526,58 @@ void CPlayerBotController::BotMovement(CPlayerAction &pa, SBotLogic &sbl) {
   BOOL bAvoid = FALSE;
   BOOL bPit = FALSE;
 
-  // If nowhere to go
-  if (props.m_pbppCurrent == NULL || NoPosChange()) {
-    // Ignore movable obstacles up close
-    if (GetWeapons()->m_fRayHitDistance < 4.0f) {
-      bAvoid = !(GetWeapons()->m_penRayHit != NULL && GetWeapons()->m_penRayHit->GetPhysicsFlags() & EPF_MOVABLE);
-    }
+  // Check if there's a bottomless pit ahead
+  if (SETTINGS.bAvoidPits && !bInLiquid && props.m_pbppCurrent == NULL) {
+    // If found a pit in the movement direction
+    if (CheckPit(vBotMovement, 0.0f, 3.0f)) {
+      // Able to jump over
+      if (SETTINGS.bJump && !CheckPit(vBotMovement, 0.0f, 8.0f)) {
+        fVerticalMove = 1.0f;
 
-    // Check if there's a bottomless pit ahead
-    if (SETTINGS.bAvoidPits && !bInLiquid && props.m_pbppCurrent == NULL) {
-      // If found a pit in the movement direction
-      if (CheckPit(vBotMovement, 0.0f, 3.0f)) {
-        bAvoid = FALSE;
+      } else {
+        bPit = TRUE;
 
-        // Able to jump over
-        if (SETTINGS.bJump && !CheckPit(vBotMovement, 0.0f, 8.0f)) {
-          fVerticalMove = 1.0f;
+        ANGLE3D aMoveDir;
+        DirectionVectorToAngles(vBotMovement, aMoveDir);
 
-        } else {
-          bPit = TRUE;
+        // Check 3 meters in front
+        FLOAT fAvoid = AvoidPits(vBotMovement, 3.0f);
 
-          ANGLE3D aMoveDir;
-          DirectionVectorToAngles(vBotMovement, aMoveDir);
+        if (fAvoid != 0.0f) {
+          // Go to the side
+          aMoveDir(1) += fAvoid;
+          AnglesToDirectionVector(aMoveDir, vBotMovement);
 
-          // Check 3 meters in front
-          FLOAT fAvoid = AvoidPits(vBotMovement, 3.0f);
+          // Check 2 meters to the side
+          FLOAT fAvoid2 = AvoidPits(vBotMovement, 2.0f);
 
-          if (fAvoid != 0.0f) {
+          if (fAvoid2 != 0.0f) {
             // Go to the side
-            aMoveDir(1) += fAvoid;
+            aMoveDir(1) += fAvoid2;
             AnglesToDirectionVector(aMoveDir, vBotMovement);
 
-            // Check 2 meters to the side
-            FLOAT fAvoid2 = AvoidPits(vBotMovement, 2.0f);
-
-            if (fAvoid2 != 0.0f) {
-              // Go to the side
-              aMoveDir(1) += fAvoid2;
-              AnglesToDirectionVector(aMoveDir, vBotMovement);
-
-              fAvoid = fAvoid2;
-            }
-
-          // Go backwards
-          } else {
-            fAvoid = 180.0f;
-            aMoveDir(1) += 180.0f;
-            AnglesToDirectionVector(aMoveDir, vBotMovement);
+            fAvoid = fAvoid2;
           }
 
-          props.Thought("Bottomless pit: %d", (INDEX)fAvoid);
+        // Go backwards
+        } else {
+          fAvoid = 180.0f;
+          aMoveDir(1) += 180.0f;
+          AnglesToDirectionVector(aMoveDir, vBotMovement);
         }
-      }
 
-    // Avoid upon no pos change
-    } else {
-      bAvoid = TRUE;
+        props.Thought("Bottomless pit: %d", (INDEX)fAvoid);
+      }
     }
+
+  // Avoid upon no pos change
+  } else if (NoPosChange()) {
+    bAvoid = TRUE;
+  }
+
+  // Avoid static obstacles up close and ignore movable ones
+  if ((props.m_pbppCurrent == NULL || NoPosChange()) && GetWeapons()->m_fRayHitDistance < 4.0f) {
+    bAvoid = !(GetWeapons()->m_penRayHit != NULL && GetWeapons()->m_penRayHit->GetPhysicsFlags() & EPF_MOVABLE);
   }
 
   // Strafe around obstacles up close
