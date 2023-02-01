@@ -32,6 +32,9 @@ extern INDEX MOD_bClientSandbox = FALSE;
 // [Cecil] 2021-06-21: Display bot thoughts
 extern INDEX MOD_bBotThoughts = FALSE;
 
+// Check for class names, rather than DLL classes
+extern INDEX MOD_bCheckClassNames = FALSE;
+
 // [Cecil] 2019-06-02: Bot names and skins
 static CStaticArray<CTString> BOT_astrNames;
 static CStaticArray<CTString> BOT_astrSkins;
@@ -677,6 +680,8 @@ extern void CECIL_InitSandboxActions(void) {
   _pShell->DeclareSymbol("persistent user INDEX " MODCOM_NAME("bBotThoughts;"), &MOD_bBotThoughts);
 
   _pShell->DeclareSymbol("user void " MODCOM_NAME("SetWeapons(INDEX, INDEX);"), &CECIL_SetWeapons);
+
+  _pShell->DeclareSymbol("persistent user INDEX " MODCOM_NAME("bCheckClassNames;"), &MOD_bCheckClassNames);
 
   // [Cecil] Bot editing
   _pShell->DeclareSymbol("user CTString " BOTCOM_NAME("strBotEdit;"), &BOT_strBotEdit);

@@ -239,8 +239,15 @@ BOOL FlatPolygon(CWorld *wo, CBrushPolygon *pbpo) {
   return (st.st_fFriction >= 1.0f && aPol(2) <= fAngleDiff && aPol(3) <= fAngleDiff);
 };
 
+// Check for class names, rather than DLL classes
+extern INDEX MOD_bCheckClassNames;
+
 // [Cecil] Check if entity is of given DLL class
 BOOL IsOfDllClass(CEntity *pen, const CDLLEntityClass &dec) {
+  if (MOD_bCheckClassNames) {
+    return IsOfClass(pen, dec.dec_strName);
+  }
+
   if (pen == NULL) {
     return FALSE;
   }
@@ -254,6 +261,10 @@ BOOL IsOfDllClass(CEntity *pen, const CDLLEntityClass &dec) {
 
 // [Cecil] Check if entity is of given DLL class or derived from it
 BOOL IsDerivedFromDllClass(CEntity *pen, const CDLLEntityClass &dec) {
+  if (MOD_bCheckClassNames) {
+    return IsDerivedFromClass(pen, dec.dec_strName);
+  }
+
   if (pen == NULL) {
     return FALSE;
   }
