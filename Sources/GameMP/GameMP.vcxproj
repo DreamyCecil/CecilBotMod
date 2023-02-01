@@ -85,7 +85,6 @@
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(CommonIncludes);$(SamEngineIncludes);$(IncludePath)</IncludePath>
     <LibraryPath>$(SamEngineLibraries);$(OtherLibraries)</LibraryPath>
-    <TargetName>$(ProjectName)MP</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_110|Win32'">
     <OutDir>$(BinDir)</OutDir>
@@ -93,7 +92,6 @@
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(CommonIncludes);$(SamEngineIncludes);$(IncludePath)</IncludePath>
     <LibraryPath>$(SamEngineLibraries);$(OtherLibraries)</LibraryPath>
-    <TargetName>$(ProjectName)MP</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(BinDir)</OutDir>
@@ -101,7 +99,7 @@
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(CommonIncludes);$(SamEngineIncludes);$(IncludePath)</IncludePath>
     <LibraryPath>$(SamEngineLibraries);$(OtherLibraries)</LibraryPath>
-    <TargetName>$(ProjectName)MPD</TargetName>
+    <TargetName>$(ProjectName)D</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_110|Win32'">
     <OutDir>$(BinDir)</OutDir>
@@ -109,7 +107,7 @@
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(CommonIncludes);$(SamEngineIncludes);$(IncludePath)</IncludePath>
     <LibraryPath>$(SamEngineLibraries);$(OtherLibraries)</LibraryPath>
-    <TargetName>$(ProjectName)MPD</TargetName>
+    <TargetName>$(ProjectName)D</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>

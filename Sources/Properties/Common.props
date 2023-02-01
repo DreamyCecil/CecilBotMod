@@ -3,7 +3,7 @@
   <PropertyGroup Label="UserMacros">
     <BinDir>$(SolutionDir)Bin\$(SE1SdkVS).$(Configuration)\</BinDir>
     <ObjDir>$(SolutionDir)Obj\$(SE1SdkVS).$(Configuration)\$(ProjectName)\</ObjDir>
-    <CommonIncludes>$(SolutionDir);$(ProjectDir)</CommonIncludes>
+    <CommonIncludes>$(SolutionDir);$(ProjectDir);$(ProjectDir)StdH\</CommonIncludes>
     <OtherLibraries>$(SolutionDir)Bin\$(SE1SdkVS).$(Configuration);$(LibraryPath)</OtherLibraries>
   </PropertyGroup>
 </Project>
