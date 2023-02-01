@@ -823,23 +823,17 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
 
       if (penNewBot == NULL) {
         // Create an entity for it
-        CPlacement3D pl(FLOAT3D(0.0f, 0.0f, 0.0f), ANGLE3D(0.0f, 0.0f, 0.0f));
+        const CPlacement3D pl(FLOAT3D(0.0f, 0.0f, 0.0f), ANGLE3D(0.0f, 0.0f, 0.0f));
 
         try {
           CTFileName fnmPlayer = CTString("Classes\\PlayerBot.ecl");
           penNewBot = (CPlayerBot *)wo.CreateEntity_t(pl, fnmPlayer);
 
-          // Add to the bot list
-          CPlayerBotController &pbNew = _aPlayerBots.Push();
-
-          penNewBot->m_pBot = &pbNew;
-          *penNewBot->m_pBot = penNewBot;
-
-          // Attach the character to it
+          // Attach character to it
           penNewBot->en_pcCharacter = pcBot;
 
           // Update settings and initialize
-          pbNew.UpdateBot(sbsSettings);
+          penNewBot->m_bot.UpdateBot(sbsSettings);
           penNewBot->Initialize();
 
           CPrintF(TRANS("Added bot '%s^r'\n"), penNewBot->GetPlayerName());

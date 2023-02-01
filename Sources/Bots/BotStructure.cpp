@@ -189,7 +189,7 @@ void CPlayerBotController::UpdateBot(const SBotSettings &sbs) {
   }
 
   // Various player settings
-  CPlayerSettings *pps = (CPlayerSettings *)pen->en_pcCharacter.pc_aubAppearance;
+  CPlayerSettings *pps = (CPlayerSettings *)GetPlayerBot()->en_pcCharacter.pc_aubAppearance;
     
   // Third person view
   if (props.m_sbsBot.b3rdPerson) {
@@ -330,7 +330,7 @@ void CPlayerBotController::BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
   }
 
   // Set bot's absolute viewpoint
-  sbl.plBotView = pen->en_plViewpoint;
+  sbl.plBotView = GetPlayerBot()->en_plViewpoint;
   sbl.plBotView.RelativeToAbsolute(pen->GetPlacement());
     
   // Bot targeting and following

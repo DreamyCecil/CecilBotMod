@@ -72,9 +72,7 @@ functions:
       *istr >> ulID;
 
       CPlayerBot *penBot = (CPlayerBot *)FindEntityByID(GetWorld(), ulID);
-      
-      penBot->m_pBot = &_aPlayerBots.Push();
-      *penBot->m_pBot = penBot;
+      penBot->InitBot();
     }
   };
 

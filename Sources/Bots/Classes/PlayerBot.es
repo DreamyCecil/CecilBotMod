@@ -42,50 +42,67 @@ thumbnail "";
 properties:
 {
   // Controller of this entity
-  CPlayerBotController *m_pBot;
+  CPlayerBotController m_bot;
 }
 
 components:
-  0 class CLASS_PLAYER "Classes\\Player.ecl",
 
 functions:
-  // Initialize the bot  
-  void InitBot(void) {
-    GetProps().Reset();
-    GetProps().ResetLastPos(this);
+  // Constructor
+  void CPlayerBot(void) {
+    m_bot.pen = this;
   };
-  
-  // Bot destructor
-  void EndBot(void) {
-    // Remove from the bot list
-    INDEX iBot = FindBotByPointer(this);
 
-    if (iBot != -1) {
-      // Replace current bot with the last one
-      CPlayerBotController &pbRemoved = _aPlayerBots.Pop();
-
-      // Only if current index is below the last one
-      if (iBot < _aPlayerBots.Count()) {
-        _aPlayerBots[iBot] = pbRemoved;
-      }
+  // Bot initialization
+  void InitBot(void) {
+    // Add to the bot list
+    if (!_aPlayerBots.IsMember(&m_bot)) {
+      _aPlayerBots.Add(&m_bot);
     }
+  };
+
+  // Upon class creation (bot addition)
+  void OnInitialize(const CEntityEvent &eeInput) {
+    CPlayer::OnInitialize(eeInput);
+    InitBot();
+  };
+
+  // Upon class destruction (bot removal)
+  void OnEnd(void) {
+    CPlayer::OnEnd();
+
+    // Remove from the bot list
+    if (_aPlayerBots.IsMember(&m_bot)) {
+      _aPlayerBots.Remove(&m_bot);
+    }
+  };
+
+  // Upon class copying
+  void Copy(CEntity &enOther, ULONG ulFlags) {
+    CPlayer::Copy(enOther, ulFlags);
+
+    // Copy bot properties
+    CPlayerBot &enBot = (CPlayerBot &)enOther;
+    m_bot = enBot.m_bot;
+
+    InitBot();
   };
 
   // Get bot properites
   SBotProperties &GetProps(void) {
-    return m_pBot->props;
+    return m_bot.props;
   };
 
   // Write to stream
   void Write_t(CTStream *ostr) {
     CPlayer::Write_t(ostr);
-    m_pBot->WriteBot(ostr);
+    m_bot.WriteBot(ostr);
   };
 
   // Read from stream
   void Read_t(CTStream *istr) {
     CPlayer::Read_t(istr);
-    m_pBot->ReadBot(istr);
+    m_bot.ReadBot(istr);
   };
 
   // [Cecil] 2021-06-12: Apply fake actions
@@ -96,9 +113,6 @@ functions:
 
   // Apply action for bots
   virtual void BotApplyAction(CPlayerAction &paAction) {
-    // Allow falling off all the time
-    en_fStepDnHeight = -1;
-
     // While alive
     if (GetFlags() & ENF_ALIVE) {
       if (m_penCamera == NULL && m_penActionMarker == NULL) {
@@ -106,12 +120,12 @@ functions:
         SBotLogic sbl;
 
         // Main bot logic
-        m_pBot->BotThinking(paAction, sbl);
+        m_bot.BotThinking(paAction, sbl);
 
         // Weapon functions
-        m_pBot->BotWeapons(paAction, sbl);
+        m_bot.BotWeapons(paAction, sbl);
 
-        m_pBot->BotSelectNewWeapon(sbl.iDesiredWeapon);
+        m_bot.BotSelectNewWeapon(sbl.iDesiredWeapon);
       }
 
     // While dead
@@ -133,7 +147,7 @@ functions:
           SendEvent(EEnd());
 
         // Try to respawn
-        } else if (m_pBot->ButtonAction()) {
+        } else if (m_bot.ButtonAction()) {
           paAction.pa_ulButtons |= PLACT_FIRE;
         }
       }
@@ -145,6 +159,15 @@ functions:
 
     vTranslation(1) *= fSpeedMul;
     vTranslation(3) *= fSpeedMul;
+
+    // Redetermine whether or not to allow falling while walking
+    if (Abs(vTranslation(3)) < plr_fSpeedForward / 1.99f
+     && Abs(vTranslation(1)) < plr_fSpeedSide / 1.99f) {
+      en_fStepDnHeight = 1.5f;
+
+    } else {
+      en_fStepDnHeight = -1;
+    }
   };
 
   // Override player initialization
@@ -152,15 +175,8 @@ functions:
     CPlayer::InitializePlayer();
 
     // Initialize the bot
-    InitBot();
-  };
-
-  // Upon class destruction (bot removal)
-  void OnEnd(void) {
-    CPlayer::OnEnd();
-
-    // End the bot
-    EndBot();
+    GetProps().Reset();
+    GetProps().ResetLastPos(this);
   };
 
 procedures:

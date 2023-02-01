@@ -27,7 +27,7 @@ BOOL CPlayerBotController::IsItemPickable(class CItem *penItem, const BOOL &bChe
     return FALSE;
   }
 
-  BOOL bPicked = (1 << CECIL_PlayerIndex(pen)) & penItem->m_ulPickedMask;
+  BOOL bPicked = (1 << CECIL_PlayerIndex(GetPlayerBot())) & penItem->m_ulPickedMask;
 
   return !bPicked && (penItem->en_RenderType == CEntity::RT_MODEL
                    || penItem->en_RenderType == CEntity::RT_SKAMODEL);

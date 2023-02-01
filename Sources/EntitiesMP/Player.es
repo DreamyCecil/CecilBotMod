@@ -3599,7 +3599,7 @@ functions:
 
     // if speeds are like walking
     if (Abs(paAction.pa_vTranslation(3))< plr_fSpeedForward/1.99f
-     && Abs(paAction.pa_vTranslation(1))< plr_fSpeedSide/1.99f) {
+      &&Abs(paAction.pa_vTranslation(1))< plr_fSpeedSide/1.99f) {
       // don't allow falling
       en_fStepDnHeight = 1.5f;
 
@@ -4972,7 +4972,6 @@ functions:
     SetPhysicsFlags(EPF_MODEL_WALKING|EPF_HASLUNGS);
     SetCollisionFlags(ECF_MODEL|((ECBI_PLAYER)<<ECB_IS));
     SetFlags(GetFlags()|ENF_ALIVE);
-
     // animation
     StartModelAnim(PLAYER_ANIM_STAND, AOF_LOOPING);
     TeleportPlayer(WLT_FIXED);

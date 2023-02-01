@@ -206,7 +206,7 @@ BOOL CPlayerBotController::IsEnemyPlayer(CEntity *penEnemy) {
     return FALSE;
   }
 
-  const CTString &strTeam = pen->en_pcCharacter.GetTeam();
+  const CTString &strTeam = GetPlayerBot()->en_pcCharacter.GetTeam();
 
   // No team has been set
   if (strTeam == "") {

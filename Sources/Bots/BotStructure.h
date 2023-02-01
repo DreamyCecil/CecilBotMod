@@ -147,20 +147,19 @@ struct DECL_DLL SBotProperties {
 class DECL_DLL CPlayerBotController {
   public:
     SBotProperties props;
-    CPlayerEntity *pen;
+    CMovableEntity *pen;
 
   public:
-    // Default constructor from entity
-    CPlayerBotController(CPlayerEntity *penSet = NULL) : pen(penSet)
-    {
-    };
-
-    // Assignment operator
+    // Copy bot properties
     CPlayerBotController &operator=(const CPlayerBotController &pbOther) {
       props = pbOther.props;
-      pen = pbOther.pen;
-
       return *this;
+    };
+
+    // Get player bot
+    CPlayerEntity *GetPlayerBot(void) {
+      ASSERT(IsDerivedFromDllClass(pen, CPlayerEntity_DLLClass));
+      return (CPlayerEntity *)pen;
     };
 
   public:

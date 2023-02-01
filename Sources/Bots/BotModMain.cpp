@@ -27,7 +27,7 @@ extern INDEX MOD_bEntityIDs;
 extern INDEX MOD_bBotThoughts;
 
 // [Cecil] 2021-06-11: List of bots
-CStaticStackArray<CPlayerBotController> _aPlayerBots;
+CDynamicContainer<CPlayerBotController> _aPlayerBots;
 
 // Find index of a bot in the list by a pointer to the entity
 INDEX FindBotByPointer(CPlayerEntity *pen) {
