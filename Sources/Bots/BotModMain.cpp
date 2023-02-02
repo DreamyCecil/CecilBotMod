@@ -102,7 +102,7 @@ void CECIL_BotGameStart(CSessionProperties &sp) {
 // [Cecil] 2021-06-12: Bot game cleanup
 void CECIL_BotGameCleanup(void) {
   // [Cecil] 2018-10-23: Clear the NavMesh
-  _pNavmesh->ClearNavMesh();
+  _pNavmesh->ClearNavmesh();
 
   // [Cecil] 2021-06-12: Clear bot list
   _aPlayerBots.Clear();
@@ -123,7 +123,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
 
   // NavMesh rendering
   if (MOD_iRenderNavMesh > 0) {
-    if (_pNavmesh->bnm_cbppPoints.Count() > 0)
+    if (_pNavmesh->bnm_aPoints.Count() > 0)
     {
       const BOOL bConnections = (MOD_iRenderNavMesh > 1);
       const BOOL bIDs = (MOD_iRenderNavMesh > 2);
@@ -136,8 +136,8 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
         pbppClosest = NearestNavMeshPointPos(penOwner, penOwner->GetPlayerWeapons()->m_vRayHit);
       }
 
-      FOREACHINDYNAMICCONTAINER(_pNavmesh->bnm_cbppPoints, CBotPathPoint, itbpp) {
-        CBotPathPoint *pbpp = itbpp;
+      for (INDEX iPoint = 0; iPoint < _pNavmesh->bnm_aPoints.Count(); iPoint++) {
+        CBotPathPoint *pbpp = _pNavmesh->bnm_aPoints.Pointer(iPoint);
         INDEX iPointID = pbpp->bpp_iIndex;
 
         FLOAT3D vPointOnScreen;
@@ -214,11 +214,8 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
           }
 
           // connections
-          INDEX ctTargets = 0;
-
           {FOREACHINDYNAMICCONTAINER(pbpp->bpp_cbppPoints, CBotPathPoint, itbppT) {
             CBotPathPoint *pbppT = itbppT;
-            ctTargets++;
 
             FLOAT3D vOnScreen1, vOnScreen2;
             FLOAT3D vPoint2 = pbppT->bpp_vPos;

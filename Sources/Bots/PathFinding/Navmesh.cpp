@@ -31,7 +31,7 @@ CBotNavmesh::CBotNavmesh(void) {
 };
 
 CBotNavmesh::~CBotNavmesh(void) {
-  ClearNavMesh();
+  ClearNavmesh();
 };
 
 // Writing & Reading
@@ -39,7 +39,7 @@ void CBotNavmesh::WriteNavmesh(CTStream *strm) {
   strm->WriteID_t("BNMV"); // Bot NavMesh Version
   *strm << INDEX(CURRENT_NAVMESH_VERSION); // latest NavMesh version
 
-  INDEX ctPoints = bnm_cbppPoints.Count();
+  INDEX ctPoints = bnm_aPoints.Count();
 
   *strm << bnm_bGenerated; // write if generated or not
   *strm << bnm_iNextPointID; // next point ID
@@ -47,7 +47,7 @@ void CBotNavmesh::WriteNavmesh(CTStream *strm) {
 
   // write points
   for (INDEX iPoint = 0; iPoint < ctPoints; iPoint++) {
-    CBotPathPoint *pbpp = bnm_cbppPoints.Pointer(iPoint);
+    CBotPathPoint *pbpp = bnm_aPoints.Pointer(iPoint);
     pbpp->WritePoint(strm);
   }
 };
@@ -69,17 +69,12 @@ void CBotNavmesh::ReadNavmesh(CTStream *strm) {
   *strm >> bnm_iNextPointID; // next point ID
   *strm >> ctPoints; // amount of points
 
-  // create points
-  INDEX iPoint;
+  // Create points
+  bnm_aPoints.Push(ctPoints);
 
-  for (iPoint = 0; iPoint < ctPoints; iPoint++) {
-    CBotPathPoint *bppNew = new CBotPathPoint();
-    bnm_cbppPoints.Add(bppNew);
-  }
-
-  // read points
-  for (iPoint = 0; iPoint < ctPoints; iPoint++) {
-    CBotPathPoint *pbpp = &bnm_cbppPoints[iPoint];
+  // Read points
+  for (INDEX iPoint = 0; iPoint < ctPoints; iPoint++) {
+    CBotPathPoint *pbpp = &bnm_aPoints[iPoint];
     pbpp->ReadPoint(strm, iVersion);
   }
 };
@@ -112,7 +107,7 @@ void CBotNavmesh::LoadNavmesh(CWorld &wo) {
   CTFileStream strm;
   strm.Open_t(fnFile);
 
-  ClearNavMesh();
+  ClearNavmesh();
 
   bnm_pwoWorld = &wo;
   ReadNavmesh(&strm);
@@ -121,7 +116,7 @@ void CBotNavmesh::LoadNavmesh(CWorld &wo) {
   strm.Close();
 };
 
-void CBotNavmesh::ClearNavMesh(void) {
+void CBotNavmesh::ClearNavmesh(void) {
   // [Cecil] 2021-06-22: Untarget all bots
   for (INDEX iBot = 0; iBot < _aPlayerBots.Count(); iBot++) {
     CPlayerBot *penBot = (CPlayerBot *)_aPlayerBots[iBot].pen;
@@ -130,31 +125,25 @@ void CBotNavmesh::ClearNavMesh(void) {
     penBot->GetProps().m_pbppTarget = NULL;
   }
 
-  // destroy all path points
-  for (INDEX iDeletePoint = 0; iDeletePoint < bnm_cbppPoints.Count(); iDeletePoint++) {
-    CBotPathPoint *pbpp = bnm_cbppPoints.Pointer(iDeletePoint);
-    delete pbpp;
-  }
+  // Destroy path points
+  bnm_aPoints.Clear();
 
-  bnm_cbppPoints.Clear();
-
-  // clear pointers to polygons
+  // Clear pointers to polygons
   bnm_apbpoPolygons.Clear();
 
-  // ready for the next generation
+  // Ready for the next generation
   bnm_bGenerated = FALSE;
   bnm_iNextPointID = 0;
 };
 
 // Add a new path point to the navmesh
 CBotPathPoint *CBotNavmesh::AddPoint(const FLOAT3D &vPoint, CPathPolygon *bppo) {
-  CBotPathPoint *bppNew = new CBotPathPoint;
-  bppNew->bpp_iIndex = bnm_iNextPointID++;
-  bppNew->bpp_vPos = vPoint;
-  bppNew->bpp_bppoPolygon = bppo;
-  bnm_cbppPoints.Add(bppNew);
+  CBotPathPoint &bppNew = bnm_aPoints.Push();
+  bppNew.bpp_iIndex = bnm_iNextPointID++;
+  bppNew.bpp_vPos = vPoint;
+  bppNew.bpp_bppoPolygon = bppo;
 
-  return bppNew;
+  return &bppNew;
 };
 
 // Find a point by its ID
@@ -164,8 +153,8 @@ CBotPathPoint *CBotNavmesh::FindPointByID(INDEX iPoint) {
     return NULL;
   }
 
-  FOREACHINDYNAMICCONTAINER(bnm_cbppPoints, CBotPathPoint, itbpp) {
-    CBotPathPoint *pbpp = itbpp;
+  for (INDEX i = 0; i < bnm_aPoints.Count(); i++) {
+    CBotPathPoint *pbpp = bnm_aPoints.Pointer(i);
 
     if (pbpp->bpp_iIndex == iPoint) {
       return pbpp;
@@ -191,8 +180,8 @@ CBotPathPoint *CBotNavmesh::FindImportantPoint(CPlayerBotController &pb, INDEX i
   // [Cecil] 2020-07-28: Reference entity
   CEntity *penReference = NULL;
 
-  FOREACHINDYNAMICCONTAINER(bnm_cbppPoints, CBotPathPoint, itbpp) {
-    CBotPathPoint *pbpp = itbpp;
+  for (INDEX i = 0; i < bnm_aPoints.Count(); i++) {
+    CBotPathPoint *pbpp = bnm_aPoints.Pointer(i);
 
     // not important
     if (pbpp->bpp_penImportant == NULL) {
@@ -314,9 +303,9 @@ void CBotNavmesh::GenerateNavmesh(CWorld *pwo) {
       
       // Check if there's a similar point already
       CBotPathPoint *pbppCheck = NULL;
-      
-      FOREACHINDYNAMICCONTAINER(bnm_cbppPoints, CBotPathPoint, itbpp) {
-        pbppCheck = itbpp;
+
+      for (INDEX iCheck = 0; iCheck < bnm_aPoints.Count(); iCheck++) {
+        pbppCheck = bnm_aPoints.Pointer(iCheck);
 
         FLOAT fDiff = (pbppCheck->bpp_vPos - vPoint).Length();
 
@@ -369,8 +358,8 @@ void CBotNavmesh::GenerateNavmesh(CWorld *pwo) {
         // Check if there's a similar point already
         BOOL bSkip = FALSE;
 
-        FOREACHINDYNAMICCONTAINER(bnm_cbppPoints, CBotPathPoint, itbpp) {
-          CBotPathPoint *pbppCheck = itbpp;
+        for (INDEX iCheck = 0; iCheck < bnm_aPoints.Count(); iCheck++) {
+          CBotPathPoint *pbppCheck = bnm_aPoints.Pointer(iCheck);
 
           FLOAT fDiff = (pbppCheck->bpp_vPos - vPoint).Length();
 
@@ -392,15 +381,15 @@ void CBotNavmesh::GenerateNavmesh(CWorld *pwo) {
     #endif
   }
 
-  CPrintF("%d polygons, generated %d points\n", bnm_apbpoPolygons.Count(), bnm_cbppPoints.Count());
+  CPrintF("%d polygons, generated %d points\n", bnm_apbpoPolygons.Count(), bnm_aPoints.Count());
 };
 
 void CBotNavmesh::ConnectPoints(INDEX iPoint) {
-  if (iPoint < 0 || iPoint >= bnm_cbppPoints.Count()) {
+  if (iPoint < 0 || iPoint >= bnm_aPoints.Count()) {
     return;
   }
 
-  CBotPathPoint *bppCurrent = &bnm_cbppPoints[iPoint];
+  CBotPathPoint *bppCurrent = bnm_aPoints.Pointer(iPoint);
 
   // no polygon
   if (bppCurrent->bpp_bppoPolygon == NULL) {
@@ -413,10 +402,10 @@ void CBotNavmesh::ConnectPoints(INDEX iPoint) {
   INDEX ctConnections = 0;
 
   // For each point, go through all points again
-  INDEX ctPoints = bnm_cbppPoints.Count();
+  INDEX ctPoints = bnm_aPoints.Count();
 
   for (INDEX iPointIter = 0; iPointIter < ctPoints; iPointIter++) {
-    CBotPathPoint *bppTarget = bnm_cbppPoints.Pointer(iPointIter);
+    CBotPathPoint *bppTarget = bnm_aPoints.Pointer(iPointIter);
 
     // Skip itself, with no polygon, existing targets, high points
     if (bppCurrent == bppTarget || bppTarget->bpp_bppoPolygon == NULL
@@ -523,10 +512,10 @@ void CBotNavmesh::ConnectPoints(INDEX iPoint) {
   }
 
   if (ctConnections <= 0) {
-    CPrintF("Point %d/%d: No connections\n", iPoint + 1, bnm_cbppPoints.Count());
+    CPrintF("Point %d/%d: No connections\n", iPoint + 1, bnm_aPoints.Count());
 
   } else {
-    CPrintF("Point %d/%d: Connected to %d points\n", iPoint + 1, bnm_cbppPoints.Count(), ctConnections);
+    CPrintF("Point %d/%d: Connected to %d points\n", iPoint + 1, bnm_aPoints.Count(), ctConnections);
   }
 };
 
@@ -535,8 +524,8 @@ void CBotNavmesh::CleanupPoints(void) {
   CDynamicContainer<CBotPathPoint> cToRemove;
   CDynamicContainer<CBotPathPoint> cToKeep;
 
-  FOREACHINDYNAMICCONTAINER(bnm_cbppPoints, CBotPathPoint, itbpp) {
-    CBotPathPoint *pbpp = itbpp;
+  for (INDEX iPoint = 0; iPoint < bnm_aPoints.Count(); iPoint++) {
+    CBotPathPoint *pbpp = bnm_aPoints.Pointer(iPoint);
 
     // No targets
     if (pbpp->bpp_cbppPoints.Count() == 0) {
@@ -565,15 +554,9 @@ void CBotNavmesh::CleanupPoints(void) {
 
   CPrintF("Removed %d orphan points\n", cToRemove.Count());
 
-  while (cToRemove.Count() > 0) {
-    CBotPathPoint *pbppRemove = cToRemove.Pointer(0);
-
+  FOREACHINDYNAMICCONTAINER(cToRemove, CBotPathPoint, itbppRemove) {
     // Remove from navmesh
-    bnm_cbppPoints.Remove(pbppRemove);
-
-    // Delete from memory
-    cToRemove.Remove(pbppRemove);
-    delete pbppRemove;
+    bnm_aPoints.Delete(itbppRemove);
   }
 };
 
@@ -623,8 +606,8 @@ CBotPathPoint *CBotNavmesh::FindNextPoint(CBotPathPoint *pbppSrc, CBotPathPoint 
   CPathPoint *ppSrc = NULL;
 
   // recreate every point
-  FOREACHINDYNAMICCONTAINER(_pNavmesh->bnm_cbppPoints, CBotPathPoint, itbpp) {
-    CBotPathPoint *pbpp = itbpp;
+  for (INDEX iPoint = 0; iPoint < bnm_aPoints.Count(); iPoint++) {
+    CBotPathPoint *pbpp = bnm_aPoints.Pointer(iPoint);
     CPathPoint *ppPoint = new CPathPoint;
 
     ppPoint->pp_bppPoint = pbpp;

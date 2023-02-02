@@ -19,9 +19,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Constructor & Destructor
 CBotPathPoint::CBotPathPoint(void) {
+  Reset();
+};
+
+CBotPathPoint::~CBotPathPoint(void) {
+  Clear();
+};
+
+// Reset path point
+void CBotPathPoint::Reset(void) {
   bpp_iIndex = -1;
   bpp_vPos = FLOAT3D(0.0f, 0.0f, 0.0f);
-  bpp_fRange = 1.0f; // normal range for walking points
+  bpp_fRange = 1.0f; // Normal range for walking points
   bpp_ulFlags = 0;
   bpp_penImportant = NULL;
   bpp_pbppNext = NULL;
@@ -31,15 +40,18 @@ CBotPathPoint::CBotPathPoint(void) {
   bpp_bppoPolygon = NULL;
 };
 
-CBotPathPoint::~CBotPathPoint(void) {
-  // clear connections
+// Clear path point
+void CBotPathPoint::Clear(void) {
+  // Clear connections
   bpp_cbppPoints.Clear();
 
-  // destroy the polygon
+  // Destroy the polygon
   if (bpp_bppoPolygon != NULL) {
     delete bpp_bppoPolygon;
     bpp_bppoPolygon = NULL;
   }
+
+  Reset();
 };
 
 // Writing & Reading
@@ -60,7 +72,7 @@ void CBotPathPoint::WritePoint(CTStream *strm) {
 
   // write next important point
   if (bpp_pbppNext != NULL) {
-    *strm << _pNavmesh->bnm_cbppPoints.Index(bpp_pbppNext);
+    *strm << _pNavmesh->bnm_aPoints.Index(bpp_pbppNext);
   } else {
     *strm << INDEX(-1);
   }
@@ -78,7 +90,7 @@ void CBotPathPoint::WritePoint(CTStream *strm) {
   
   // write indices
   FOREACHINDYNAMICCONTAINER(bpp_cbppPoints, CBotPathPoint, itbpp) {
-    INDEX iPoint = _pNavmesh->bnm_cbppPoints.Index(itbpp);
+    INDEX iPoint = _pNavmesh->bnm_aPoints.Index(itbpp);
     *strm << iPoint;
   }
 
@@ -137,7 +149,7 @@ void CBotPathPoint::ReadPoint(CTStream *strm, INDEX iVersion) {
   
   // set next important point
   if (iNext != -1) {
-    bpp_pbppNext = &_pNavmesh->bnm_cbppPoints[iNext];
+    bpp_pbppNext = &_pNavmesh->bnm_aPoints[iNext];
   } else {
     bpp_pbppNext = NULL;
   }
@@ -153,7 +165,7 @@ void CBotPathPoint::ReadPoint(CTStream *strm, INDEX iVersion) {
     INDEX iPoint;
     *strm >> iPoint;
 
-    CBotPathPoint *pbpp = &_pNavmesh->bnm_cbppPoints[iPoint];
+    CBotPathPoint *pbpp = &_pNavmesh->bnm_aPoints[iPoint];
     bpp_cbppPoints.Add(pbpp);
 
     ctConnections--;

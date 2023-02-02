@@ -969,7 +969,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
 
       } else {
         if (_pNavmesh->bnm_bGenerated) {
-          _pNavmesh->ClearNavMesh();
+          _pNavmesh->ClearNavmesh();
           CPrintF("[NavMeshGenerator]: NavMesh has been cleared\n");
 
         } else {
@@ -988,14 +988,14 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
 
       } catch (char *strError) {
         CPrintF("%s\n", strError);
-        _pNavmesh->ClearNavMesh();
+        _pNavmesh->ClearNavmesh();
       }
     } break;
     
     // NavMesh clearing
     case ESA_NAVMESH_CLEAR: {
       CPrintF("NavMesh has been cleared\n");
-      _pNavmesh->ClearNavMesh();
+      _pNavmesh->ClearNavmesh();
     } break;
 
     // NavMesh editing
@@ -1041,8 +1041,8 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
 
       if (pbpp != NULL) {
         // Remove this point from every connection
-        FOREACHINDYNAMICCONTAINER(_pNavmesh->bnm_cbppPoints, CBotPathPoint, itbpp) {
-          CBotPathPoint *pbppCheck = itbpp;
+        for (INDEX iPoint = 0; iPoint < _pNavmesh->bnm_aPoints.Count(); iPoint++) {
+          CBotPathPoint *pbppCheck = _pNavmesh->bnm_aPoints.Pointer(iPoint);
 
           // Remove connection with this point
           if (pbppCheck->bpp_cbppPoints.IsMember(pbpp)) {
@@ -1051,10 +1051,9 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
         }
 
         // Remove point from the NavMesh
-        _pNavmesh->bnm_cbppPoints.Remove(pbpp);
-        delete pbpp;
+        _pNavmesh->bnm_aPoints.Delete(pbpp);
 
-        _pShell->Execute("MOD_iNavMeshPoint = -1;");
+        MOD_iNavMeshPoint = -1;
       }
     } break;
 

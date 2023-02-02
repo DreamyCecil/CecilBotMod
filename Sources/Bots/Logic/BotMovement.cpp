@@ -32,7 +32,7 @@ BOOL CPlayerBotController::NoPosChange(void) {
 
 // [Cecil] 2021-06-14: Try to find some path
 void CPlayerBotController::BotPathFinding(SBotLogic &sbl) {
-  if (_pNavmesh->bnm_cbppPoints.Count() <= 0) {
+  if (_pNavmesh->bnm_aPoints.Count() <= 0) {
     return;
   }
 

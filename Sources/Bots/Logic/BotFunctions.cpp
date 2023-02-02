@@ -30,7 +30,7 @@ SBotLogic::SBotLogic(void) : ulFlags(0), peiTarget(NULL),  aAim(0.0f, 0.0f, 0.0f
 
 // [Cecil] 2019-05-28: Find nearest NavMesh point to some position
 CBotPathPoint *NearestNavMeshPointPos(CEntity *pen, const FLOAT3D &vCheck) {
-  if (_pNavmesh->bnm_cbppPoints.Count() <= 0) {
+  if (_pNavmesh->bnm_aPoints.Count() <= 0) {
     return NULL;
   }
 
@@ -44,8 +44,8 @@ CBotPathPoint *NearestNavMeshPointPos(CEntity *pen, const FLOAT3D &vCheck) {
   FLOAT fDist = 1000.0f;
   CBotPathPoint *pbppNearest = NULL;
 
-  FOREACHINDYNAMICCONTAINER(_pNavmesh->bnm_cbppPoints, CBotPathPoint, itbpp) {
-    CBotPathPoint *pbpp = itbpp;
+  for (INDEX iPoint = 0; iPoint < _pNavmesh->bnm_aPoints.Count(); iPoint++) {
+    CBotPathPoint *pbpp = _pNavmesh->bnm_aPoints.Pointer(iPoint);
     FLOAT3D vPosDiff = (pbpp->bpp_vPos - vCheck);
 
     // Vertical and horizontal position differences
@@ -69,7 +69,7 @@ CBotPathPoint *NearestNavMeshPointPos(CEntity *pen, const FLOAT3D &vCheck) {
 
 // [Cecil] 2021-06-21: Find nearest NavMesh point to the bot
 CBotPathPoint *CPlayerBotController::NearestNavMeshPointBot(BOOL bSkipCurrent) {
-  if (_pNavmesh->bnm_cbppPoints.Count() <= 0) {
+  if (_pNavmesh->bnm_aPoints.Count() <= 0) {
     return NULL;
   }
 
@@ -82,8 +82,8 @@ CBotPathPoint *CPlayerBotController::NearestNavMeshPointBot(BOOL bSkipCurrent) {
   FLOAT fDist = 1000.0f;
   CBotPathPoint *pbppNearest = NULL;
 
-  FOREACHINDYNAMICCONTAINER(_pNavmesh->bnm_cbppPoints, CBotPathPoint, itbpp) {
-    CBotPathPoint *pbpp = itbpp;
+   for (INDEX iPoint = 0; iPoint < _pNavmesh->bnm_aPoints.Count(); iPoint++) {
+    CBotPathPoint *pbpp = _pNavmesh->bnm_aPoints.Pointer(iPoint);
     FLOAT3D vPosDiff = (pbpp->bpp_vPos - vBot);
 
     // Vertical and horizontal position differences

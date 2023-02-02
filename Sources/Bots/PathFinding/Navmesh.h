@@ -32,11 +32,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // [Cecil] 2021-09-09: Legacy path point version
 #define LEGACY_PATHPOINT_VERSION 4
 
-// [Cecil] 2018-10-23: Bot NavMesh
+// [Cecil] 2018-10-23: Bot Navigation Mesh
 class DECL_DLL CBotNavmesh {
   public:
     // All path points
-    CDynamicContainer<CBotPathPoint> bnm_cbppPoints;
+    CDynamicStackArray<CBotPathPoint> bnm_aPoints;
     // All brush polygons in the world
     CStaticArray<CBrushPolygon *> bnm_apbpoPolygons;
     // World for this NavMesh
@@ -45,7 +45,7 @@ class DECL_DLL CBotNavmesh {
     BOOL bnm_bGenerated; // has NavMesh been generated or not
     INDEX bnm_iNextPointID; // index for the next point
 
-    // Find next point in the NavMesh
+    // Find next point in the navmesh
     CBotPathPoint *FindNextPoint(CBotPathPoint *bppSrc, CBotPathPoint *bppDst);
     CBotPathPoint *ReconstructPath(CPathPoint *ppCurrent);
 
@@ -61,8 +61,8 @@ class DECL_DLL CBotNavmesh {
     void SaveNavmesh(CWorld &wo);
     void LoadNavmesh(CWorld &wo);
 
-    // Clear the NavMesh
-    void ClearNavMesh(void);
+    // Clear the navmesh
+    void ClearNavmesh(void);
 
     // Add a new path point to the navmesh
     CBotPathPoint *AddPoint(const FLOAT3D &vPoint, CPathPolygon *bppo);

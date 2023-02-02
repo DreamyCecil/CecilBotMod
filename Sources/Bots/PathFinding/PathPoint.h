@@ -48,9 +48,16 @@ class DECL_DLL CBotPathPoint {
     // Possible connections
     CDynamicContainer<CBotPathPoint> bpp_cbppPoints;
 
+  public:
     // Constructor & Destructor
     CBotPathPoint(void);
     ~CBotPathPoint(void);
+
+    // Reset path point
+    void Reset(void);
+
+    // Clear path point
+    void Clear(void);
 
     // Writing & Reading
     void WritePoint(CTStream *strm);

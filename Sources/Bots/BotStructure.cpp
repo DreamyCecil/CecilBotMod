@@ -95,14 +95,14 @@ void CPlayerBotController::WriteBot(CTStream *strm) {
   *strm << props.m_tmLastItemSearch;
 
   // Write current point
-  if (props.m_pbppCurrent == NULL || !_pNavmesh->bnm_cbppPoints.IsMember(props.m_pbppCurrent)) {
+  if (props.m_pbppCurrent == NULL) {
     *strm << (INDEX)-1;
   } else {
     *strm << props.m_pbppCurrent->bpp_iIndex;
   }
 
   // Write target point
-  if (props.m_pbppTarget == NULL || !_pNavmesh->bnm_cbppPoints.IsMember(props.m_pbppTarget)) {
+  if (props.m_pbppTarget == NULL) {
     *strm << (INDEX)-1;
   } else {
     *strm << props.m_pbppTarget->bpp_iIndex;

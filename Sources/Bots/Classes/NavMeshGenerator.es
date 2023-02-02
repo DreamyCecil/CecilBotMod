@@ -56,7 +56,7 @@ procedures:
     autowait(0.1f);
 
     m_iPoint = _iLastPoint; // [Cecil] TEMP
-    m_ctPoints = _pNavmesh->bnm_cbppPoints.Count();
+    m_ctPoints = _pNavmesh->bnm_aPoints.Count();
     EDGES_LOOP;
 
     CPrintF("-- New Generator:\n");
