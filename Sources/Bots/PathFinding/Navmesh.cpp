@@ -173,38 +173,35 @@ CBotPathPoint *CBotNavmesh::FindImportantPoint(CPlayerBotController &pb, INDEX i
     return NULL;
   }
 
-  // create array of points
+  // Create array of points
   CDynamicContainer<CBotPathPoint> cbpp;
   INDEX iImportantPoint = 0;
-
-  // [Cecil] 2020-07-28: Reference entity
-  CEntity *penReference = NULL;
 
   for (INDEX i = 0; i < bnm_aPoints.Count(); i++) {
     CBotPathPoint *pbpp = bnm_aPoints.Pointer(i);
 
-    // not important
-    if (!ASSERT_ENTITY(pbpp->bpp_penImportant)) {
-      continue;
-    }
+    // Not important
+    if (!pbpp->IsImportant()) continue;
 
+    // Entity is not important at the moment
     CEntity *penEntity = pbpp->bpp_penImportant;
-    
-    // not important at the moment
-    if (penEntity == NULL || !pb.ImportantForNavMesh(penEntity)) {
+
+    if (penEntity != NULL && !pb.ImportantForNavMesh(penEntity)) {
       continue;
     }
 
-    penReference = penEntity;
     cbpp.Add(pbpp);
     iImportantPoint++;
   }
 
   if (iImportantPoint > 0) {
     CBotPathPoint *pbppReturn = NULL;
-    INDEX iIndex = penReference->IRnd() % iImportantPoint;
 
-    // pick specific point
+    // This is safe; CEntity::IRnd() should be static but it's not
+    CEntity *penRND = NULL;
+    INDEX iIndex = penRND->IRnd() % iImportantPoint;
+
+    // Pick specific point
     if (iPoint >= 0) {
       iIndex = Clamp(iPoint, (INDEX)0, INDEX(iImportantPoint - 1));
       pbppReturn = cbpp.Pointer(iIndex);
@@ -213,7 +210,7 @@ CBotPathPoint *CBotNavmesh::FindImportantPoint(CPlayerBotController &pb, INDEX i
       return pbppReturn;
     }
 
-    // pick random point
+    // Pick random point
     pbppReturn = cbpp.Pointer(iIndex);
     cbpp.Clear();
 

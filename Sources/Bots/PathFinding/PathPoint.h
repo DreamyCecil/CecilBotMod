@@ -66,6 +66,9 @@ class DECL_DLL CBotPathPoint {
     // Path points comparison
     BOOL operator==(const CBotPathPoint &bppOther) const;
 
+    // Check if the point is important
+    BOOL IsImportant(void);
+
     // Check if the point is locked (cannot be passed through)
     BOOL IsLocked(void);
 
