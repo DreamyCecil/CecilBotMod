@@ -188,7 +188,7 @@ BOOL CBotPathPoint::operator==(const CBotPathPoint &bppOther) const {
 
 // Check if the point is important
 BOOL CBotPathPoint::IsImportant(void) {
-  return ASSERT_ENTITY(bpp_penImportant);
+  return (bpp_ulFlags & PPF_IMPORTANT) || ASSERT_ENTITY(bpp_penImportant);
 };
 
 // Check if the point is locked (cannot be passed through)

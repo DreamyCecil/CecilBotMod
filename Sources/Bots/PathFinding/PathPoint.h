@@ -19,12 +19,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "PathPolygon.h"
 
 // Path Point Flags (rearranging them can break previously created NavMeshes)
-#define PPF_WALK        (1 << 0) // don't run from this point
-#define PPF_JUMP        (1 << 1) // jump from this point
-#define PPF_CROUCH      (1 << 2) // crouch while going from this point
-#define PPF_OVERRIDE    (1 << 3) // apply point's flags before reaching the point
-#define PPF_UNREACHABLE (1 << 4) // cannot be reached directly by foot (only for target points)
-#define PPF_TELEPORT    (1 << 5) // acts as a teleport and has 0 distance to any target point
+#define PPF_WALK        (1 << 0) // Don't run from this point
+#define PPF_JUMP        (1 << 1) // Jump from this point
+#define PPF_CROUCH      (1 << 2) // Crouch while going from this point
+#define PPF_OVERRIDE    (1 << 3) // Apply point's flags before reaching the point
+#define PPF_UNREACHABLE (1 << 4) // Cannot be reached directly by foot (only for target points)
+#define PPF_TELEPORT    (1 << 5) // Acts as a teleport and has 0 distance to any target point
+#define PPF_IMPORTANT   (1 << 6) // This point is significant for one reason or another
 
 // [Cecil] 2018-10-22: Bot Path Points
 class DECL_DLL CBotPathPoint {
@@ -33,7 +34,6 @@ class DECL_DLL CBotPathPoint {
     FLOAT3D bpp_vPos;  // position of this point
     FLOAT bpp_fRange;  // walking radius of a point
     ULONG bpp_ulFlags; // special point flags
-    // [Cecil] TODO: Add ability to just mark points as "important" without any entity attached to them
     CEntity *bpp_penImportant; // important entity
     CBotPathPoint *bpp_pbppNext; // next important point
     // [Cecil] TODO: Add defending time which would force bots to stay on important points for some time

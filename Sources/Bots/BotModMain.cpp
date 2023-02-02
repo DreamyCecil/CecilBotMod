@@ -321,6 +321,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
               POINT_DESC(OVERRIDE);
               POINT_DESC(UNREACHABLE);
               POINT_DESC(TELEPORT);
+              POINT_DESC(IMPORTANT);
 
               #undef POINT_DESC
             }
