@@ -30,7 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // [Cecil] 2021-06-14: Bot logic settings
 struct SBotLogic {
   ULONG ulFlags; // Things bot is thinking about
-  EntityInfo *peiTarget; // Info of a target that bot is looking at
+  FLOATaabbox3D boxTarget; // Collision box of a target
   const struct SBotWeaponConfig *aWeapons; // Selected weapon config
 
   CPlacement3D plBotView; // Bot's viewpoint

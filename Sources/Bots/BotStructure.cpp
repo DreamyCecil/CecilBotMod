@@ -331,7 +331,7 @@ void CPlayerBotController::BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
 
   // Set bot's absolute viewpoint
   sbl.plBotView = GetPlayerBot()->en_plViewpoint;
-  sbl.plBotView.RelativeToAbsolute(pen->GetPlacement());
+  sbl.plBotView.RelativeToAbsoluteSmooth(pen->GetPlacement());
     
   // Bot targeting and following
   CEntity *penBotTarget = ClosestEnemy(props.m_fTargetDist, sbl);
@@ -357,7 +357,10 @@ void CPlayerBotController::BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
   // Enemy exists
   if (props.m_penTarget != NULL) {
     sbl.ulFlags |= BLF_ENEMYEXISTS;
-    sbl.peiTarget = (EntityInfo *)props.m_penTarget->GetEntityInfo();
+
+    // Subtracting position because CEntity::GetBoundingBox() returns absolute position
+    props.m_penTarget->GetBoundingBox(sbl.boxTarget);
+    sbl.boxTarget -= props.m_penTarget->GetPlacement().pl_PositionVector;
 
     // Can see the enemy
     if (CastBotRay(props.m_penTarget, sbl, TRUE)) {

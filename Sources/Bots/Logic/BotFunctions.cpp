@@ -22,8 +22,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "EntitiesMP/MovingBrush.h"
 
 // Constructor
-SBotLogic::SBotLogic(void) : ulFlags(0), peiTarget(NULL),  aAim(0.0f, 0.0f, 0.0f),
-  plBotView(FLOAT3D(0.0f, 0.0f, 0.0f), ANGLE3D(0.0f, 0.0f, 0.0f)), iDesiredWeapon(WPN_DEFAULT_1)
+SBotLogic::SBotLogic(void) : ulFlags(0), boxTarget(FLOAT3D(0.0f, 0.0f, 0.0f), FLOAT3D(0.0f, 0.0f, 0.0f)),
+  aAim(0.0f, 0.0f, 0.0f), plBotView(FLOAT3D(0.0f, 0.0f, 0.0f), ANGLE3D(0.0f, 0.0f, 0.0f)), iDesiredWeapon(WPN_DEFAULT_1)
 {
   aWeapons = PickWeaponConfig();
 };
@@ -167,15 +167,10 @@ BOOL CPlayerBotController::CastBotRay(CEntity *penTarget, const SBotLogic &sbl, 
     return FALSE;
   }
 
-  FLOAT3D vBody = FLOAT3D(0.0f, 0.0f, 0.0f);
-
   // Target's body center
-  if (sbl.peiTarget != NULL) {
-    FLOAT *v = sbl.peiTarget->vTargetCenter;
-    vBody = FLOAT3D(v[0], v[1], v[2]) * penTarget->GetRotationMatrix();
-  }
+  FLOAT3D vTarget = penTarget->GetPlacement().pl_PositionVector
+                  + sbl.boxTarget.Center() * penTarget->GetRotationMatrix();
 
-  FLOAT3D vTarget = penTarget->GetPlacement().pl_PositionVector + vBody;
   CCastRay crBot(pen, sbl.ViewPos(), vTarget);
 
   crBot.cr_ttHitModels = CCastRay::TT_NONE;

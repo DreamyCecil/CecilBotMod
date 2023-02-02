@@ -262,17 +262,9 @@ void CPlayerBotController::BotAim(CPlayerAction &pa, SBotLogic &sbl) {
     return;
   }
 
-  EntityInfo *peiTarget = (EntityInfo *)props.m_penTarget->GetEntityInfo();
-  FLOAT3D vEnemy;
-
-  // Get target center position
-  if (peiTarget != NULL) {
-    GetEntityInfoPosition(props.m_penTarget, peiTarget->vTargetCenter, vEnemy);
-
-  // Just enemy position if no entity info
-  } else {
-    vEnemy = props.m_penTarget->GetPlacement().pl_PositionVector + FLOAT3D(0.0f, 1.0f, 0.0f) * props.m_penTarget->GetRotationMatrix();
-  }
+  // Get target's center
+  FLOAT3D vEnemy = props.m_penTarget->GetPlacement().pl_PositionVector
+                 + sbl.boxTarget.Center() * props.m_penTarget->GetRotationMatrix();
 
   // Current weapon
   const SBotWeaponConfig &bw = sbl.aWeapons[props.m_iBotWeapon];
