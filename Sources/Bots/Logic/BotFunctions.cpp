@@ -274,7 +274,7 @@ CEntity *CPlayerBotController::ClosestEnemy(FLOAT &fLast, const SBotLogic &sbl) 
     FLOAT3D vEnemy = penCheck->GetPlacement().pl_PositionVector;
 
     FLOAT fHealth = ((CMovableEntity *)penCheck)->GetHealth();
-    FLOAT fDist = DistanceToPos(sbl.ViewPos(), vEnemy);
+    FLOAT fDist = PosDist(sbl.ViewPos(), vEnemy);
     BOOL bCurrentVisible = CastBotRay(penCheck, sbl, TRUE);
     CEntity *penTargetEnemy = NULL;
 
@@ -332,8 +332,8 @@ CEntity *CPlayerBotController::ClosestRealPlayer(FLOAT3D vCheckPos, FLOAT &fDist
 
     FLOAT3D vPlayer = penReal->GetPlacement().pl_PositionVector;
 
-    if (fDist == -1.0f || DistanceToPos(vCheckPos, vPlayer) < fDist) {
-      fDist = DistanceToPos(vCheckPos, vPlayer);
+    if (fDist == -1.0f || PosDist(vCheckPos, vPlayer) < fDist) {
+      fDist = PosDist(vCheckPos, vPlayer);
       penReturn = penReal;
     }
   }

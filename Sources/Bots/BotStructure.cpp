@@ -324,7 +324,7 @@ void CPlayerBotController::BotWeapons(CPlayerAction &pa, SBotLogic &sbl) {
 void CPlayerBotController::BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
   const FLOAT3D &vBotPos = pen->GetPlacement().pl_PositionVector;
 
-  if (DistanceToPos(vBotPos, props.m_vLastPos) > 2.0f) {
+  if (PosDist(vBotPos, props.m_vLastPos) > 2.0f) {
     props.m_tmPosChange = _pTimer->CurrentTick();
     props.m_vLastPos = vBotPos;
   }

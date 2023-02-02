@@ -19,31 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // --- Helper functions
 
-// [Cecil] 2019-06-02: Function from Serious Gang mod that returns amount of numbers in the fraction
-INDEX FractionNumbers(FLOAT fNumber) {
-  INDEX iNumbers = 0;
-  FLOAT fShift = 0.000001f; // 6 numbers max
-
-  double dDummy = 0;
-  FLOAT fDecimalPoint = Abs(modf(fNumber, &dDummy));
-
-  while (fDecimalPoint > fShift) {
-    fDecimalPoint *= 10.0f;
-    fDecimalPoint = Abs(modf(fDecimalPoint, &dDummy));
-    iNumbers++;
-    fShift *= 10.0f;
-  }
-  return iNumbers;
-};
-
-// [Cecil] 2019-06-02: Convert float number into the string without extra zeros
-inline CTString FloatToStr(const FLOAT &f) {
-  CTString str;
-  str.PrintF("%.*f", FractionNumbers(f), f);
-
-  return str;
-};
-
 // [Cecil] 2019-06-04: Convert unsigned long into a binary number
 CTString ULongToBinary(ULONG ul) {
   if (ul == 0) {
@@ -58,20 +33,6 @@ CTString ULongToBinary(ULONG ul) {
   }
 
   return strOut;
-};
-
-// [Cecil] 2019-06-05: Return file name with extension
-CTString FileNameWithExt(CTString strFileName) {
-  // find last backlash in what's left
-  char *pBackSlash = strrchr(strFileName.str_String, '\\');
-
-  // return everything if there is no backslash
-  if (pBackSlash == NULL) {
-    return strFileName;
-  }
-
-  // return the string, starting after the backslash
-  return CTString(pBackSlash+1);
 };
 
 // [Cecil] 2020-07-29: Project 3D line onto 2D space
@@ -98,34 +59,27 @@ BOOL ProjectLine(CProjection3D *ppr, FLOAT3D vPoint1, FLOAT3D vPoint2, FLOAT3D &
   return FALSE;
 };
 
-// [Cecil] 2018-10-28: Finds an entity by its ID
+// [Cecil] 2018-10-28: Find an active entity by its ID
 CEntity *FindEntityByID(CWorld *pwo, const INDEX &iEntityID) {
-  // invalid ID
-  if (iEntityID < 0) {
-    return NULL;
-  }
+  // Invalid ID
+  if (iEntityID < 0) return NULL;
 
-  // for each entity
   FOREACHINDYNAMICCONTAINER(pwo->wo_cenEntities, CEntity, iten) {
     CEntity *pen = iten;
 
-    // if it exists
-    if (!(pen->GetFlags() & ENF_DELETED)) {
-      // if same ID
-      if (pen->en_ulID == iEntityID) {
-        // return it
-        return pen;
-      }
+    // If exists and is under the same ID
+    if (!(pen->GetFlags() & ENF_DELETED) && pen->en_ulID == iEntityID) {
+      return pen;
     }
   }
 
-  // otherwise, none exists
+  // None found
   return NULL;
 };
 
 // [Cecil] 2021-06-16: Determine vertical position difference
 FLOAT3D VerticalDiff(FLOAT3D vPosDiff, const FLOAT3D &vGravityDir) {
-  // vertical difference based on the gravity vector
+  // Vertical difference based on the gravity vector
   vPosDiff(1) *= vGravityDir(1);
   vPosDiff(2) *= vGravityDir(2);
   vPosDiff(3) *= vGravityDir(3);
@@ -135,7 +89,7 @@ FLOAT3D VerticalDiff(FLOAT3D vPosDiff, const FLOAT3D &vGravityDir) {
 
 // [Cecil] 2021-06-14: Determine position difference on the same plane
 FLOAT3D HorizontalDiff(FLOAT3D vPosDiff, const FLOAT3D &vGravityDir) {
-  // remove vertical difference
+  // Remove vertical difference
   return vPosDiff + VerticalDiff(vPosDiff, vGravityDir);
 };
 

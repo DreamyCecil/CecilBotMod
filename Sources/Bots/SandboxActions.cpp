@@ -1168,8 +1168,9 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
     } break;
 
     case ESA_NAVMESH_FLAGS: {
-      INDEX iCurrentPoint, iFlags;
-      nmMessage >> iCurrentPoint >> iFlags;
+      INDEX iCurrentPoint;
+      ULONG ulNewFlags;
+      nmMessage >> iCurrentPoint >> ulNewFlags;
 
       CBotPathPoint *pbpp = _pNavmesh->FindPointByID(iCurrentPoint);
 
@@ -1177,10 +1178,10 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
         CPrintF("NavMesh point doesn't exist!\n");
 
       } else {
-        ULONG ulFlags = pbpp->bpp_ulFlags;
-        pbpp->bpp_ulFlags = (ULONG)iFlags;
+        ULONG ulOldFlags = pbpp->bpp_ulFlags;
+        pbpp->bpp_ulFlags = ulNewFlags;
 
-        CPrintF("Point's flags: %s -> %s\n", ULongToBinary(ulFlags), ULongToBinary((ULONG)iFlags));
+        CPrintF("Point's flags: %s -> %s\n", ULongToBinary(ulOldFlags), ULongToBinary(ulNewFlags));
       }
     } break;
 
@@ -1222,7 +1223,7 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
         FLOAT fOldRange = pbpp->bpp_fRange;
         pbpp->bpp_fRange = fRange;
 
-        CPrintF("Changed point's range from %s to %s\n", FloatToStr(fOldRange), FloatToStr(fRange));
+        CPrintF("Changed point's range from %g to %g\n", fOldRange, fRange);
       }
     } break;
 

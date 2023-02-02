@@ -19,26 +19,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // --- Helper functions
 
-// [Cecil] 2019-06-02: Function from Serious Gang mod that returns amount of numbers in the fraction
-DECL_DLL INDEX FractionNumbers(FLOAT fNumber);
-
-// [Cecil] 2019-06-02: Convert float number into the string without extra zeros
-DECL_DLL inline CTString FloatToStr(const FLOAT &f);
-
 // [Cecil] 2019-06-04: Convert unsigned long into a binary number
 DECL_DLL CTString ULongToBinary(ULONG ul);
-
-// [Cecil] 2019-06-05: Return file name with extension
-DECL_DLL CTString FileNameWithExt(CTString strFileName);
 
 // [Cecil] 2020-07-29: Project 3D line onto 2D space
 DECL_DLL BOOL ProjectLine(CProjection3D *ppr, FLOAT3D vPoint1, FLOAT3D vPoint2, FLOAT3D &vOnScreen1, FLOAT3D &vOnScreen2);
 
-// [Cecil] 2018-10-28: Finds an entity by its ID
+// [Cecil] 2018-10-28: Find an active entity by its ID
 DECL_DLL CEntity *FindEntityByID(CWorld *pwo, const INDEX &iEntityID);
 
-// [Cecil] 2018-10-11: Distance Length Function
-inline FLOAT DistanceToPos(FLOAT3D vPos1, FLOAT3D vPos2) {
+// [Cecil] 2018-10-11: Calculate distance from one point to another
+inline FLOAT PosDist(FLOAT3D vPos1, FLOAT3D vPos2) {
   return (vPos1 - vPos2).Length();
 };
 
