@@ -226,7 +226,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
           }}
 
           // connect with important entity
-          if (pbpp->bpp_penImportant != NULL) {
+          if (ASSERT_ENTITY(pbpp->bpp_penImportant)) {
             CEntity *penImportant = pbpp->bpp_penImportant;
             FLOAT3D vEntity = penImportant->GetLerpedPlacement().pl_PositionVector;
 
@@ -239,7 +239,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
           }
 
           // connect with lock entity
-          if (pbpp->bpp_penLock != NULL) {
+          if (ASSERT_ENTITY(pbpp->bpp_penLock)) {
             CEntity *penLock = pbpp->bpp_penLock;
             FLOAT3D vEntity = penLock->GetLerpedPlacement().pl_PositionVector;
             ANGLE3D aEntity = penLock->GetLerpedPlacement().pl_OrientationAngle;

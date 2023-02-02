@@ -184,7 +184,7 @@ CBotPathPoint *CBotNavmesh::FindImportantPoint(CPlayerBotController &pb, INDEX i
     CBotPathPoint *pbpp = bnm_aPoints.Pointer(i);
 
     // not important
-    if (pbpp->bpp_penImportant == NULL) {
+    if (!ASSERT_ENTITY(pbpp->bpp_penImportant)) {
       continue;
     }
 

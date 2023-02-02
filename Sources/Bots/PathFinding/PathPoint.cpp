@@ -64,7 +64,7 @@ void CBotPathPoint::WritePoint(CTStream *strm) {
   *strm << bpp_ulFlags;
 
   // write important entity
-  if (bpp_penImportant != NULL) {
+  if (ASSERT_ENTITY(bpp_penImportant)) {
     *strm << INDEX(bpp_penImportant->en_ulID);
   } else {
     *strm << INDEX(-1);
@@ -78,7 +78,7 @@ void CBotPathPoint::WritePoint(CTStream *strm) {
   }
 
   // write lock entity
-  if (bpp_penLock != NULL) {
+  if (ASSERT_ENTITY(bpp_penLock)) {
     *strm << INDEX(bpp_penLock->en_ulID);
     *strm << bpp_plLockOrigin;
   } else {
@@ -189,7 +189,7 @@ BOOL CBotPathPoint::operator==(const CBotPathPoint &bppOther) const {
 // Check if the point is locked (cannot be passed through)
 BOOL CBotPathPoint::IsLocked(void) {
   // no lock entity
-  if (bpp_penLock == NULL) {
+  if (!ASSERT_ENTITY(bpp_penLock)) {
     return FALSE;
   }
 

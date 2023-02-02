@@ -20,9 +20,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // [Cecil] TEMP: Last processed point in the NavMesh generation
 extern INDEX _iLastPoint = 0;
+
+extern BOOL LoadNavMeshPacket(void);
 %}
 
-class CBotModGlobal : CEntity {
+class CBotModGlobal : CRationalEntity {
 name      "BotModGlobal";
 thumbnail "";
 
@@ -79,7 +81,23 @@ functions:
 procedures:
   Main() {
     InitAsVoid();
-    SetFlags(GetFlags() | ENF_CROSSESLEVELS);
+    SetFlags(GetFlags() | ENF_NOTIFYLEVELCHANGE | ENF_CROSSESLEVELS);
+
+    wait() {
+      on (EPreLevelChange) : {
+        // Clear current navmesh
+        _pNavmesh->ClearNavmesh();
+        resume;
+      }
+
+      on (EPostLevelChange) : {
+        // Load navmesh for the new map
+        LoadNavMeshPacket();
+        resume;
+      }
+
+      otherwise() : { resume; }
+    };
 
     return;
   };

@@ -364,18 +364,24 @@ static void CECIL_NavMeshSave(void) {
   }
 };
 
+// Send packet for loading a navmesh
+BOOL LoadNavMeshPacket(void) {
+  if (!_pNetwork->IsServer()) {
+    return FALSE;
+  }
+
+  CCecilStreamBlock nsbNavMesh = CECIL_BotServerPacket(ESA_NAVMESH_LOAD);
+  CECIL_AddBlockToAllSessions(nsbNavMesh);
+
+  return TRUE;
+};
+
 static void CECIL_NavMeshLoad(void) {
   CPrintF(MODCOM_NAME("NavMeshLoad:\n"));
 
-  if (!_pNetwork->IsServer()) {
+  if (!LoadNavMeshPacket()) {
     CPrintF("  <not a server>\n");
-    return;
   }
-  
-  CCecilStreamBlock nsbNavMesh = CECIL_BotServerPacket(ESA_NAVMESH_LOAD);
-
-  // put the message in buffer to be sent to all sessions
-  CECIL_AddBlockToAllSessions(nsbNavMesh);
 };
 
 // [Cecil] 2021-06-16: Quick function for NavMesh clearing
@@ -443,9 +449,9 @@ static void CECIL_NavMeshPointInfo(void) {
   CPrintF("Pos:    %.2f, %.2f, %.2f\n", pbpp->bpp_vPos(1), pbpp->bpp_vPos(2), pbpp->bpp_vPos(3));
   CPrintF("Range:  %.2f\n", pbpp->bpp_fRange);
   CPrintF("Flags:  %s\n", ULongToBinary(pbpp->bpp_ulFlags));
-  CPrintF("Entity: \"%s\"\n", (penImportant == NULL) ? "<none>" : penImportant->GetName());
+  CPrintF("Entity: \"%s\"\n", ASSERT_ENTITY(penImportant) ? penImportant->GetName() : "<none>");
   CPrintF("Next:   %d\n", (pbpp->bpp_pbppNext == NULL) ? -1 : pbpp->bpp_pbppNext->bpp_iIndex);
-  CPrintF("Lock:   \"%s\"\n", (penLock == NULL) ? "<none>" : penLock->GetName());
+  CPrintF("Lock:   \"%s\"\n", ASSERT_ENTITY(penLock) ? penLock->GetName() : "<none>");
 
   if (penLock != NULL) {
     FLOAT3D &vPos = pbpp->bpp_plLockOrigin.pl_PositionVector;
