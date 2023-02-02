@@ -46,6 +46,8 @@ properties:
 }
 
 components:
+  // Needed for precaching
+  0 class CLASS_PLAYER "Classes\\Player.ecl",
 
 functions:
   // Constructor
