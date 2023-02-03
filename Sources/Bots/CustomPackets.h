@@ -38,7 +38,7 @@ enum ESandboxAction {
   ESA_NAVMESH_CLEAR, // Clear the NavMesh
 
   ESA_LAST_ADMIN = ESA_NAVMESH_CLEAR, // Last admin action
-  
+
   // [Cecil] 2019-11-07: NavMesh Editing Actions
   ESA_NAVMESH_CREATE,   // Add a new path point
   ESA_NAVMESH_DELETE,   // Delete a path point

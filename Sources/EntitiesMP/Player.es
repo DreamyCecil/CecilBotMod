@@ -1647,7 +1647,8 @@ functions:
   void GetDetailStatsDM(CTString &strStats)
   {
     extern INDEX SetAllPlayersStats( INDEX iSortKey);
-    extern CPlayer *_apenPlayers[NET_MAXGAMEPLAYERS];
+    // [Cecil] NOTE: Dynamic container of all players and bots
+    extern CDynamicContainer<CPlayer> _apenPlayers;
     // determine type of game
     const BOOL bFragMatch = GetSP()->sp_bUseFrags;
 
@@ -1662,7 +1663,7 @@ functions:
     INDEX iMaxFrags = LowerLimit(INDEX(0));
     INDEX iMaxScore = LowerLimit(INDEX(0));
     {for(INDEX iPlayer=0; iPlayer<ctPlayers; iPlayer++) {
-      CPlayer *penPlayer = _apenPlayers[iPlayer];
+      CPlayer *penPlayer = _apenPlayers.Pointer(iPlayer); // [Cecil]
       iMaxFrags = Max(iMaxFrags, penPlayer->m_psLevelStats.ps_iKills);
       iMaxScore = Max(iMaxScore, penPlayer->m_psLevelStats.ps_iScore);
     }}
@@ -1705,7 +1706,7 @@ functions:
     strStats += "\n\n";
     {for(INDEX iPlayer=0; iPlayer<ctPlayers; iPlayer++) {
       CTString strLine;
-      CPlayer *penPlayer = _apenPlayers[iPlayer];
+      CPlayer *penPlayer = _apenPlayers.Pointer(iPlayer); // [Cecil]
       INDEX iPing = ceil(penPlayer->en_tmPing*1000.0f);
       INDEX iScore = bFragMatch ? penPlayer->m_psLevelStats.ps_iKills : penPlayer->m_psLevelStats.ps_iScore;
       CTString strName = penPlayer->GetPlayerName();
@@ -1728,14 +1729,15 @@ functions:
 
     // get stats from all players
     extern INDEX SetAllPlayersStats( INDEX iSortKey);
-    extern CPlayer *_apenPlayers[NET_MAXGAMEPLAYERS];
+    // [Cecil] NOTE: Dynamic container of all players and bots
+    extern CDynamicContainer<CPlayer> _apenPlayers;
     const INDEX ctPlayers = SetAllPlayersStats(3); // sort by score
 
     // for each player
     PlayerStats psSquadLevel = PlayerStats();
     PlayerStats psSquadGame  = PlayerStats();
     {for( INDEX iPlayer=0; iPlayer<ctPlayers; iPlayer++) {
-      CPlayer *penPlayer = _apenPlayers[iPlayer];
+      CPlayer *penPlayer = _apenPlayers.Pointer(iPlayer); // [Cecil]
       // add values to squad stats
       ASSERT( penPlayer!=NULL);
       PlayerStats psLevel = penPlayer->m_psLevelStats;
@@ -1783,7 +1785,7 @@ functions:
 
     // for each player
     {for(INDEX iPlayer=0; iPlayer<ctPlayers; iPlayer++) {
-      CPlayer *penPlayer = _apenPlayers[iPlayer];
+      CPlayer *penPlayer = _apenPlayers.Pointer(iPlayer); // [Cecil]
       // if this one
       if (penPlayer==this) {
         // skip it

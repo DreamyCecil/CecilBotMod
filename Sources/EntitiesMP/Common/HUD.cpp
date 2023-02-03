@@ -74,8 +74,8 @@ static TIME  _tmNow = -1.0f;
 static TIME  _tmLast = -1.0f;
 static CFontData _fdNumbersFont;
 
-// array for pointers of all players
-extern CPlayer *_apenPlayers[NET_MAXGAMEPLAYERS] = {0};
+// [Cecil] NOTE: Dynamic container of all players and bots
+CDynamicContainer<CPlayer> _apenPlayers;
 
 // status bar textures
 static CTextureObject _toHealth;
@@ -376,24 +376,29 @@ extern INDEX SetAllPlayersStats( INDEX iSortKey)
   INDEX iPlayers    = 0;
   INDEX iMaxPlayers = CECIL_GetMaxPlayers();
   CPlayer *penCurrent;
+
+  // [Cecil] Clear the list
+  _apenPlayers.Clear();
+
   // loop thru potentional players 
   for( INDEX i=0; i<iMaxPlayers; i++)
   { // ignore non-existent players
     penCurrent = CECIL_GetPlayerEntity(i);
     if( penCurrent==NULL) continue;
     // fill in player parameters
-    _apenPlayers[iPlayers] = penCurrent;
+    _apenPlayers.Add(penCurrent);
     // advance to next real player
     iPlayers++;
   }
   // sort statistics by some key if needed
   switch( iSortKey) {
-  case PSK_NAME:    qsort( _apenPlayers, iPlayers, sizeof(CPlayer*), qsort_CompareNames);   break;
-  case PSK_SCORE:   qsort( _apenPlayers, iPlayers, sizeof(CPlayer*), qsort_CompareScores);  break;
-  case PSK_HEALTH:  qsort( _apenPlayers, iPlayers, sizeof(CPlayer*), qsort_CompareHealth);  break;
-  case PSK_MANA:    qsort( _apenPlayers, iPlayers, sizeof(CPlayer*), qsort_CompareManas);   break;
-  case PSK_FRAGS:   qsort( _apenPlayers, iPlayers, sizeof(CPlayer*), qsort_CompareFrags);   break;
-  case PSK_DEATHS:  qsort( _apenPlayers, iPlayers, sizeof(CPlayer*), qsort_CompareDeaths);  break;
+  // [Cecil] Pass raw array of pointers from the container
+  case PSK_NAME:    qsort( _apenPlayers.sa_Array, iPlayers, sizeof(CPlayer**), qsort_CompareNames);   break;
+  case PSK_SCORE:   qsort( _apenPlayers.sa_Array, iPlayers, sizeof(CPlayer**), qsort_CompareScores);  break;
+  case PSK_HEALTH:  qsort( _apenPlayers.sa_Array, iPlayers, sizeof(CPlayer**), qsort_CompareHealth);  break;
+  case PSK_MANA:    qsort( _apenPlayers.sa_Array, iPlayers, sizeof(CPlayer**), qsort_CompareManas);   break;
+  case PSK_FRAGS:   qsort( _apenPlayers.sa_Array, iPlayers, sizeof(CPlayer**), qsort_CompareFrags);   break;
+  case PSK_DEATHS:  qsort( _apenPlayers.sa_Array, iPlayers, sizeof(CPlayer**), qsort_CompareDeaths);  break;
   default:  break;  // invalid or NONE key specified so do nothing
   }
   // all done
@@ -1138,7 +1143,7 @@ extern void DrawHUD( const CPlayer *penPlayerCurrent, CDrawPort *pdpCurrent, BOO
     // loop thru players 
     for( INDEX i=0; i<iPlayers; i++)
     { // get player name and mana
-      CPlayer *penPlayer = _apenPlayers[i];
+      CPlayer *penPlayer = _apenPlayers.Pointer(i); // [Cecil]
       CTString strName = penPlayer->GetPlayerName(); // [Cecil] Made not const
       // [Cecil] Add team tag at the end of the bot name
       if (IsDerivedFromDllClass(penPlayer, CPlayerBot_DLLClass) && penPlayer->en_pcCharacter.GetTeam() != "") {
@@ -1205,7 +1210,7 @@ extern void DrawHUD( const CPlayer *penPlayerCurrent, CDrawPort *pdpCurrent, BOO
       INDEX iMaxFrags = LowerLimit(INDEX(0));
       INDEX iMaxScore = LowerLimit(INDEX(0));
       {for(INDEX iPlayer=0; iPlayer<ctPlayers; iPlayer++) {
-        CPlayer *penPlayer = _apenPlayers[iPlayer];
+        CPlayer *penPlayer = _apenPlayers.Pointer(iPlayer); // [Cecil]
         iMaxFrags = Max(iMaxFrags, penPlayer->m_psLevelStats.ps_iKills);
         iMaxScore = Max(iMaxScore, penPlayer->m_psLevelStats.ps_iScore);
       }}
