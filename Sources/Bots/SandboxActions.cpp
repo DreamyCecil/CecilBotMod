@@ -738,6 +738,7 @@ extern void CECIL_InitSandboxActions(void) {
   // [Cecil] NavMesh editing
   _pShell->DeclareSymbol("persistent user INDEX " MODCOM_NAME("iRenderNavMesh;"), &MOD_iRenderNavMesh);
   _pShell->DeclareSymbol("persistent user FLOAT " MODCOM_NAME("fNavMeshRenderRange;"), &MOD_fNavMeshRenderRange);
+  _pShell->DeclareSymbol("persistent user INDEX " MODCOM_NAME("iNavMeshRangeModel;"), &MOD_iNavMeshRangeModel);
   _pShell->DeclareSymbol("user INDEX " MODCOM_NAME("iNavMeshPoint;"), &MOD_iNavMeshPoint);
   _pShell->DeclareSymbol("user INDEX " MODCOM_NAME("iNavMeshConnecting;"), &MOD_iNavMeshConnecting);
 

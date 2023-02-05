@@ -18,13 +18,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Bots/Logic/BotFunctions.h"
 
 // [Cecil] 2019-05-28: NavMesh Commands
-extern INDEX MOD_iRenderNavMesh = 0; // NavMesh render mode (0 - disabled, 1 - points, 2 - connections, 3 - IDs, 4 - flags)
-extern FLOAT MOD_fNavMeshRenderRange = 0.0f; // NavMesh point rendering range (0 - infinite)
-extern INDEX MOD_iNavMeshPoint = -1; // currently selected NavMesh point
-extern INDEX MOD_iNavMeshConnecting = 0; // connecting mode (0 - disabled, 1 - to point, 2 - to each other, 3 - others to this one)
+INDEX MOD_iRenderNavMesh = 0; // NavMesh render mode (0 - disabled, 1 - points, 2 - connections, 3 - IDs, 4 - flags)
+FLOAT MOD_fNavMeshRenderRange = 0.0f; // NavMesh point rendering range (0 - infinite)
+INDEX MOD_iNavMeshRangeModel = 0; // NavMesh point range model (0 - flat, 1 - circle, 2 - sphere)
+INDEX MOD_iNavMeshPoint = -1; // currently selected NavMesh point
+INDEX MOD_iNavMeshConnecting = 0; // connecting mode (0 - disabled, 1 - to point, 2 - to each other, 3 - others to this one)
 
 extern INDEX MOD_bEntityIDs;
 extern INDEX MOD_bBotThoughts;
+
+// Point range models
+static CModelObject _amoRange[3];
 
 // [Cecil] 2021-06-11: List of bots
 CDynamicContainer<CPlayerBotController> _aPlayerBots;
@@ -64,6 +68,17 @@ void CECIL_InitBotMod(void) {
   // [Cecil] 2021-06-23: Initialize sandbox actions
   extern void CECIL_InitSandboxActions(void);
   CECIL_InitSandboxActions();
+
+  // Preload point range models
+  _amoRange[0].SetData_t(CTFILENAME("Cecil\\Models\\Flat.mdl"));
+  _amoRange[1].SetData_t(CTFILENAME("Cecil\\Models\\Circle.mdl"));
+  _amoRange[2].SetData_t(CTFILENAME("Cecil\\Models\\Sphere.mdl"));
+
+  // Set texture and transparency
+  for (INDEX i = 0; i < 3; i++) {
+    _amoRange[i].mo_toTexture.SetData_t(CTFILENAME("Cecil\\Models\\Range.tex"));
+    _amoRange[i].mo_colBlendColor = 0xFFFFFF3F;
+  }
 };
 
 // [Cecil] 2021-06-13: End the bot mod
@@ -131,7 +146,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
 
       const CBotPathPoint *pbppClosest = NULL;
 
-      // bots don't need to select points
+      // Bots don't need to select points
       if (!IsDerivedFromDllClass(penOwner, CPlayerBot_DLLClass)) {
         pbppClosest = NearestNavMeshPointPos(penOwner, penOwner->GetPlayerWeapons()->m_vRayHit);
       }
@@ -146,7 +161,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
 
         vPointOnScreen(2) = -vPointOnScreen(2) + pdp->GetHeight();
 
-        // point opacity based on distance to the viewer
+        // Point opacity based on distance to the viewer
         UBYTE ubPointAlpha = 0xFF;
 
         if (MOD_fNavMeshRenderRange > 0.0f) {
@@ -184,36 +199,12 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
           }
         }
 
-        // highlight closest point for selection
+        // Highlight closest point for selection
         BOOL bClosestPoint = (pbppClosest == pbpp);
         CBotPathPoint *pbppSelected = _pNavmesh->FindPointByID(MOD_iNavMeshPoint);
 
-        // range and connections
+        // Connections
         if (bConnections) {
-          // range
-          for (INDEX iRange = 0; iRange < 3; iRange++) {
-            FLOAT3D vRangeDir = FLOAT3D(CosFast(iRange * 60.0f), 0.0f, SinFast(iRange * 60.0f)) * pbpp->bpp_fRange;
-
-            FLOAT3D vRangeEnd1, vRangeEnd2;
-            prProjection.ProjectCoordinate(vPoint1 + vRangeDir, vRangeEnd1);
-            prProjection.ProjectCoordinate(vPoint1 - vRangeDir, vRangeEnd2);
-
-            if (vRangeEnd1(3) > 0.0f || vRangeEnd2(3) > 0.0f) {
-              continue;
-            }
-
-            // range is too small for rendering
-            if ((vRangeEnd1 - vRangeEnd2).Length() < 12.0f) {
-              continue;
-            }
-
-            vRangeEnd1(2) = -vRangeEnd1(2) + pdp->GetHeight();
-            vRangeEnd2(2) = -vRangeEnd2(2) + pdp->GetHeight();
-
-            pdp->DrawLine(vRangeEnd1(1), vRangeEnd1(2), vRangeEnd2(1), vRangeEnd2(2), 0x00FFFF00 | UBYTE(ubPointAlpha * 0.625f));
-          }
-
-          // connections
           {FOREACHINDYNAMICCONTAINER(pbpp->bpp_cbppPoints, CBotPathPoint, itbppT) {
             CBotPathPoint *pbppT = itbppT;
 
@@ -330,6 +321,67 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
           }
         }
       }
+
+      // Prepare projection
+      CPerspectiveProjection3D &ppr = (CPerspectiveProjection3D &)*(CProjection3D *)apr;
+      ppr.Prepare();
+
+      ppr.FrontClipDistanceL() = 0.1f;
+      ppr.DepthBufferNearL() = 0.0f;
+      ppr.DepthBufferFarL() = 0.1f;
+
+      CAnyProjection3D aprWallhack;
+      aprWallhack = ppr;
+
+      BeginModelRenderingView(aprWallhack, pdp);
+
+      // Render point ranges
+      for (INDEX iPointRange = 0; iPointRange < _pNavmesh->bnm_aPoints.Count(); iPointRange++) {
+        CBotPathPoint *pbpp = _pNavmesh->bnm_aPoints.Pointer(iPointRange);
+        FLOAT3D vPoint = pbpp->bpp_vPos;
+        FLOAT3D(pbpp->bpp_fRange, pbpp->bpp_fRange, pbpp->bpp_fRange);
+
+        // Point opacity based on distance to the viewer
+        UBYTE ubPointAlpha = 0xFF;
+
+        if (MOD_fNavMeshRenderRange > 0.0f) {
+          FLOAT fViewDist = (penViewer->GetPlacement().pl_PositionVector - vPoint).Length();
+          FLOAT fPointAlpha = 1.0f - Clamp((fViewDist - MOD_fNavMeshRenderRange) / MOD_fNavMeshRenderRange, 0.0f, 1.0f);
+
+          ubPointAlpha = NormFloatToByte(fPointAlpha);
+        }
+
+        if (ubPointAlpha <= 2) {
+          continue;
+        }
+
+        // Pick range model
+        const INDEX iRangeModel = Clamp(MOD_iNavMeshRangeModel, (INDEX)0, (INDEX)2);
+        CModelObject &moRange = _amoRange[iRangeModel];
+
+        // Render range model
+        CRenderModel rmMain;
+        rmMain.SetObjectPlacement(CPlacement3D(vPoint, ANGLE3D(0.0f, 0.0f, 0.0f)));
+        rmMain.rm_colLight = C_BLACK;  
+        rmMain.rm_colAmbient = C_WHITE;
+        rmMain.rm_colBlend = 0x00FFFF00 | ubPointAlpha;
+        rmMain.rm_vLightDirection = FLOAT3D(1.0f, 1.0f, 1.0f);
+
+        moRange.SetupModelRendering(rmMain);
+
+        // Multiply model size
+        rmMain.rm_vStretch(1) *= pbpp->bpp_fRange;
+        rmMain.rm_vStretch(3) *= pbpp->bpp_fRange;
+
+        // Resize vertically only if sphere model
+        if (iRangeModel == 2) {
+          rmMain.rm_vStretch(2) *= pbpp->bpp_fRange;
+        }
+
+        moRange.RenderModel(rmMain);
+      }
+
+      EndModelRenderingView();
     }
 
     // [Cecil] 2019-06-04: Render bots' target points
