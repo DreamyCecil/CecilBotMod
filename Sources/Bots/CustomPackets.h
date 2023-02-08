@@ -27,6 +27,7 @@ enum ECecilPackets {
 enum ESandboxAction {
   // Admin actions
   ESA_ADDBOT, // Add a new bot
+  ESA_ADDBOTS, // Add multiple bots at once
   ESA_REMBOT, // Remove a bot
   ESA_UPDATEBOT, // Update bot settings
   ESA_TELEPORTBOTS, // Teleport specific bots to the player

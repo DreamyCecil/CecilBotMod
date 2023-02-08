@@ -202,6 +202,47 @@ static void CECIL_QuickBot(void) {
   CECIL_AddBot(&strName, &strSkin, &strTeam);
 };
 
+// Add multiple bots
+static void CECIL_QuickBots(INDEX ctBots) {
+  CPrintF(MODCOM_NAME("QuickBots:\n"));
+
+  if (!_pNetwork->IsServer()) {
+    CPrintF("  <not a server>\n");
+    return;
+  }
+
+  const CTString strName = BOT_strSpawnName;
+
+  // Create message for adding multiple bots
+  CCecilStreamBlock nsbAddBots = CECIL_BotServerPacket(ESA_ADDBOTS);
+  nsbAddBots << _sbsBotSettings; // Update bot settings
+  nsbAddBots << ctBots; // Amount of bots
+
+  for (INDEX i = 0; i < ctBots; i++) {
+    // Pick random name and skin if there are none
+    CTString strBotName = (strName == "") ? GetRandomName() : strName;
+    CTString strBotSkin = GetRandomSkin();
+
+    CPlayerCharacter pcBot;
+    CPlayerSettings *pps = (CPlayerSettings *)pcBot.pc_aubAppearance;
+
+    pps->ps_iWeaponAutoSelect = PS_WAS_NONE; // never select new weapons
+    memset(pps->ps_achModelFile, 0, sizeof(pps->ps_achModelFile));
+    strncpy(pps->ps_achModelFile, strBotSkin.str_String, sizeof(pps->ps_achModelFile));
+
+    for (INDEX iGUID = 0; iGUID < 16; iGUID++) {
+      pcBot.pc_aubGUID[iGUID] = rand() % 256;
+    }
+
+    pcBot.pc_strName = strBotName;
+    pcBot.pc_strTeam = BOT_strSpawnTeam;
+
+    nsbAddBots << pcBot; // Character data
+  }
+
+  CECIL_AddBlockToAllSessions(nsbAddBots);
+};
+
 // [Cecil] 2018-10-14: Bot removing
 static void CECIL_RemoveAllBots(void) {
   CPrintF(MODCOM_NAME("RemoveAllBots:\n"));
@@ -669,6 +710,7 @@ static void CECIL_NavMeshConnectionType(void) {
 extern void CECIL_InitSandboxActions(void) {
   // [Cecil] Bot mod
   _pShell->DeclareSymbol("user void " MODCOM_NAME("QuickBot(void);"), &CECIL_QuickBot);
+  _pShell->DeclareSymbol("user void " MODCOM_NAME("QuickBots(INDEX);"), &CECIL_QuickBots);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("AddBot(CTString, CTString, CTString);"), &CECIL_AddBot);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("RemoveBot(CTString);"), &CECIL_RemoveBot);
   _pShell->DeclareSymbol("user void " MODCOM_NAME("RemoveAllBots(void);"), &CECIL_RemoveAllBots);
@@ -851,6 +893,53 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
 
       } else {
         CPrintF(TRANS("Player entity with the given character already exists!\n"));
+      }
+    } break;
+
+    // Add multiple bots to the game
+    case ESA_ADDBOTS: {
+      SBotSettings sbsSettings;
+      nmMessage >> sbsSettings;
+
+      INDEX ctBots;
+      nmMessage >> ctBots;
+
+      // Delete all predictors
+      wo.DeletePredictors();
+
+      const CPlacement3D pl(FLOAT3D(0.0f, 0.0f, 0.0f), ANGLE3D(0.0f, 0.0f, 0.0f));
+      CTFileName fnmPlayer = CTString("Classes\\PlayerBot.ecl");
+
+      CPutString("Added bots:\n");
+
+      for (INDEX i = 0; i < ctBots; i++) {
+        CPlayerCharacter pcBot;
+        nmMessage >> pcBot; // Player character
+
+        // If there is no entity with that character in the world
+        CPlayerBot *penNewBot = (CPlayerBot *)wo.FindEntityWithCharacter(pcBot);
+
+        if (penNewBot == NULL) {
+          // Create an entity for it
+          try {
+            penNewBot = (CPlayerBot *)wo.CreateEntity_t(pl, fnmPlayer);
+
+            // Attach character to it
+            penNewBot->en_pcCharacter = pcBot;
+
+            // Update settings and initialize
+            penNewBot->m_bot.UpdateBot(sbsSettings);
+            penNewBot->Initialize();
+
+            CPrintF(TRANS(" '%s^r'\n"), penNewBot->GetPlayerName());
+
+          } catch (char *strError) {
+            FatalError(TRANS("Cannot load PlayerBot class:\n%s"), strError);
+          }
+
+        } else {
+          CPrintF(TRANS("Player entity with the given character already exists!\n"));
+        }
       }
     } break;
 
