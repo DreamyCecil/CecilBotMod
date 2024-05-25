@@ -1,4 +1,4 @@
 [submodule "Sources/Includes"]
 	path = Sources/Includes
-	url = https://github.com/DreamyCecil/SeriousSam_SDK107.git
+	url = https://github.com/DreamyCecil/SE1-ModSDK.git
 	branch = includes

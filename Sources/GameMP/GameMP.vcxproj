@@ -83,31 +83,35 @@
     <OutDir>$(BinDir)</OutDir>
     <IntDir>$(ObjDir)</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(CommonIncludes);$(SamEngineIncludes);$(IncludePath)</IncludePath>
-    <LibraryPath>$(SamEngineLibraries);$(OtherLibraries)</LibraryPath>
+    <IncludePath>$(SamEngineIncludes);$(SdkIncl)</IncludePath>
+    <LibraryPath>$(SamEngineLibraries);$(SdkLibs)</LibraryPath>
+    <ExecutablePath>$(SdkExe)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_110|Win32'">
     <OutDir>$(BinDir)</OutDir>
     <IntDir>$(ObjDir)</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(CommonIncludes);$(SamEngineIncludes);$(IncludePath)</IncludePath>
-    <LibraryPath>$(SamEngineLibraries);$(OtherLibraries)</LibraryPath>
+    <IncludePath>$(SamEngineIncludes);$(SdkIncl)</IncludePath>
+    <LibraryPath>$(SamEngineLibraries);$(SdkLibs)</LibraryPath>
+    <ExecutablePath>$(SdkExe)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(BinDir)</OutDir>
     <IntDir>$(ObjDir)</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(CommonIncludes);$(SamEngineIncludes);$(IncludePath)</IncludePath>
-    <LibraryPath>$(SamEngineLibraries);$(OtherLibraries)</LibraryPath>
+    <IncludePath>$(SamEngineIncludes);$(SdkIncl)</IncludePath>
+    <LibraryPath>$(SamEngineLibraries);$(SdkLibs)</LibraryPath>
     <TargetName>$(ProjectName)D</TargetName>
+    <ExecutablePath>$(SdkExe)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_110|Win32'">
     <OutDir>$(BinDir)</OutDir>
     <IntDir>$(ObjDir)</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(CommonIncludes);$(SamEngineIncludes);$(IncludePath)</IncludePath>
-    <LibraryPath>$(SamEngineLibraries);$(OtherLibraries)</LibraryPath>
+    <IncludePath>$(SamEngineIncludes);$(SdkIncl)</IncludePath>
+    <LibraryPath>$(SamEngineLibraries);$(SdkLibs)</LibraryPath>
     <TargetName>$(ProjectName)D</TargetName>
+    <ExecutablePath>$(SdkExe)</ExecutablePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>

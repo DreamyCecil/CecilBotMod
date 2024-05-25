@@ -117,9 +117,6 @@
     <ClCompile Include="Common\PathFinding.cpp">
       <Filter>Source Files\Common sources</Filter>
     </ClCompile>
-    <ClCompile Include="StdH\StdH.cpp">
-      <Filter>Source Files\Common sources</Filter>
-    </ClCompile>
     <ClCompile Include="AirElemental.cpp">
       <Filter>Source Files\Entity sources</Filter>
     </ClCompile>
@@ -642,6 +639,9 @@
     <ClCompile Include="..\Bots\BotStructure.cpp">
       <Filter>Source Files\Bots sources</Filter>
     </ClCompile>
+    <ClCompile Include="LibMain.cpp">
+      <Filter>Source Files\Common sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\Common.h">
@@ -657,9 +657,6 @@
       <Filter>Header Files\Common headers</Filter>
     </ClInclude>
     <ClInclude Include="Common\PathFinding.h">
-      <Filter>Header Files\Common headers</Filter>
-    </ClInclude>
-    <ClInclude Include="StdH\StdH.h">
       <Filter>Header Files\Common headers</Filter>
     </ClInclude>
     <ClInclude Include="Common\WeaponPositions.h">
@@ -1660,6 +1657,12 @@
     </ClInclude>
     <ClInclude Include="..\Bots\BotStructure.h">
       <Filter>Header Files\Bots headers</Filter>
+    </ClInclude>
+    <ClInclude Include="StdH.h">
+      <Filter>Header Files\Common headers</Filter>
+    </ClInclude>
+    <ClInclude Include="EntitiesAPI.h">
+      <Filter>Header Files\Common headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

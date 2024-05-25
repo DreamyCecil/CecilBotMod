@@ -3,7 +3,9 @@
   <PropertyGroup Label="UserMacros">
     <BinDir>$(SolutionDir)Bin\$(SE1SdkVS).$(Configuration)\</BinDir>
     <ObjDir>$(SolutionDir)Obj\$(SE1SdkVS).$(Configuration)\$(ProjectName)\</ObjDir>
-    <CommonIncludes>$(SolutionDir);$(ProjectDir);$(ProjectDir)StdH\</CommonIncludes>
-    <OtherLibraries>$(SolutionDir)Bin\$(SE1SdkVS).$(Configuration);$(LibraryPath)</OtherLibraries>
+
+    <SdkExe>$(SolutionDir)Includes;$(ExecutablePath);</SdkExe>
+    <SdkIncl>$(SolutionDir);$(ProjectDir);$(IncludePath);</SdkIncl>
+    <SdkLibs>$(SolutionDir)Bin\$(SE1SdkVS).$(Configuration);$(LibraryPath);</SdkLibs>
   </PropertyGroup>
 </Project>
