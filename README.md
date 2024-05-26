@@ -8,15 +8,11 @@ Visit repository's wiki to find information about integration help and available
 
 <img src="https://i.imgur.com/7ZzR1gM.jpg">
 
-Building
---------
+# Building
 
-To compile the source code, you'll need to use a compiler from Microsoft Visual C++ 6.0.
+Building instructions are available here: https://github.com/DreamyCecil/SE1-ModSDK/wiki/Building
 
-Full guide: https://github.com/DreamyCecil/SE1-ModSDK#building
-
-Running
--------
+# Running
 
 Once the project is compiled, there should be three libraries in the Bin folder: `EntitiesMP.dll`, `GameGUIMP.dll` and `GameMP.dll`.
 
@@ -26,13 +22,6 @@ There are two ways to start the mod:
 
 When running a selected project, make sure the mod in project properties **Debugging** -> **Command Arguments** is set to your mod name instead of `CecilBotMod` (example: `+game MyBots`).
 
-License
--------
+# License
 
 Just like Croteam's [Serious Engine 1.10](https://github.com/Croteam-official/Serious-Engine) source code, Serious Sam SDK is licensed under the GNU GPL v2 (see LICENSE file).
-
-This SDK includes Croteam's Entity Class Compiler (`Sources/Extras/Ecc.exe`) that is used to compile `.es` files and officially distributed with classic Serious Sam games. Its source code is included in Serious Engine 1.10.
-
-Some of the code included with the SDK may not be licensed under the GNU GPL v2:
-
-* DirectX8 SDK (Headers & Libraries) (`d3d8.h`, `d3d8caps.h` and `d3d8types.h` located in `Sources/Extras`) by Microsoft
