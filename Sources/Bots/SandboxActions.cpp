@@ -1,4 +1,4 @@
-/* Copyright (c) 2018-2023 Dreamy Cecil
+/* Copyright (c) 2018-2024 Dreamy Cecil
 This program is free software; you can redistribute it and/or modify
 it under the terms of version 2 of the GNU General Public License as published by
 the Free Software Foundation
@@ -36,8 +36,8 @@ extern INDEX MOD_bBotThoughts = FALSE;
 extern INDEX MOD_bCheckClassNames = FALSE;
 
 // [Cecil] 2019-06-02: Bot names and skins
-static CStaticArray<CTString> BOT_astrNames;
-static CStaticArray<CTString> BOT_astrSkins;
+static CStaticStackArray<CTString> BOT_astrNames;
+static CStaticStackArray<CTString> BOT_astrSkins;
 
 // [Cecil] 2021-08-28: Names and skins for the current game
 static CDynamicContainer<CTString> BOT_cnCurrentNames;
@@ -94,7 +94,7 @@ extern void CopyBotSkins(void) {
 };
 
 // Get random bot name
-static const CTString &GetRandomName(void) {
+static void GetRandomName(CTString &strName) {
   INDEX ctNames = BOT_cnCurrentNames.Count();
 
   // Restore the name container
@@ -105,19 +105,19 @@ static const CTString &GetRandomName(void) {
 
   // No names
   if (ctNames <= 0) {
-    static const CTString strDefault = "Bot";
-    return strDefault;
+    strName = "Bot";
+    return;
   }
 
   // Pull out a random name
   CTString *pstrName = BOT_cnCurrentNames.Pointer(rand() % ctNames);
-  BOT_cnCurrentNames.Remove(pstrName);
+  strName = *pstrName;
 
-  return *pstrName;
+  BOT_cnCurrentNames.Remove(pstrName);
 };
 
 // Get random bot skin
-static const CTString &GetRandomSkin(void) {
+static void GetRandomSkin(CTString &strSkin) {
   INDEX ctSkins = BOT_cnCurrentSkins.Count();
 
   // Restore the skin container
@@ -128,15 +128,15 @@ static const CTString &GetRandomSkin(void) {
 
   // No skins
   if (ctSkins <= 0) {
-    static const CTString strDefault = "SeriousSam";
-    return strDefault;
+    strSkin = "SeriousSam";
+    return;
   }
 
   // Pull out a random skin
   CTString *pstrSkin = BOT_cnCurrentSkins.Pointer(rand() % ctSkins);
-  //BOT_cnCurrentSkins.Remove(pstrSkin);
+  strSkin = *pstrSkin;
 
-  return *pstrSkin;
+  //BOT_cnCurrentSkins.Remove(pstrSkin);
 };
 
 // [Cecil] 2018-10-15: Config reset
@@ -157,10 +157,7 @@ static void CECIL_ResetBotConfig(INDEX iDifficulty) {
 };
 
 // [Cecil] 2018-10-09: Bot adding
-static void CECIL_AddBot(CTString *pstrBotName, CTString *pstrBotSkin, CTString *pstrBotTeam) {
-  CTString strBotName = *pstrBotName;
-  CTString strBotSkin = *pstrBotSkin;
-
+static void CECIL_AddBot(const CTString &strName, const CTString &strSkin, const CTString &strTeam) {
   CPrintF(MODCOM_NAME("AddBot:\n"));
 
   if (!_pNetwork->IsServer()) {
@@ -169,8 +166,11 @@ static void CECIL_AddBot(CTString *pstrBotName, CTString *pstrBotSkin, CTString 
   }
 
   // Pick random name and skin if there are none
-  if (strBotName == "") strBotName = GetRandomName();
-  if (strBotSkin == "") strBotSkin = GetRandomSkin();
+  CTString strBotName = strName;
+  if (strBotName == "") GetRandomName(strBotName);
+
+  CTString strBotSkin = strSkin;
+  if (strBotSkin == "") GetRandomSkin(strBotSkin);
 
   CPlayerCharacter pcBot;
   CPlayerSettings *pps = (CPlayerSettings *)pcBot.pc_aubAppearance;
@@ -184,7 +184,7 @@ static void CECIL_AddBot(CTString *pstrBotName, CTString *pstrBotSkin, CTString 
   }
 
   pcBot.pc_strName = strBotName;
-  pcBot.pc_strTeam = *pstrBotTeam;
+  pcBot.pc_strTeam = strTeam;
 
   // create message for adding player data to sessions
   CCecilStreamBlock nsbAddBot = CECIL_BotServerPacket(ESA_ADDBOT);
@@ -196,10 +196,7 @@ static void CECIL_AddBot(CTString *pstrBotName, CTString *pstrBotSkin, CTString 
 };
 
 static void CECIL_QuickBot(void) {
-  CTString strName = BOT_strSpawnName;
-  CTString strSkin = "";
-  CTString strTeam = BOT_strSpawnTeam;
-  CECIL_AddBot(&strName, &strSkin, &strTeam);
+  CECIL_AddBot(BOT_strSpawnName, "", BOT_strSpawnTeam);
 };
 
 // Add multiple bots
@@ -219,9 +216,9 @@ static void CECIL_QuickBots(INDEX ctBots) {
   nsbAddBots << ctBots; // Amount of bots
 
   for (INDEX i = 0; i < ctBots; i++) {
-    // Pick random name and skin if there are none
-    CTString strBotName = (strName == "") ? GetRandomName() : strName;
-    CTString strBotSkin = GetRandomSkin();
+    // Pick random skin if there's none
+    CTString strBotSkin;
+    GetRandomSkin(strBotSkin);
 
     CPlayerCharacter pcBot;
     CPlayerSettings *pps = (CPlayerSettings *)pcBot.pc_aubAppearance;
@@ -234,7 +231,13 @@ static void CECIL_QuickBots(INDEX ctBots) {
       pcBot.pc_aubGUID[iGUID] = rand() % 256;
     }
 
-    pcBot.pc_strName = strBotName;
+    // Pick random name if there's none
+    if (strName == "") {
+      GetRandomName(pcBot.pc_strName);
+    } else {
+      pcBot.pc_strName = strName;
+    }
+
     pcBot.pc_strTeam = BOT_strSpawnTeam;
 
     nsbAddBots << pcBot; // Character data
@@ -277,9 +280,9 @@ static void CECIL_RemoveAllBots(void) {
   } else {
     CPrintF("  <removed %d bots>\n", iBot);
   }
-}
+};
 
-static void CECIL_RemoveBot(CTString *pstrBotName) {
+static void CECIL_RemoveBot(const CTString &strBotName) {
   CPrintF(MODCOM_NAME("RemoveBot:\n"));
 
   if (!_pNetwork->IsServer()) {
@@ -287,7 +290,6 @@ static void CECIL_RemoveBot(CTString *pstrBotName) {
     return;
   }
 
-  CTString strBotName = *pstrBotName;
   BOOL bRemoved = FALSE;
 
   for (INDEX iBot = 0; iBot < _aPlayerBots.Count(); iBot++) {
@@ -809,16 +811,16 @@ extern void CECIL_InitSandboxActions(void) {
     strmNames.Open_t(CTFILENAME("Cecil\\Bots\\BotNames.txt"));
 
     // clear names list
-    BOT_astrNames.Clear();
+    BOT_astrNames.PopAll();
 
     // fill names array
     while (!strmNames.AtEOF()) {
-      CTString str = "";
+      CTString str;
       strmNames.GetLine_t(str);
 
-      INDEX ctNames = BOT_astrNames.Count();
-      BOT_astrNames.Expand(ctNames + 1);
-      BOT_astrNames[ctNames] = str;
+      if (str != "") {
+        BOT_astrNames.Push() = str;
+      }
     }
 
     strmNames.Close();
@@ -832,21 +834,50 @@ extern void CECIL_InitSandboxActions(void) {
     strmSkins.Open_t(CTFILENAME("Cecil\\Bots\\BotSkins.txt"));
 
     // clear skins list
-    BOT_astrSkins.Clear();
+    BOT_astrSkins.PopAll();
 
     // fill skins array
     while (!strmSkins.AtEOF()) {
-      CTString str = "";
+      CTString str;
       strmSkins.GetLine_t(str);
 
-      INDEX ctSkins = BOT_astrSkins.Count();
-      BOT_astrSkins.Expand(ctSkins + 1);
-      BOT_astrSkins[ctSkins] = str;
+      if (str != "") {
+        BOT_astrSkins.Push() = str;
+      }
     }
 
     strmSkins.Close();
   } catch (char *strError) {
     CPrintF("%s\n", strError);
+  }
+};
+
+// Try to add a new bot with a specific character
+static void AddBotWithCharacter(CWorld &wo, CPlayerCharacter &pcBot, const SBotSettings &sbs) {
+  static const CPlacement3D pl(FLOAT3D(0, 0, 0), ANGLE3D(0, 0, 0));
+  static CTFileName fnmPlayer = CTString("Classes\\PlayerBot.ecl");
+
+  // Check if there's an entity with that character already
+  CPlayerBot *penNewBot = (CPlayerBot *)wo.FindEntityWithCharacter(pcBot);
+
+  if (penNewBot != NULL) {
+    CPrintF(TRANS("Player entity with the given character already exists!\n"));
+    return;
+  }
+
+  try {
+    // Create an entity with a character
+    penNewBot = (CPlayerBot *)wo.CreateEntity_t(pl, fnmPlayer);
+    penNewBot->en_pcCharacter = pcBot;
+
+    // Update settings and initialize
+    penNewBot->m_bot.UpdateBot(sbs);
+    penNewBot->Initialize();
+
+    CPrintF(" '%s^r'\n", penNewBot->GetPlayerName());
+
+  } catch (char *strError) {
+    FatalError(TRANS("Cannot load PlayerBot class:\n%s"), strError);
   }
 };
 
@@ -856,10 +887,10 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
   CWorld &wo = _pNetwork->ga_World;
 
   switch (iAction) {
-    // [Cecil] 2019-06-03: Add a new bot to the game
+    // Add a new bot to the game
     case ESA_ADDBOT: {
       CPlayerCharacter pcBot;
-      nmMessage >> pcBot; // Player character
+      nmMessage >> pcBot;
 
       SBotSettings sbsSettings;
       nmMessage >> sbsSettings;
@@ -867,33 +898,8 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
       // Delete all predictors
       wo.DeletePredictors();
 
-      // If there is no entity with that character in the world
-      CPlayerBot *penNewBot = (CPlayerBot *)wo.FindEntityWithCharacter(pcBot);
-
-      if (penNewBot == NULL) {
-        // Create an entity for it
-        const CPlacement3D pl(FLOAT3D(0.0f, 0.0f, 0.0f), ANGLE3D(0.0f, 0.0f, 0.0f));
-
-        try {
-          CTFileName fnmPlayer = CTString("Classes\\PlayerBot.ecl");
-          penNewBot = (CPlayerBot *)wo.CreateEntity_t(pl, fnmPlayer);
-
-          // Attach character to it
-          penNewBot->en_pcCharacter = pcBot;
-
-          // Update settings and initialize
-          penNewBot->m_bot.UpdateBot(sbsSettings);
-          penNewBot->Initialize();
-
-          CPrintF(TRANS("Added bot '%s^r'\n"), penNewBot->GetPlayerName());
-
-        } catch (char *strError) {
-          FatalError(TRANS("Cannot load PlayerBot class:\n%s"), strError);
-        }
-
-      } else {
-        CPrintF(TRANS("Player entity with the given character already exists!\n"));
-      }
+      CPutString(TRANS("Added bot"));
+      AddBotWithCharacter(wo, pcBot, sbsSettings);
     } break;
 
     // Add multiple bots to the game
@@ -907,39 +913,13 @@ void CECIL_SandboxAction(CPlayer *pen, const INDEX &iAction, CNetworkMessage &nm
       // Delete all predictors
       wo.DeletePredictors();
 
-      const CPlacement3D pl(FLOAT3D(0.0f, 0.0f, 0.0f), ANGLE3D(0.0f, 0.0f, 0.0f));
-      CTFileName fnmPlayer = CTString("Classes\\PlayerBot.ecl");
-
-      CPutString("Added bots:\n");
+      CPutString(TRANS("Added bots:\n"));
 
       for (INDEX i = 0; i < ctBots; i++) {
         CPlayerCharacter pcBot;
-        nmMessage >> pcBot; // Player character
+        nmMessage >> pcBot;
 
-        // If there is no entity with that character in the world
-        CPlayerBot *penNewBot = (CPlayerBot *)wo.FindEntityWithCharacter(pcBot);
-
-        if (penNewBot == NULL) {
-          // Create an entity for it
-          try {
-            penNewBot = (CPlayerBot *)wo.CreateEntity_t(pl, fnmPlayer);
-
-            // Attach character to it
-            penNewBot->en_pcCharacter = pcBot;
-
-            // Update settings and initialize
-            penNewBot->m_bot.UpdateBot(sbsSettings);
-            penNewBot->Initialize();
-
-            CPrintF(TRANS(" '%s^r'\n"), penNewBot->GetPlayerName());
-
-          } catch (char *strError) {
-            FatalError(TRANS("Cannot load PlayerBot class:\n%s"), strError);
-          }
-
-        } else {
-          CPrintF(TRANS("Player entity with the given character already exists!\n"));
-        }
+        AddBotWithCharacter(wo, pcBot, sbsSettings);
       }
     } break;
 
