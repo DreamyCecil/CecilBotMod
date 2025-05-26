@@ -36,6 +36,9 @@ UBYTE _aubHighScorePacked[MAX_HIGHSCORETABLESIZE];
 // controls used for all commands not belonging to any particular player
 static CControls _ctrlCommonControls;
 
+// [Cecil] Mod hotkeys
+static CControls _ctrlHotkeys;
+
 // array for keeping all frames' times
 static CStaticStackArray<TIME>  _atmFrameTimes;
 static CStaticStackArray<INDEX> _actTriangles;  // world, model, particle, total
@@ -791,6 +794,7 @@ void CGame::GameHandleTimer(void)
     // execute all button-action shell commands for common controls
     if (gm_bGameOn) {
       _ctrlCommonControls.DoButtonActions();
+      _ctrlHotkeys.DoButtonActions(); // [Cecil] Mod hotkeys
     }
   }
   // if DirectInput is disabled, and game is currently active
@@ -1008,6 +1012,9 @@ void CGame::InitInternal( void)
   } catch (char *strError) {
     FatalError(TRANS("Cannot load common controls: %s\n"), strError);
   }
+
+  // [Cecil] Load mod hotkeys
+  _ctrlHotkeys.LoadHotkeys();
 
   // init LCD textures/fonts
   LCDInit();

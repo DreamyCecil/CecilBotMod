@@ -114,6 +114,9 @@ public:
   virtual void RemoveButtonAction( CButtonAction &baButtonAction);
   virtual void Load_t( CTFileName fnFile); // throw char *
   virtual void Save_t( CTFileName fnFile); // throw char *
+
+  // [Cecil] Load mod hotkeys instead of specific controls from a file
+  void LoadHotkeys(void);
 };
 
 class CLocalPlayer

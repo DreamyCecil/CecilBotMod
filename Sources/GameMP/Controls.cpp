@@ -257,48 +257,6 @@ void CControls::Load_t( CTFileName fnFile)
   }
 	while( !strmFile.AtEOF());
 
-  // [Cecil] TEMP 2021-06-13: Bot mod buttons
-  if (fnFile == CTString("Controls\\System\\Common.ctl")) {
-    for (INDEX i = 0; i < _ctKeysInTable; i++) {
-      const SKeyConversion &kc = _akcKeyTable[i];
-
-      // [Cecil] 2022-05-11: Load commands for one hotkey
-      SHotkey hk;
-
-      if (!LoadCommands(hk, kc)) {
-        continue;
-      }
-
-      CTString strKeyName(0, "Bot Mod %s Key", kc.kc_strName);
-      BOOL bAlreadyExists = FALSE;
-
-      // Check if it's been added already
-      FOREACHINLIST(CButtonAction, ba_lnNode, ctrl_lhButtonActions, itba) {
-        CButtonAction &baCheck = *itba;
-
-        if (baCheck.ba_strName == strKeyName) {
-          bAlreadyExists = TRUE;
-          break;
-        }
-      }
-
-      // Already exists
-      if (bAlreadyExists) {
-        continue;
-      }
-
-      CButtonAction &baNew = AddButtonAction();
-      baNew.ba_strName = strKeyName;
-      baNew.ba_iFirstKey = hk.iKey;
-      baNew.ba_strCommandLineWhenPressed = hk.strPressed;
-      baNew.ba_strCommandLineWhenReleased = hk.strReleased;
-
-      // Add key to the top
-      baNew.ba_lnNode.Remove();
-      ctrl_lhButtonActions.AddHead(baNew.ba_lnNode);
-    }
-  }
-
 /*
   // search for talk button
   BOOL bHasTalk = FALSE;
@@ -339,6 +297,42 @@ void CControls::Load_t( CTFileName fnFile)
 
   CalculateInfluencesForAllAxis();
 }
+
+// [Cecil] Load mod hotkeys instead of specific controls from a file
+void CControls::LoadHotkeys(void) {
+  // Remove old button actions
+  FORDELETELIST(CButtonAction, ba_lnNode, ctrl_lhButtonActions, itButtonAction) {
+    delete &*itButtonAction;
+  }
+
+  for (INDEX i = 0; i < _ctKeysInTable; i++) {
+    const SKeyConversion &kc = _akcKeyTable[i];
+
+    SHotkey hk;
+    if (!LoadCommands(hk, kc)) continue;
+
+    CTString strKeyName(0, "Bot Mod %s Key", kc.kc_strName);
+    BOOL bAlreadyExists = FALSE;
+
+    // Check if it's been added already
+    FOREACHINLIST(CButtonAction, ba_lnNode, ctrl_lhButtonActions, itba) {
+      CButtonAction &baCheck = *itba;
+
+      if (baCheck.ba_strName == strKeyName) {
+        bAlreadyExists = TRUE;
+        break;
+      }
+    }
+
+    if (bAlreadyExists) continue;
+
+    CButtonAction &baNew = AddButtonAction();
+    baNew.ba_strName = strKeyName;
+    baNew.ba_iFirstKey = hk.iKey;
+    baNew.ba_strCommandLineWhenPressed = hk.strPressed;
+    baNew.ba_strCommandLineWhenReleased = hk.strReleased;
+  }
+};
 
 void CControls::Save_t( CTFileName fnFile)
 {
