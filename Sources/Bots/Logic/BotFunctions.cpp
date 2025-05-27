@@ -1,4 +1,4 @@
-/* Copyright (c) 2018-2023 Dreamy Cecil
+/* Copyright (c) 2018-2025 Dreamy Cecil
 This program is free software; you can redistribute it and/or modify
 it under the terms of version 2 of the GNU General Public License as published by
 the Free Software Foundation
@@ -50,8 +50,8 @@ CBotPathPoint *NearestNavMeshPointPos(CEntity *pen, const FLOAT3D &vCheck) {
 
     // Vertical and horizontal position differences
     FLOAT3D vDiffV = VerticalDiff(vPosDiff, vGravityDir);
-    FLOAT3D vDiffH = vPosDiff + vDiffV;
-    
+    FLOAT3D vDiffH = vPosDiff + vDiffV; // Equivalent to HorizontalDiff(vPosDiff, vGravityDir)
+
     // Apply range to horizontal difference
     FLOAT fDiffH = ClampDn(vDiffH.Length() - pbpp->bpp_fRange, 0.0f);
 

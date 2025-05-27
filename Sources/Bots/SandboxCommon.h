@@ -1,4 +1,4 @@
-/* Copyright (c) 2018-2023 Dreamy Cecil
+/* Copyright (c) 2018-2025 Dreamy Cecil
 This program is free software; you can redistribute it and/or modify
 it under the terms of version 2 of the GNU General Public License as published by
 the Free Software Foundation
@@ -39,9 +39,12 @@ DECL_DLL FLOAT3D VerticalDiff(FLOAT3D vPosDiff, const FLOAT3D &vGravityDir);
 // [Cecil] 2021-06-14: Determine position difference on the same plane
 DECL_DLL FLOAT3D HorizontalDiff(FLOAT3D vPosDiff, const FLOAT3D &vGravityDir);
 
-// [Cecil] 2021-06-28: Get relative angles from the directed placement
-DECL_DLL FLOAT GetRelH(const CPlacement3D &pl);
-DECL_DLL FLOAT GetRelP(const CPlacement3D &pl);
+// [Cecil] 2021-06-28: Get relative angles from current angles towards desired direction
+DECL_DLL FLOAT GetRelH(FLOAT3D vDesiredDir, const ANGLE3D &aCurrent);
+DECL_DLL FLOAT GetRelP(FLOAT3D vDesiredDir, const ANGLE3D &aCurrent);
+
+// [Cecil] Two synced angles (different result from simply calling GetRelH() and GetRelP() together)
+DECL_DLL FLOAT2D GetRelAngles(FLOAT3D vDesiredDir, const ANGLE3D &aCurrent);
 
 // [Cecil] 2020-07-29: Do the ray casting with specific passable flags
 DECL_DLL void CastRayFlags(CCastRay &cr, CWorld *pwoWorld, ULONG ulPass);

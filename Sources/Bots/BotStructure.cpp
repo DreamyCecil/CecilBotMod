@@ -1,4 +1,4 @@
-/* Copyright (c) 2022-2023 Dreamy Cecil
+/* Copyright (c) 2022-2025 Dreamy Cecil
 This program is free software; you can redistribute it and/or modify
 it under the terms of version 2 of the GNU General Public License as published by
 the Free Software Foundation
@@ -454,10 +454,10 @@ void CPlayerBotController::BotThinking(CPlayerAction &pa, SBotLogic &sbl) {
         // Look at the player
         if (!sbl.SeeEnemy() && sbl.SeePlayer()) {
           // Relative position
-          CPlacement3D plToPlayer(penPlayer->GetPlacement().pl_PositionVector - vBotPos, sbl.ViewAng());
+          const FLOAT3D vDiff = penPlayer->GetPlacement().pl_PositionVector - vBotPos;
 
           // Angle towards the target
-          FLOAT2D vToPlayer = FLOAT2D(GetRelH(plToPlayer), GetRelP(plToPlayer));
+          FLOAT2D vToPlayer = FLOAT2D(GetRelH(vDiff, sbl.ViewAng()), GetRelP(vDiff, sbl.ViewAng()));
 
           // Set rotation speed
           sbl.aAim(1) = vToPlayer(1) / 0.5f;

@@ -1,4 +1,4 @@
-/* Copyright (c) 2018-2023 Dreamy Cecil
+/* Copyright (c) 2018-2025 Dreamy Cecil
 This program is free software; you can redistribute it and/or modify
 it under the terms of version 2 of the GNU General Public License as published by
 the Free Software Foundation
@@ -232,13 +232,13 @@ void CPlayerBotController::BotAim(CPlayerAction &pa, SBotLogic &sbl) {
   {
     // Running speed
     FLOAT3D vRunDir = HorizontalDiff(pen->en_vCurrentTranslationAbsolute, pen->en_vGravityDir);
-    
+
     // Relative position
-    CPlacement3D plToDir(pen->en_vCurrentTranslationAbsolute, sbl.ViewAng());
+    const FLOAT3D vToDir = pen->en_vCurrentTranslationAbsolute;
 
     // Angle towards the target (negate pitch)
-    FLOAT2D vToTarget = FLOAT2D(GetRelH(plToDir), -sbl.ViewAng()(2));
-    FLOAT fPitch = GetRelP(plToDir);
+    FLOAT2D vToTarget = FLOAT2D(GetRelH(vToDir, sbl.ViewAng()), -sbl.ViewAng()(2));
+    FLOAT fPitch = GetRelP(vToDir, sbl.ViewAng());
 
     // [Cecil] TODO: Try to find 'm_fFallTime' from the property list
     CPlayer *penPlayer = (CPlayer *)pen;
@@ -280,16 +280,15 @@ void CPlayerBotController::BotAim(CPlayerAction &pa, SBotLogic &sbl) {
   }
 
   // Relative position
-  CPlacement3D plToTarget = sbl.plBotView;
-  plToTarget.pl_PositionVector = vEnemy - plToTarget.pl_PositionVector;
+  FLOAT3D vDiff = vEnemy - sbl.ViewPos();
 
   // Angle towards the target
-  FLOAT2D vToTarget = FLOAT2D(GetRelH(plToTarget), GetRelP(plToTarget));
+  FLOAT2D vToTarget = GetRelAngles(vDiff, sbl.ViewAng());
 
   // Update accuracy angles
   if (SETTINGS.fAccuracyAngle > 0.0f) {
     FLOAT tmNow = _pTimer->CurrentTick();
-        
+
     // Randomize every half a second
     if (props.m_tmBotAccuracy <= tmNow) {
       // More accurate with the sniper
@@ -359,7 +358,7 @@ BOOL CPlayerBotController::CheckPit(FLOAT3D vMovement, FLOAT fHeadingDir, FLOAT 
   const FLOAT3D vNextPos = pen->en_vNextPosition;
   const FLOAT fStepDnHeight = pen->en_fStepDnHeight;
 
-  pen->en_vNextPosition = vBot + (vMovement + FLOAT3D(0.0f,  2.0f, 0.0f)) * pen->GetRotationMatrix();
+  pen->en_vNextPosition = vBot + (vMovement + FLOAT3D(0.0f, 2.0f, 0.0f)) * pen->GetRotationMatrix();
   pen->en_fStepDnHeight = 16.0f;
 
   // Check if there's any proper polygon below the position
@@ -473,8 +472,6 @@ void CPlayerBotController::BotMovement(CPlayerAction &pa, SBotLogic &sbl) {
 
     // Set the speed if there's a place to go
     if (bShouldFollow && plDelta.pl_PositionVector.Length() > 0.0f) {
-      FLOAT aDeltaHeading = GetRelH(plDelta);
-
       // Compare directional difference
       FLOAT3D vHor = HorizontalDiff(plDelta.pl_PositionVector, pen->en_vGravityDir);
       FLOAT3D vVer = VerticalDiff(plDelta.pl_PositionVector, pen->en_vGravityDir);
@@ -488,27 +485,25 @@ void CPlayerBotController::BotMovement(CPlayerAction &pa, SBotLogic &sbl) {
       if (bInLiquid) {
         vBotMovement = plDelta.pl_PositionVector.Normalize();
 
+      // Stop moving if needed
+      } else if (sbl.StayOnPoint()) {
+        vBotMovement = FLOAT3D(0.0f, 0.0f, 0.0f);
+
       } else {
-        // Stop moving if needed
-        if (sbl.StayOnPoint()) {
-          vBotMovement = FLOAT3D(0.0f, 0.0f, 0.0f);
+        // Run direction from 2D angle
+        const FLOAT aDeltaHeading = GetRelH(plDelta.pl_PositionVector, plDelta.pl_OrientationAngle);
+        AnglesToDirectionVector(ANGLE3D(aDeltaHeading, 0, 0), vBotMovement);
+
+        // Crouch if needed instead of jumping
+        if (bShouldCrouch) {
+          fVerticalMove = -1.0f;
+
+        // Jump if allowed (not while avoiding pits)
+        } else if (bShouldJump && SETTINGS.bJump && !SETTINGS.bAvoidPits) {
+          fVerticalMove = 1.0f;
 
         } else {
-          FLOAT3D vRunDir;
-          AnglesToDirectionVector(ANGLE3D(aDeltaHeading, 0.0f, 0.0f), vRunDir);
-          vBotMovement = vRunDir;
-
-          // Crouch if needed instead of jumping
-          if (bShouldCrouch) {
-            fVerticalMove = -1.0f;
-
-          // Jump if allowed (not while avoiding pits)
-          } else if (bShouldJump && SETTINGS.bJump && !SETTINGS.bAvoidPits) {
-            fVerticalMove = 1.0f;
-
-          } else {
-            fVerticalMove = 0.0f;
-          }
+          fVerticalMove = 0.0f;
         }
       }
     }

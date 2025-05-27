@@ -1,4 +1,4 @@
-/* Copyright (c) 2018-2023 Dreamy Cecil
+/* Copyright (c) 2018-2025 Dreamy Cecil
 This program is free software; you can redistribute it and/or modify
 it under the terms of version 2 of the GNU General Public License as published by
 the Free Software Foundation
@@ -94,44 +94,79 @@ FLOAT3D HorizontalDiff(FLOAT3D vPosDiff, const FLOAT3D &vGravityDir) {
 };
 
 // [Cecil] 2021-06-28: Get relative angles from the directed placement
-FLOAT GetRelH(const CPlacement3D &pl) {
+FLOAT GetRelH(FLOAT3D vDesiredDir, const ANGLE3D &aCurrent) {
   FLOATmatrix3D mRot;
-  MakeRotationMatrix(mRot, pl.pl_OrientationAngle);
-  
-  FLOAT3D vDir = FLOAT3D(pl.pl_PositionVector).SafeNormalize();
+  MakeRotationMatrix(mRot, aCurrent);
 
-  // get front component of vector
+  FLOAT3D vDir = vDesiredDir.SafeNormalize();
+
+  // Get front component of vector
   FLOAT fFront = -vDir(1) * mRot(1, 3)
                  -vDir(2) * mRot(2, 3)
                  -vDir(3) * mRot(3, 3);
 
-  // get left component of vector
+  // Get left component of vector
   FLOAT fLeft = -vDir(1) * mRot(1, 1)
                 -vDir(2) * mRot(2, 1)
                 -vDir(3) * mRot(3, 1);
 
-  // relative heading is arctan of angle between front and left
+  // Relative heading is arctan of angle between front and left
   return ATan2(fLeft, fFront);
 };
 
-FLOAT GetRelP(const CPlacement3D &pl) {
+FLOAT GetRelP(FLOAT3D vDesiredDir, const ANGLE3D &aCurrent) {
   FLOATmatrix3D mRot;
-  MakeRotationMatrix(mRot, pl.pl_OrientationAngle);
-  
-  FLOAT3D vDir = FLOAT3D(pl.pl_PositionVector).SafeNormalize();
+  MakeRotationMatrix(mRot, aCurrent);
 
-  // get front component of vector
+  FLOAT3D vDir = vDesiredDir.SafeNormalize();
+
+  // Get front component of vector
   FLOAT fFront = -vDir(1) * mRot(1, 3)
                  -vDir(2) * mRot(2, 3)
                  -vDir(3) * mRot(3, 3);
 
-  // get up component of vector
+  // Get up component of vector
   FLOAT fUp = +vDir(1) * mRot(1, 2)
               +vDir(2) * mRot(2, 2)
               +vDir(3) * mRot(3, 2);
 
-  // relative pitch is arctan of angle between front and up
+  // Relative pitch is arctan of angle between front and up
   return ATan2(fUp, fFront);
+};
+
+FLOAT2D GetRelAngles(FLOAT3D vDesiredDir, const ANGLE3D &aCurrent) {
+  FLOATmatrix3D mRot;
+  MakeRotationMatrix(mRot, aCurrent);
+
+  FLOAT3D vDir = vDesiredDir.SafeNormalize();
+
+  // Get right component of vector
+  FLOAT fRight = +vDir(1) * mRot(1, 1)
+                 +vDir(2) * mRot(2, 1)
+                 +vDir(3) * mRot(3, 1);
+
+  // Get up component of vector
+  FLOAT fUp = +vDir(1) * mRot(1, 2)
+              +vDir(2) * mRot(2, 2)
+              +vDir(3) * mRot(3, 2);
+
+  // Get back component of vector
+  FLOAT fBack = +vDir(1) * mRot(1, 3)
+                +vDir(2) * mRot(2, 3)
+                +vDir(3) * mRot(3, 3);
+
+  // Calculate pitch
+  FLOAT2D vAngles(0, ASin(fUp));
+
+  // Heading is irrelevant with perfectly vertical pitch
+  if (fUp > 0.99 || fUp < -0.99) {
+    vAngles(1) = 0;
+
+  } else {
+    vAngles(1) = ATan2(-fRight, -fBack);
+  }
+
+  return vAngles;
 };
 
 // [Cecil] 2020-07-29: Do the ray casting with specific passable flags
