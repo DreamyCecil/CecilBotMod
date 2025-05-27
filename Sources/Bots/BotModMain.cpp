@@ -19,10 +19,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // [Cecil] 2019-05-28: NavMesh Commands
 INDEX MOD_iRenderNavMesh = 0; // NavMesh render mode (0 - disabled, 1 - points, 2 - connections, 3 - IDs, 4 - flags)
+INDEX MOD_bOnlyCurrentConnections = FALSE; // Only render connections of a currently selected point (with MOD_iRenderNavMesh >= 2)
 FLOAT MOD_fNavMeshRenderRange = 0.0f; // NavMesh point rendering range (0 - infinite)
 INDEX MOD_iNavMeshRangeModel = 0; // NavMesh point range model (0 - flat, 1 - circle, 2 - sphere)
-INDEX MOD_iNavMeshPoint = -1; // currently selected NavMesh point
-INDEX MOD_iNavMeshConnecting = 0; // connecting mode (0 - disabled, 1 - to point, 2 - to each other, 3 - others to this one)
+INDEX MOD_iNavMeshPoint = -1; // Currently selected NavMesh point
+INDEX MOD_iNavMeshConnecting = 0; // Connecting mode (0 - disabled, 1 - to point, 2 - to each other, 3 - others to this one)
 
 extern INDEX MOD_bEntityIDs;
 extern INDEX MOD_bBotThoughts;
@@ -140,6 +141,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
   if (MOD_iRenderNavMesh > 0) {
     if (_pNavmesh->bnm_aPoints.Count() > 0)
     {
+      const INDEX iSelected = MOD_iNavMeshPoint;
       const BOOL bConnections = (MOD_iRenderNavMesh > 1);
       const BOOL bIDs = (MOD_iRenderNavMesh > 2);
       const BOOL bFlags = (MOD_iRenderNavMesh > 3);
@@ -153,7 +155,9 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
 
       for (INDEX iPoint = 0; iPoint < _pNavmesh->bnm_aPoints.Count(); iPoint++) {
         CBotPathPoint *pbpp = _pNavmesh->bnm_aPoints.Pointer(iPoint);
-        INDEX iPointID = pbpp->bpp_iIndex;
+
+        const INDEX iPointID = pbpp->bpp_iIndex;
+        const BOOL bSelectedPoint = (iSelected == iPointID);
 
         FLOAT3D vPointOnScreen;
         FLOAT3D vPoint1 = pbpp->bpp_vPos;
@@ -200,11 +204,13 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
         }
 
         // Highlight closest point for selection
-        BOOL bClosestPoint = (pbppClosest == pbpp);
-        CBotPathPoint *pbppSelected = _pNavmesh->FindPointByID(MOD_iNavMeshPoint);
+        const BOOL bClosestPoint = (pbppClosest == pbpp);
+
+        // Render connections only if it should be for all points, if there's no current point or it is THE current point
+        const BOOL bSelectedConnections = (!MOD_bOnlyCurrentConnections || iSelected < 0 || bSelectedPoint);
 
         // Connections
-        if (bConnections) {
+        if (bConnections && bSelectedConnections) {
           {FOREACHINDYNAMICCONTAINER(pbpp->bpp_cbppPoints, CBotPathPoint, itbppT) {
             CBotPathPoint *pbppT = itbppT;
 
@@ -285,7 +291,7 @@ void CECIL_WorldOverlayRender(CPlayer *penOwner, CEntity *penViewer, CAnyProject
         if (vPointOnScreen(3) < 0.0f)
         {
           // Selected point
-          if (pbppSelected == pbpp) {
+          if (bSelectedPoint) {
             pdp->DrawPoint(vPointOnScreen(1), vPointOnScreen(2), 0xFF000000 | ubPointAlpha, 10);
 
           // Point for selection

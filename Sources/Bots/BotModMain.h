@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // [Cecil] 2019-05-28: NavMesh commands
 extern INDEX MOD_iRenderNavMesh;
+extern INDEX MOD_bOnlyCurrentConnections;
 extern FLOAT MOD_fNavMeshRenderRange;
 extern INDEX MOD_iNavMeshRangeModel;
 extern INDEX MOD_iNavMeshPoint;
