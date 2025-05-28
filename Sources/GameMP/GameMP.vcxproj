@@ -83,7 +83,7 @@
     <OutDir>$(BinDir)</OutDir>
     <IntDir>$(ObjDir)</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SamEngineIncludes);$(SdkIncl)</IncludePath>
+    <IncludePath>$(SamEngineIncludes);$(SamEngineModels);$(SdkIncl)</IncludePath>
     <LibraryPath>$(SamEngineLibraries);$(SdkLibs)</LibraryPath>
     <ExecutablePath>$(SdkExe)</ExecutablePath>
   </PropertyGroup>
@@ -91,7 +91,7 @@
     <OutDir>$(BinDir)</OutDir>
     <IntDir>$(ObjDir)</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SamEngineIncludes);$(SdkIncl)</IncludePath>
+    <IncludePath>$(SamEngineIncludes);$(SamEngineModels);$(SdkIncl)</IncludePath>
     <LibraryPath>$(SamEngineLibraries);$(SdkLibs)</LibraryPath>
     <ExecutablePath>$(SdkExe)</ExecutablePath>
   </PropertyGroup>
@@ -99,7 +99,7 @@
     <OutDir>$(BinDir)</OutDir>
     <IntDir>$(ObjDir)</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SamEngineIncludes);$(SdkIncl)</IncludePath>
+    <IncludePath>$(SamEngineIncludes);$(SamEngineModels);$(SdkIncl)</IncludePath>
     <LibraryPath>$(SamEngineLibraries);$(SdkLibs)</LibraryPath>
     <TargetName>$(ProjectName)D</TargetName>
     <ExecutablePath>$(SdkExe)</ExecutablePath>
@@ -108,7 +108,7 @@
     <OutDir>$(BinDir)</OutDir>
     <IntDir>$(ObjDir)</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SamEngineIncludes);$(SdkIncl)</IncludePath>
+    <IncludePath>$(SamEngineIncludes);$(SamEngineModels);$(SdkIncl)</IncludePath>
     <LibraryPath>$(SamEngineLibraries);$(SdkLibs)</LibraryPath>
     <TargetName>$(ProjectName)D</TargetName>
     <ExecutablePath>$(SdkExe)</ExecutablePath>

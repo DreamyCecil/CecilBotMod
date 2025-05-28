@@ -83,7 +83,7 @@
     <IntDir>$(ObjDir)</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>$(SdkExe)</ExecutablePath>
-    <IncludePath>$(SamEngineIncludes);$(SdkIncl)</IncludePath>
+    <IncludePath>$(SamEngineIncludes);$(SamEngineModels);$(SdkIncl)</IncludePath>
     <LibraryPath>$(SamEngineLibraries);$(SdkLibs)</LibraryPath>
     <OutDir>$(BinDir)</OutDir>
   </PropertyGroup>
@@ -92,7 +92,7 @@
     <IntDir>$(ObjDir)</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>$(SdkExe)</ExecutablePath>
-    <IncludePath>$(SamEngineIncludes);$(SdkIncl)</IncludePath>
+    <IncludePath>$(SamEngineIncludes);$(SamEngineModels);$(SdkIncl)</IncludePath>
     <LibraryPath>$(SamEngineLibraries);$(SdkLibs)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -100,7 +100,7 @@
     <IntDir>$(ObjDir)</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>$(SdkExe)</ExecutablePath>
-    <IncludePath>$(SamEngineIncludes);$(SdkIncl)</IncludePath>
+    <IncludePath>$(SamEngineIncludes);$(SamEngineModels);$(SdkIncl)</IncludePath>
     <LibraryPath>$(SamEngineLibraries);$(SdkLibs)</LibraryPath>
     <TargetName>$(ProjectName)D</TargetName>
   </PropertyGroup>
@@ -109,7 +109,7 @@
     <IntDir>$(ObjDir)</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>$(SdkExe)</ExecutablePath>
-    <IncludePath>$(SamEngineIncludes);$(SdkIncl)</IncludePath>
+    <IncludePath>$(SamEngineIncludes);$(SamEngineModels);$(SdkIncl)</IncludePath>
     <LibraryPath>$(SamEngineLibraries);$(SdkLibs)</LibraryPath>
     <TargetName>$(ProjectName)D</TargetName>
   </PropertyGroup>
